@@ -8,6 +8,23 @@ with mondays as
 SELECT generate_series((current_date-365 + ((8 - EXTRACT(DOW FROM current_date-365)::int) % 7))+'1 week'::interval,current_date,'1 week'::interval)::date AS snapshot_date
 ),
 
+brokers_onboarded_last_year as 
+(select d.id, d.created_at from debtors d 
+where d.status = 'active'
+and d.created_at >= current_date - 365),
+
+debtors_invoice_last_year as
+(select * from
+(select *, row_number() over (partition by debtor_id order by approved_date) as rn from invoices i) a
+where rn=1
+and approved_date>= current_date-365),
+
+debtors_invoice_amount_last_year as
+(select debtor_id, count(distinct id) as invoice_count, sum(approved_accounts_receivable_amount) as invoice_amount from invoices i
+where created_at >= current_date - 365
+and paid_date is not null
+group by debtor_id),
+
 cal_debtor_weekly_open_invoice_volume as --here
 (
 select
@@ -42,6 +59,26 @@ report_date,
 d.approved_total,
 d.debtor_limit
 ),
+
+cal_debtor_weekly_open_invoice_volume_v2 as 
+(select *, 
+case when (last_year_created_at is not null or last_year_invoice_debtor_id is not null) and debtor_limit>1000000
+and invoice_amount <= 500000 then 1 else 0 --payment criteria
+end as correction_flag
+from
+(select a.*, x.created_at as last_year_created_at, y.debtor_id as last_year_invoice_debtor_id,
+case when z.invoice_count is null then 0 else z.invoice_count end as invoice_count, 
+case when z.invoice_amount is null then 0 else z.invoice_amount end as invoice_amount
+from
+cal_debtor_weekly_open_invoice_volume a
+left join brokers_onboarded_last_year x 
+on a.id=x.id
+left join debtors_invoice_last_year y 
+on a.id=y.debtor_id 
+left join debtors_invoice_amount_last_year z 
+on a.id=z.debtor_id) sq
+),
+
 cal_statistical_values as
 (
 select
@@ -57,7 +94,8 @@ stddev_samp(approved_amount) as std_dev,
 percentile_cont(0.5) within group (order by approved_amount) as median,
 (percentile_cont(0.75) within group (order by approved_amount) - percentile_cont(0.25) within group (order by approved_amount)) as IQR,
 (stddev_samp(approved_amount)/nullif(avg(approved_amount),0)) as CV
-from cal_debtor_weekly_open_invoice_volume
+from cal_debtor_weekly_open_invoice_volume_v2
+where correction_flag =0
 group by
 id,
 name,
@@ -227,9 +265,20 @@ consolidate_v2 as
 select * from consolidate
 union
 select id,name,mc,dot,rating,current_approved_total,adjusted_broker_limit_v2 as adjusted_broker_limit, debtor_limit from hack_exhaustion
-)
+),
 
-select * from consolidate_v2
+consolidate_v3 as 
+(select *, 0 as correction_flag from consolidate_v2
+union
+select id,name,mc,dot,rating,current_approved_total,debtor_limit/100 as adjusted_broker_limit, debtor_limit, correction_flag from cal_debtor_weekly_open_invoice_volume_v2
+where correction_flag=1)
+
+
+select * from consolidate_v3
+
+--select * from brokers 
+--where debtor_id in ('6cfdeeb9-580a-447e-ba2f-d020dce143ee',
+--'8405ff3e-6209-44bc-a3fb-10d7a1ecc4ea')
 --consolidate_v3 as 
 --(select cv2.*, x.created_at as last_year_created_at, y.debtor_id as last_year_invoice_debtor_id,
 --case when z.invoice_count is null then 0 else z.invoice_count end as invoice_count, 
