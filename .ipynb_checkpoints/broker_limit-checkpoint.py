@@ -334,7 +334,7 @@ class broker_limit:
     ])
     
         fig.update_layout(
-            title="Broker Weekly Invoice Trend",
+            title="Broker Daily Invoice Trend",
             xaxis_title="Date",
             yaxis_title="Open invoices amount",
             template="plotly_white",
