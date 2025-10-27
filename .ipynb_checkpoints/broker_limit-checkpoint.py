@@ -6,6 +6,7 @@ import psycopg2
 from datetime import date
 from datetime import datetime
 import statistics as stats
+import plotly.graph_objects as go
 
 class broker_limit:
     def __init__(self, config_path):
@@ -176,6 +177,8 @@ class broker_limit:
             df_t=df_t[['snapshot_date','invoice_approved', 'invoice_approved_dollars','open_invoices_in_point', 'invoice_paid', 'invoice_paid_dollars']].set_index('snapshot_date').T
         else:
             None
+
+        broker_limit.payment_trend_graph(df_t.T.reset_index())
         return df_t
 
     @staticmethod
@@ -240,7 +243,7 @@ class broker_limit:
         
     @staticmethod
     def generate_report(broker_level_df, broker_profile_report=False, cohort=[52, 12],payment_trend_count=5, payment_trend_step='default', debtors_df=None, brokers_df=None, invoice_df=None):
-        cols=['open invoice volume', 'approved invoices', 'paid invoices', 'approved invoices (dollars)', 'paid invoices (dollars)', 'dtp']
+        cols=['open_invoices_in_point', 'invoice_approved', 'invoice_paid', 'invoice_approved_dollars', 'invoice_paid_dollars', 'dtp']
         days_diff=(broker_level_df['snapshot_date'].iloc[1] - broker_level_df['snapshot_date'].iloc[0]).days
         days_diff_dict={'7': 'weeks', '30':'months', '1': 'days'}
         d=days_diff_dict[str(days_diff)]
@@ -261,7 +264,7 @@ class broker_limit:
             dictt[f"paid_invoice_{metric}_l{rows}_{d}"]=broker_level_df_new['invoice_paid'].mean()
             dictt[f"approved_invoice_dollars_{metric}_l{rows}_{d}"]=broker_level_df_new['invoice_approved_dollars'].mean()
             dictt[f"paid_invoice_dollars_{metric}_l{rows}_{d}"]=broker_level_df_new['invoice_paid_dollars'].mean()
-            dictt[f"dtp_{metric}_l{rows}_{d}"]=broker_level_df_new['dtp'].mean()
+            dictt[f"dtp_{metric}_l{rows}_{d}"]=broker_level_df_new[broker_level_df_new['dtp'].isna()==False]['dtp'].mean()
         
             values_mean=[dictt[f"open_invoice_{metric}_l{rows}_{d}"], dictt[f"approved_invoice_{metric}_l{rows}_{d}"], dictt[f"paid_invoice_{metric}_l{rows}_{d}"], dictt[f"approved_invoice_dollars_{metric}_l{rows}_{d}"], dictt[f"paid_invoice_dollars_{metric}_l{rows}_{d}"], dictt[f"dtp_{metric}_l{rows}_{d}"]]
         
@@ -271,7 +274,7 @@ class broker_limit:
             dictt[f"paid_invoice_{metric}_l{rows}_{d}"]=stats.stdev(broker_level_df_new['invoice_paid'])
             dictt[f"approved_invoice_dollars_{metric}_l{rows}_{d}"]=stats.stdev(broker_level_df_new['invoice_approved_dollars'])
             dictt[f"paid_invoice_dollars_{metric}_l{rows}_{d}"]=stats.stdev(broker_level_df_new['invoice_paid_dollars'])
-            dictt[f"dtp_{metric}_l{rows}_{d}"]=stats.stdev(broker_level_df_new['dtp'])
+            dictt[f"dtp_{metric}_l{rows}_{d}"]=stats.stdev(broker_level_df_new[broker_level_df_new['dtp'].isna()==False]['dtp'])
         
             values_stdev=[dictt[f"open_invoice_{metric}_l{rows}_{d}"], dictt[f"approved_invoice_{metric}_l{rows}_{d}"], dictt[f"paid_invoice_{metric}_l{rows}_{d}"], dictt[f"approved_invoice_dollars_{metric}_l{rows}_{d}"], dictt[f"paid_invoice_dollars_{metric}_l{rows}_{d}"], dictt[f"dtp_{metric}_l{rows}_{d}"]]
 
@@ -298,6 +301,9 @@ class broker_limit:
         # print(df_)
         pivot_table = df_.pivot_table(index='metrics', columns='cohort', values=['mean', 'std_dev'])
         pivot_table=pivot_table.sort_index(axis=1, level=[1, 0])
+        
+        if broker_profile_report==False:
+            pivot_table=pd.concat([pivot_table, df_t], axis=1)
             
             # need to cater for current dates. Should report take into account curretn dates
 
@@ -316,6 +322,32 @@ class broker_limit:
             #     pivot_table=pivot_table.sort_index(axis=1, level=[1, 0])
             
         return pivot_table, df_t, pivot_table_client_conc
+
+    @staticmethod
+    def payment_trend_graph(df):
+        fig = go.Figure([
+        go.Scatter(x=df['snapshot_date'], y=df['invoice_approved'], mode='lines+markers', name='Approved invoices', yaxis='y2'),
+        go.Scatter(x=df['snapshot_date'], y=df['invoice_paid'], mode='lines+markers', name='Paid Invoices', yaxis='y2'),
+        go.Scatter(x=df['snapshot_date'], y=df['open_invoices_in_point'], mode='lines+markers', name='Open Invoices', yaxis='y1'),
+        # go.Scatter(x=df['snapshot_date'], y=df['invoice_approved_dollars'], mode='lines+markers', name='Invoices Approved (dollars)', yaxis='y1'),
+        # go.Scatter(x=df['snapshot_date'], y=df['invoice_paid_dollars'], mode='lines+markers', name='Invoices Paid (dollars)', yaxis='y1')
+    ])
+    
+        fig.update_layout(
+            title="Broker Weekly Invoice Trend",
+            xaxis_title="Date",
+            yaxis_title="Open invoices amount",
+            template="plotly_white",
+            yaxis2=dict(
+            title='Invoice count amount',
+            overlaying='y',     # overlay on the same plotting area
+            side='right'        # place on right
+            ),
+            legend=dict(x=1.1, y=1.1),
+            height=500
+        )
+        
+        fig.show()
                     
             
             
