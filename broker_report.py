@@ -85,7 +85,11 @@ class broker_report:
         if type(datetime.date(datetime.today()))!=type(invoice_df['created_at'].iloc[0]):
             invoice_df['created_at']=invoice_df['created_at'].apply(lambda x: datetime.date(x) if pd.isna(x)==False else x)
 
-        final=yy.merge(invoice_df, left_on='id', right_on='debtor_id', how='left').groupby(yy.columns.to_list())
+        grouping_cols=yy.columns.to_list()
+        if len(brokers_df)==0:
+            grouping_cols.remove('mc')
+            grouping_cols.remove('dot')
+        final=yy.merge(invoice_df, left_on='id', right_on='debtor_id', how='left').groupby(grouping_cols)
 
         broker_level=final.apply(lambda g: pd.Series({
             'invoice_approved': g.loc[
@@ -165,8 +169,8 @@ class broker_report:
             weekly_start_date=date.today()-pd.Timedelta(weeks=count)
             weekly_end_date=date.today()
             df_t1=broker_report.generate_segment_level_data(weekly_start_date, weekly_end_date,debtors_df, brokers_df, invoice_df, step=step)
-            df_t2=broker_report.generate_segment_level_data(start_date=None, end_date=date.toda(), debtors_df=debtors_df, brokers_df=brokers_df, invoice_df=invoice_df, step='current')
-            df_t=pd.concat([broker_level, broker_level_current], ignore_index=True)
+            df_t2=broker_report.generate_segment_level_data(start_date=None, end_date=date.today(), debtors_df=debtors_df, brokers_df=brokers_df, invoice_df=invoice_df, step='current')
+            df_t=pd.concat([df_t1, df_t2], ignore_index=True)
             # add "current" segment level data as well
             df_t=df_t[['snapshot_date','invoice_approved', 'invoice_approved_dollars','open_invoices_in_point', 'invoice_paid', 'invoice_paid_dollars']].set_index('snapshot_date').T
             
