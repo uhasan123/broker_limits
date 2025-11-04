@@ -61,6 +61,8 @@ class broker_report:
         conn=self.make_db_connection()
         query='select * from invoices limit 10'
         invoice_df=pd.read_sql_query(query, conn)
+        conn.close()
+        tunnel.stop()
         return invoice_df
 
     @staticmethod

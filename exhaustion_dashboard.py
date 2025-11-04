@@ -17,6 +17,8 @@ def calc_open_invoice_volume(conn):
 
     open_invoice_df=pd.read_sql_query(query, conn)
     open_invoice_df=open_invoice_df[['id', 'snapshot_date', 'approved_amount']]
+    conn.close()
+    tunnel.stop()
     return open_invoice_df
 def calc_open_invoice_volume_l90(debtor_id, conn):
     with open('calc_open_invoice_volume_l90.sql', 'r') as file:
@@ -25,6 +27,8 @@ def calc_open_invoice_volume_l90(debtor_id, conn):
 
     open_invoice_df_l90=pd.read_sql_query(query, conn)
     open_invoice_df_l90=open_invoice_df_l90[['id', 'snapshot_date', 'approved_amount']]
+    conn.close()
+    tunnel.stop()
     return open_invoice_df_l90
 
 def calc_debtor_limit(conn):
@@ -35,6 +39,8 @@ def calc_debtor_limit(conn):
     debtor_limit_df = debtor_limit_df.drop_duplicates(subset=['original_id', 'snapshot_date'], keep='first')
     debtor_limit_df['debtor_limit']=debtor_limit_df['debtor_limit']/100
     debtor_limit_df=debtor_limit_df[['original_id', 'snapshot_date', 'debtor_limit']]
+    conn.close()
+    tunnel.stop()
     return debtor_limit_df
 def calc_debtor_limit_l90(debtor_id, conn):
     with open('calc_debtor_limit_l90.sql', 'r') as file:
@@ -45,6 +51,8 @@ def calc_debtor_limit_l90(debtor_id, conn):
     debtor_limit_df_l90 = debtor_limit_df_l90.drop_duplicates(subset=['original_id', 'snapshot_date'], keep='first')
     debtor_limit_df_l90['debtor_limit']=debtor_limit_df_l90['debtor_limit']/100
     debtor_limit_df_l90=debtor_limit_df_l90[['original_id', 'snapshot_date', 'debtor_limit']]
+    conn.close()
+    tunnel.stop()
     return debtor_limit_df_l90
 
 def calc_broker_limit_breach(conn):
@@ -53,6 +61,8 @@ def calc_broker_limit_breach(conn):
 
     broker_limit_breach_df=pd.read_sql_query(query, conn)
     broker_limit_breach_df['created_date']=broker_limit_breach_df['created_at'].dt.date
+    conn.close()
+    tunnel.stop()
     return broker_limit_breach_df
 
 def sum_until_zero(g):
@@ -96,6 +106,9 @@ def create_debtor_level_view():
     open_invoice_df=calc_open_invoice_volume(conn)
     debtor_limit_df=calc_debtor_limit(conn)
     broker_limit_breach_df=calc_broker_limit_breach(conn)
+
+    conn.close()
+    tunnel.stop()
     
     ageing_df=open_invoice_df.merge(debtor_limit_df, left_on=['id', 'snapshot_date'], right_on=['original_id', 'snapshot_date'], how='inner')
     ageing_df['is_exhausted']=ageing_df.apply(lambda x: 1 if x['approved_amount']>=x['debtor_limit']else 0, axis=1)
@@ -151,6 +164,10 @@ with tab2:
     debtor_id=st.text_input("debtor id. : ", key=f"debtor_id")
     open_invoice_df_l90=calc_open_invoice_volume_l90(debtor_id, conn)
     debtor_limit_df_l90=calc_debtor_limit_l90(debtor_id, conn)
+
+    conn.close()
+    tunnel.stop()
+    
     df_l90=open_invoice_df_l90.merge(debtor_limit_df_l90, left_on=['id', 'snapshot_date'], right_on=['original_id', 'snapshot_date'], how='outer')
     df_l90['approved_amount']=df_l90['approved_amount'].apply(lambda x: 0 if str(x)=='nan' else x)
     df_l90['limit_exceed']=df_l90['approved_amount']>=df_l90['debtor_limit']
