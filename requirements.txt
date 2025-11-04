@@ -2,7 +2,6 @@ pip==25.3
 streamlit==1.39.0
 sshtunnel
 pandas
-psycopg2
 psycopg2-binary
 datetime
 statistics
