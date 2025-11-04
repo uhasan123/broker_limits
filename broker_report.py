@@ -7,18 +7,25 @@ from datetime import date
 from datetime import datetime
 import statistics as stats
 import plotly.graph_objects as go
+import tempfile
 
 class broker_report:
-    def __init__(self, config_path):
-        load_dotenv(config_path)
+    def __init__(self):
+        # load_dotenv(config_path)
         self.ssh_host = os.getenv("ssh_host")
         self.ssh_user = os.getenv("ssh_user")
-        self.ssh_key = os.getenv("ssh_key")
+        self.ssh_key_temp = os.getenv("ssh_key")
         self.db_host = os.getenv("db_host")
         self.db_port = int(os.getenv("db_port"))
         self.db_name = os.getenv("db_name")
         self.db_user = os.getenv("db_user")
         self.db_password = os.getenv("db_password")
+
+        temp = tempfile.NamedTemporaryFile(delete=False, suffix=".pem")
+        temp.write(self.ssh_key_temp.encode())
+        temp.close()
+
+        self.ssh_key=temp.name
 
     def make_db_connection(self):
         # Open SSH tunnel
@@ -39,6 +46,12 @@ class broker_report:
             password=self.db_password
         )
         return conn
+
+    def invoice_table(self):
+        conn=self.make_db_connection()
+        query='select * from invoices limit 10'
+        invoice_df=pd.read_sql_query(query, conn)
+        return invoice_df
 
     @staticmethod
     def generate_date_series(start_date=None, end_date=None, step='weekly'):
