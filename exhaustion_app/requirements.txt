@@ -3,7 +3,9 @@ dotenv
 sshtunnel
 pandas
 psycopg2
+psycopg2-binary
 datetime
 statistics
 plotly
 math
+openpyxl
