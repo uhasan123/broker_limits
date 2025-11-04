@@ -111,18 +111,19 @@ def create_debtor_level_view():
     debtor_level['limit_cohort']=debtor_level['debtor_limit'].apply(lambda x: limit_cohort(x))
     limit_cohort_df=debtor_level.groupby('limit_cohort').agg(broker_count=('id', 'nunique')).reset_index()
 
-    return ageing_cohort_df, limit_cohort_df
+    return debtor_level, ageing_cohort_df, limit_cohort_df
 
 
 tab1, tab2, tab3=st.tabs(['TAB 1', 'TAB 2', 'TAB 3'])
 with tab1:
     exhaust_debtors=get_exhausted_debtors()
-    ageing_cohort_df,limit_cohort_df=create_debtor_level_view()
+    debtor_level, ageing_cohort_df,limit_cohort_df=create_debtor_level_view()
     
     brokers_exhausted=exhaust_debtors['id'].nunique()
     st.write('Exhaustion counter', brokers_exhausted)
     colss=st.columns(2)
     colss[0].write(ageing_cohort_df)
     colss[1].write(limit_cohort_df)
+    st.write(debtor_level)
 
 
