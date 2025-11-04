@@ -18,6 +18,14 @@ def calc_open_invoice_volume(conn):
     open_invoice_df=pd.read_sql_query(query, conn)
     open_invoice_df=open_invoice_df[['id', 'snapshot_date', 'approved_amount']]
     return open_invoice_df
+def calc_open_invoice_volume_l90(debtor_id, conn):
+    with open('calc_open_invoice_volume_l90.sql', 'r') as file:
+        query=file.read()
+    query=query.format(debtor_id=debtor_id)
+
+    open_invoice_df_l90=pd.read_sql_query(query, conn)
+    open_invoice_df_l90=open_invoice_df_l90[['id', 'snapshot_date', 'approved_amount']]
+    return open_invoice_df_l90
 
 def calc_debtor_limit(conn):
     with open('calc_debtor_limit.sql', 'r') as file:
@@ -28,6 +36,16 @@ def calc_debtor_limit(conn):
     debtor_limit_df['debtor_limit']=debtor_limit_df['debtor_limit']/100
     debtor_limit_df=debtor_limit_df[['original_id', 'snapshot_date', 'debtor_limit']]
     return debtor_limit_df
+def calc_debtor_limit_l90(debtor_id, conn):
+    with open('calc_debtor_limit_l90.sql', 'r') as file:
+        query=file.read()
+    query=query.format(debtor_id=debtor_id)
+    
+    debtor_limit_df_l90=pd.read_sql_query(query, conn)
+    debtor_limit_df_l90 = debtor_limit_df_l90.drop_duplicates(subset=['original_id', 'snapshot_date'], keep='first')
+    debtor_limit_df_l90['debtor_limit']=debtor_limit_df_l90['debtor_limit']/100
+    debtor_limit_df_l90=debtor_limit_df_l90[['original_id', 'snapshot_date', 'debtor_limit']]
+    return debtor_limit_df_l90
 
 def calc_broker_limit_breach(conn):
     with open('broker_limit_breach_query.sql', 'r') as file:
@@ -111,18 +129,58 @@ def create_debtor_level_view():
     debtor_level['limit_cohort']=debtor_level['debtor_limit'].apply(lambda x: limit_cohort(x))
     limit_cohort_df=debtor_level.groupby('limit_cohort').agg(broker_count=('id', 'nunique')).reset_index()
 
-    return ageing_cohort_df, limit_cohort_df
+    return debtor_level, ageing_cohort_df, limit_cohort_df
 
 
 tab1, tab2, tab3=st.tabs(['TAB 1', 'TAB 2', 'TAB 3'])
 with tab1:
     exhaust_debtors=get_exhausted_debtors()
-    ageing_cohort_df,limit_cohort_df=create_debtor_level_view()
-    
+    debtor_level, ageing_cohort_df,limit_cohort_df=create_debtor_level_view()
+    debtor_level=debtor_level[['id', 'debtor_limit', 'approved_total', 'utilization_rate', 'invoice_created_l30', 'invoice_breached_l30', 'perc_invoices_breached_l30']]
     brokers_exhausted=exhaust_debtors['id'].nunique()
     st.write('Exhaustion counter', brokers_exhausted)
     colss=st.columns(2)
     colss[0].write(ageing_cohort_df)
     colss[1].write(limit_cohort_df)
+    st.write(debtor_level)
+
+with tab2:
+    obj=broker_report()
+    conn=obj.make_db_connection()
+    
+    debtor_id=st.text_input("debtor id. : ", key=f"debtor_id")
+    open_invoice_df_l90=calc_open_invoice_volume_l90(debtor_id, conn)
+    debtor_limit_df_l90=calc_debtor_limit_l90(debtor_id, conn)
+    df_l90=open_invoice_df_l90.merge(debtor_limit_df_l90, left_on=['id', 'snapshot_date'], right_on=['original_id', 'snapshot_date'], how='outer')
+    df_l90['approved_amount']=df_l90['approved_amount'].apply(lambda x: 0 if str(x)=='nan' else x)
+    df_l90['limit_exceed']=df_l90['approved_amount']>=df_l90['debtor_limit']
+    df_l90['limit_exceed_shift']=df_l90['limit_exceed'].shift(-1)
+    df_l90['breach_count']=df_l90.apply(lambda x: 1 if (x['limit_exceed']==False) & (x['limit_exceed_shift']==True) else 0, axis=1)
+
+    df_l90_=debtor_limit[debtor_limit['id']==debtor_id]
+    df_l90_['utilization_rate']=df_l90_['approved_total'] / df_l90_['debtor_limit']
+    df_l90_['unnaturality']=df_l90_['approved_total']-df_l90_['debtor_limit']
+    df_l90_['debtor_limit_change']=df_l90_['debtor_limit']-df_l90[df_l90['snapshot_date']==df_l90['snapshot_date'].min()]['approved_amount'].iloc[0]
+    df_l90_['no_of_exhaustions']=df_l90['breach_count'].sum()
+    st.write(df_l90_)
+
+    fig = go.Figure([
+    go.Scatter(x=df_l90['snapshot_date'], y=df_l90['approved_amount'], mode='lines+markers', name='Approved amount', yaxis='y1'),
+    go.Scatter(x=df_l90['snapshot_date'], y=df_l90['debtor_limit'], mode='lines+markers', name='Debtor Limit', yaxis='y1'),
+    # go.Scatter(x=df['snapshot_date'], y=df['invoice_approved_dollars'], mode='lines+markers', name='Invoices Approved (dollars)', yaxis='y1'),
+    # go.Scatter(x=df['snapshot_date'], y=df['invoice_paid_dollars'], mode='lines+markers', name='Invoices Paid (dollars)', yaxis='y1')
+    ])
+    
+    fig.update_layout(
+        title="Broker Approved invoices against debtor limit day wise",
+        xaxis_title="Date",
+        yaxis_title="Amount in dollars",
+        template="plotly_white",
+        legend=dict(x=1.1, y=1.1),
+        height=500
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
 
 
