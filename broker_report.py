@@ -29,32 +29,32 @@ class broker_report:
 
     def make_db_connection(self):
 
-        conn = psycopg2.connect(
-            host=self.db_host,
-            port=self.db_port,
-            database=self.db_name,
-            user=self.db_user,
-            password=self.db_password,
-            sslmode="require"
-        )
-
-        # Open SSH tunnel
-        # tunnel = SSHTunnelForwarder(
-        #     (self.ssh_host, 22),
-        #     ssh_username=self.ssh_user,
-        #     ssh_pkey=self.ssh_key,
-        #     remote_bind_address=(self.db_host, self.db_port)
-        # )
-        
-        # tunnel.start()
-        # # Connect to DB through the tunnel
         # conn = psycopg2.connect(
-        #     host="127.0.0.1",
-        #     port=tunnel.local_bind_port,
+        #     host=self.db_host,
+        #     port=self.db_port,
         #     database=self.db_name,
         #     user=self.db_user,
-        #     password=self.db_password
+        #     password=self.db_password,
+        #     sslmode="require"
         # )
+
+        # Open SSH tunnel
+        tunnel = SSHTunnelForwarder(
+            (self.ssh_host, 22),
+            ssh_username=self.ssh_user,
+            ssh_pkey=self.ssh_key,
+            remote_bind_address=(self.db_host, self.db_port)
+        )
+        
+        tunnel.start()
+        # Connect to DB through the tunnel
+        conn = psycopg2.connect(
+            host="127.0.0.1",
+            port=tunnel.local_bind_port,
+            database=self.db_name,
+            user=self.db_user,
+            password=self.db_password
+        )
         return conn
 
     def invoice_table(self):
