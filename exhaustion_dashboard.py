@@ -117,7 +117,7 @@ def create_debtor_level_view():
 tab1, tab2, tab3=st.tabs(['TAB 1', 'TAB 2', 'TAB 3'])
 with tab1:
     exhaust_debtors=get_exhausted_debtors()
-    ageing_cohort_df,limit_cohort_df=create_debtor_level_view
+    ageing_cohort_df,limit_cohort_df=create_debtor_level_view()
     
     brokers_exhausted=exhaust_debtors['id'].nunique()
     st.write('Exhaustion counter', brokers_exhausted)
