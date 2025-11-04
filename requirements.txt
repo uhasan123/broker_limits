@@ -1,6 +1,5 @@
 pip==25.3
 streamlit==1.39.0
-python-dotenv
 sshtunnel
 pandas
 psycopg2
