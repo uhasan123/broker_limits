@@ -1,0 +1,9 @@
+streamlit
+dotenv
+sshtunnel
+pandas
+psycopg2
+datetime
+statistics
+plotly
+math
