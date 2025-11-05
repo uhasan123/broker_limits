@@ -14,18 +14,18 @@ class broker_report:
         load_dotenv(config_path)
         self.ssh_host = os.getenv("ssh_host")
         self.ssh_user = os.getenv("ssh_user")
-        self.ssh_key_temp = os.getenv("ssh_key")
+        self.ssh_key = os.getenv("ssh_key")
         self.db_host = os.getenv("db_host")
         self.db_port = int(os.getenv("db_port"))
         self.db_name = os.getenv("db_name")
         self.db_user = os.getenv("db_user")
         self.db_password = os.getenv("db_password")
 
-        temp = tempfile.NamedTemporaryFile(delete=False, suffix=".pem")
-        temp.write(self.ssh_key_temp.encode())
-        temp.close()
+        # temp = tempfile.NamedTemporaryFile(delete=False, suffix=".pem")
+        # temp.write(self.ssh_key_temp.encode())
+        # temp.close()
 
-        self.ssh_key=temp.name
+        # self.ssh_key=temp.name
 
     def make_db_connection(self):
 

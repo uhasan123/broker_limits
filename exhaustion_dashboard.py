@@ -260,12 +260,13 @@ with tab3:
     conn.autocommit=True
     
     debtor_id=st.text_input("debtor id : ", key="debtor_id_t3")
-    cohort=st.text_input("cohort: ", key=cohort)
+    cohort=st.text_input("cohort: ", key="cohort")
     payment_trend_count=st.number_input("payment trend count: ", key='payment_trend_count')
     payment_trend_step=st.text_input("payment trend step: ", key='payment_trend_step')
     step=st.text_input("step: ", key='step')
     generate_broker_report=st.checkbox("generate_broker_report")
-    cohort=ast.literal_eval(cohort)
+    if cohort!='':
+        cohort=ast.literal_eval(cohort)
 
     if st.button("Submit", key='submit_tab3'):
         st.session_state.tab3=True
