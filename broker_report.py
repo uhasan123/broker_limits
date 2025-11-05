@@ -21,11 +21,11 @@ class broker_report:
         self.db_user = os.getenv("db_user")
         self.db_password = os.getenv("db_password")
 
-        temp = tempfile.NamedTemporaryFile(delete=False, suffix=".pem")
-        temp.write(self.ssh_key_temp.encode())
-        temp.close()
+        # temp = tempfile.NamedTemporaryFile(delete=False, suffix=".pem")
+        # temp.write(self.ssh_key_temp.encode())
+        # temp.close()
 
-        self.ssh_key=temp.name
+        # self.ssh_key=temp.name
 
     def make_db_connection(self):
 

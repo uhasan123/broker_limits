@@ -9,6 +9,7 @@ from broker_report import broker_report
 def get_exhausted_debtors():
     obj=broker_report()
     conn=obj.make_db_connection()
+    conn.autocommit=True
     query="select id, debtor_limit/100 as debtor_limit, approved_total/100 as approved_total from debtors d where d.approved_total>=d.debtor_limit and d.status = 'active' and d.debtor_limit<>100"
     exhaust_debtors=pd.read_sql_query(query, conn)
     return exhaust_debtors
@@ -105,6 +106,7 @@ def limit_cohort(x):
 def create_debtor_level_view():
     obj=broker_report()
     conn=obj.make_db_connection()
+    conn.autocommit=True
     open_invoice_df=calc_open_invoice_volume(conn)
     debtor_limit_df=calc_debtor_limit(conn)
     broker_limit_breach_df=calc_broker_limit_breach(conn)
@@ -205,6 +207,7 @@ with tab1:
 with tab2:
     obj=broker_report()
     conn=obj.make_db_connection()
+    conn.autocommit=True
     
     debtor_id=st.text_input("debtor id : ", key="debtor_id_t2")
     if st.button("Submit", key='submit_tab2'):
@@ -252,6 +255,10 @@ with tab2:
             st.session_state.tab2=False
 
 with tab3:
+    obj=broker_report()
+    conn=obj.make_db_connection()
+    conn.autocommit=True
+
     debtor_id=st.text_input("debtor id : ", key="debtor_id_t3")
     cohort=st.text_input("cohort: ", key=cohort)
     payment_trend_count=st.number_input("payment trend count: ", key='payment_trend_count')
