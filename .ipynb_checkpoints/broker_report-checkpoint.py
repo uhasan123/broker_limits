@@ -207,7 +207,7 @@ class broker_report:
         else:
             None
 
-        broker_report.payment_trend_graph(df_t.T.reset_index())
+        # broker_report.payment_trend_graph(df_t.T.reset_index())
         return df_t
 
     @staticmethod
@@ -375,8 +375,9 @@ class broker_report:
             legend=dict(x=1.1, y=1.1),
             height=500
         )
+        return fig
         
-        fig.show()
+        # fig.show()
                     
             
             
