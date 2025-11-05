@@ -39,8 +39,8 @@ def calc_debtor_limit(conn):
     debtor_limit_df = debtor_limit_df.drop_duplicates(subset=['original_id', 'snapshot_date'], keep='first')
     debtor_limit_df['debtor_limit']=debtor_limit_df['debtor_limit']/100
     debtor_limit_df=debtor_limit_df[['original_id', 'snapshot_date', 'debtor_limit']]
-    conn.close()
-    tunnel.stop()
+    # conn.close()
+    # tunnel.stop()
     return debtor_limit_df
 def calc_debtor_limit_l90(debtor_id, conn):
     with open('calc_debtor_limit_l90.sql', 'r') as file:
