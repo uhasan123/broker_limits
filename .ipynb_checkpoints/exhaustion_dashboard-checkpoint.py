@@ -7,8 +7,9 @@ import ast
 from broker_report import broker_report
 
 def get_exhausted_debtors():
-    obj=broker_report()
+    obj=broker_report("config.env")
     conn=obj.make_db_connection()
+    conn.autocommit=True
     query="select id, debtor_limit/100 as debtor_limit, approved_total/100 as approved_total from debtors d where d.approved_total>=d.debtor_limit and d.status = 'active' and d.debtor_limit<>100"
     exhaust_debtors=pd.read_sql_query(query, conn)
     return exhaust_debtors
@@ -103,8 +104,9 @@ def limit_cohort(x):
         return None
 
 def create_debtor_level_view():
-    obj=broker_report()
+    obj=broker_report("config.env")
     conn=obj.make_db_connection()
+    conn.autocommit=True
     open_invoice_df=calc_open_invoice_volume(conn)
     debtor_limit_df=calc_debtor_limit(conn)
     broker_limit_breach_df=calc_broker_limit_breach(conn)
@@ -146,7 +148,7 @@ def create_debtor_level_view():
 
     return debtor_level, ageing_cohort_df, limit_cohort_df
 
-def generate_data_for_payment_trend(debtor_id):
+def generate_data_for_payment_trend(debtor_id, conn):
     for attempt in range(3):
         try:
             query = "select * from invoices i where debtor_id=%s and i.approved_date is not null"
@@ -203,8 +205,9 @@ with tab1:
         st.session_state.tab1=False
 
 with tab2:
-    obj=broker_report()
+    obj=broker_report("config.env")
     conn=obj.make_db_connection()
+    conn.autocommit=True
     
     debtor_id=st.text_input("debtor id : ", key="debtor_id_t2")
     if st.button("Submit", key='submit_tab2'):
@@ -252,6 +255,10 @@ with tab2:
             st.session_state.tab2=False
 
 with tab3:
+    obj=broker_report("config.env")
+    conn=obj.make_db_connection()
+    conn.autocommit=True
+    
     debtor_id=st.text_input("debtor id : ", key="debtor_id_t3")
     cohort=st.text_input("cohort: ", key=cohort)
     payment_trend_count=st.number_input("payment trend count: ", key='payment_trend_count')
@@ -265,7 +272,7 @@ with tab3:
         
     if st.session_state.tab3==True:
         if debtor_id !='':
-            invoice_df, debtors_df, brokers_df=generate_data_for_payment_trend(debtor_id)
+            invoice_df, debtors_df, brokers_df=generate_data_for_payment_trend(debtor_id, conn)
             if generate_broker_report:
                 date_today=date.today()
                 date_last_year=date_today - pd.Timedelta(days=365)

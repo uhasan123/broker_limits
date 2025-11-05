@@ -1,5 +1,5 @@
 import os
-# from dotenv import load_dotenv
+from dotenv import load_dotenv
 from sshtunnel import SSHTunnelForwarder
 import pandas as pd
 import psycopg2
@@ -10,8 +10,8 @@ import plotly.graph_objects as go
 import tempfile
 
 class broker_report:
-    def __init__(self):
-        # load_dotenv(config_path)
+    def __init__(self, config_path):
+        load_dotenv(config_path)
         self.ssh_host = os.getenv("ssh_host")
         self.ssh_user = os.getenv("ssh_user")
         self.ssh_key_temp = os.getenv("ssh_key")
