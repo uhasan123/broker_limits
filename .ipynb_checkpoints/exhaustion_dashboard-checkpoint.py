@@ -162,6 +162,7 @@ with tab2:
     conn=obj.make_db_connection()
     
     debtor_id=st.text_input("debtor id. : ", key=f"debtor_id")
+    debtor_limit=get_exhausted_debtors()
     if debtor_id !='':
         open_invoice_df_l90=calc_open_invoice_volume_l90(debtor_id, conn)
         debtor_limit_df_l90=calc_debtor_limit_l90(debtor_id, conn)
