@@ -260,7 +260,7 @@ with tab3:
     conn.autocommit=True
 
     debtor_id=st.text_input("debtor id : ", key="debtor_id_t3")
-    cohort=st.text_input("cohort: ", key=cohort)
+    cohort=st.text_input("cohort: ", key="cohort")
     payment_trend_count=st.number_input("payment trend count: ", key='payment_trend_count')
     payment_trend_step=st.text_input("payment trend step: ", key='payment_trend_step')
     step=st.text_input("step: ", key='step')
@@ -303,7 +303,7 @@ with tab3:
                 st.write(pivot_table)
                 st.plotly_chart(fig, use_container_width=True)
 
-            st.session_state.tab3==False
+            st.session_state.tab3=False
 
 
 
