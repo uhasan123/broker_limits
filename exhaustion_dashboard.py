@@ -3,6 +3,7 @@ import pandas as pd
 import streamlit as st
 import plotly.graph_objects as go
 import ast
+from datetime import date
 
 from broker_report import broker_report
 
@@ -304,7 +305,7 @@ with tab3:
                 st.write(pivot_table)
                 st.plotly_chart(fig, use_container_width=True)
 
-            st.session_state.tab3==False
+            st.session_state.tab3=False
 
 
 
