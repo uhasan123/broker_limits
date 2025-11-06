@@ -293,7 +293,10 @@ class broker_report:
             dictt[f"paid_invoice_{metric}_l{rows}_{d}"]=broker_level_df_new['invoice_paid'].mean()
             dictt[f"approved_invoice_dollars_{metric}_l{rows}_{d}"]=broker_level_df_new['invoice_approved_dollars'].mean()
             dictt[f"paid_invoice_dollars_{metric}_l{rows}_{d}"]=broker_level_df_new['invoice_paid_dollars'].mean()
-            dictt[f"dtp_{metric}_l{rows}_{d}"]=broker_level_df_new[broker_level_df_new['dtp'].isna()==False]['dtp'].mean()
+            if len(broker_level_df_new[broker_level_df_new['dtp'].isna()==False])==0:
+                dictt[f"dtp_{metric}_l{rows}_{d}"]='NA'
+            else:
+                dictt[f"dtp_{metric}_l{rows}_{d}"]=broker_level_df_new[broker_level_df_new['dtp'].isna()==False]['dtp'].mean()
         
             values_mean=[dictt[f"open_invoice_{metric}_l{rows}_{d}"], dictt[f"approved_invoice_{metric}_l{rows}_{d}"], dictt[f"paid_invoice_{metric}_l{rows}_{d}"], dictt[f"approved_invoice_dollars_{metric}_l{rows}_{d}"], dictt[f"paid_invoice_dollars_{metric}_l{rows}_{d}"], dictt[f"dtp_{metric}_l{rows}_{d}"]]
         
@@ -303,7 +306,10 @@ class broker_report:
             dictt[f"paid_invoice_{metric}_l{rows}_{d}"]=stats.stdev(broker_level_df_new['invoice_paid'])
             dictt[f"approved_invoice_dollars_{metric}_l{rows}_{d}"]=stats.stdev(broker_level_df_new['invoice_approved_dollars'])
             dictt[f"paid_invoice_dollars_{metric}_l{rows}_{d}"]=stats.stdev(broker_level_df_new['invoice_paid_dollars'])
-            dictt[f"dtp_{metric}_l{rows}_{d}"]=stats.stdev(broker_level_df_new[broker_level_df_new['dtp'].isna()==False]['dtp'])
+            if len(broker_level_df_new[broker_level_df_new['dtp'].isna()==False])==0:
+                dictt[f"dtp_{metric}_l{rows}_{d}"]='NA'
+            else:
+                dictt[f"dtp_{metric}_l{rows}_{d}"]=stats.stdev(broker_level_df_new[broker_level_df_new['dtp'].isna()==False]['dtp'])
         
             values_stdev=[dictt[f"open_invoice_{metric}_l{rows}_{d}"], dictt[f"approved_invoice_{metric}_l{rows}_{d}"], dictt[f"paid_invoice_{metric}_l{rows}_{d}"], dictt[f"approved_invoice_dollars_{metric}_l{rows}_{d}"], dictt[f"paid_invoice_dollars_{metric}_l{rows}_{d}"], dictt[f"dtp_{metric}_l{rows}_{d}"]]
 
