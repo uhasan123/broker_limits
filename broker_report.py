@@ -301,15 +301,30 @@ class broker_report:
             values_mean=[dictt[f"open_invoice_{metric}_l{rows}_{d}"], dictt[f"approved_invoice_{metric}_l{rows}_{d}"], dictt[f"paid_invoice_{metric}_l{rows}_{d}"], dictt[f"approved_invoice_dollars_{metric}_l{rows}_{d}"], dictt[f"paid_invoice_dollars_{metric}_l{rows}_{d}"], dictt[f"dtp_{metric}_l{rows}_{d}"]]
         
             metric='stdev'
-            dictt[f"open_invoice_{metric}_l{rows}_{d}"]=stats.stdev(broker_level_df_new['open_invoices_in_point'])
-            dictt[f"approved_invoice_{metric}_l{rows}_{d}"]=stats.stdev(broker_level_df_new['invoice_approved'])
-            dictt[f"paid_invoice_{metric}_l{rows}_{d}"]=stats.stdev(broker_level_df_new['invoice_paid'])
-            dictt[f"approved_invoice_dollars_{metric}_l{rows}_{d}"]=stats.stdev(broker_level_df_new['invoice_approved_dollars'])
-            dictt[f"paid_invoice_dollars_{metric}_l{rows}_{d}"]=stats.stdev(broker_level_df_new['invoice_paid_dollars'])
-            if len(broker_level_df_new[broker_level_df_new['dtp'].isna()==False])==0:
-                dictt[f"dtp_{metric}_l{rows}_{d}"]='NA'
-            else:
+            try:
+                dictt[f"open_invoice_{metric}_l{rows}_{d}"]=stats.stdev(broker_level_df_new['open_invoices_in_point'])
+            except StatisticsError as e:
+                dictt[f"open_invoice_{metric}_l{rows}_{d}"]='NA'
+            try:
+                dictt[f"approved_invoice_{metric}_l{rows}_{d}"]=stats.stdev(broker_level_df_new['invoice_approved'])
+            except StatisticsError as e:
+                dictt[f"approved_invoice_{metric}_l{rows}_{d}"]='NA'
+            try:
+                dictt[f"paid_invoice_{metric}_l{rows}_{d}"]=stats.stdev(broker_level_df_new['invoice_paid'])
+            except StatisticsError as e:
+                dictt[f"paid_invoice_{metric}_l{rows}_{d}"]='NA'
+            try:
+                dictt[f"approved_invoice_dollars_{metric}_l{rows}_{d}"]=stats.stdev(broker_level_df_new['invoice_approved_dollars'])
+            except StatisticsError as e:
+                dictt[f"approved_invoice_dollars_{metric}_l{rows}_{d}"]='NA'
+            try:
+                dictt[f"paid_invoice_dollars_{metric}_l{rows}_{d}"]=stats.stdev(broker_level_df_new['invoice_paid_dollars'])
+            except StatisticsError as e:
+                dictt[f"paid_invoice_dollars_{metric}_l{rows}_{d}"]='NA'
+            try:    
                 dictt[f"dtp_{metric}_l{rows}_{d}"]=stats.stdev(broker_level_df_new[broker_level_df_new['dtp'].isna()==False]['dtp'])
+            except StatisticsError as e:
+                dictt[f"dtp_{metric}_l{rows}_{d}"]='NA'
         
             values_stdev=[dictt[f"open_invoice_{metric}_l{rows}_{d}"], dictt[f"approved_invoice_{metric}_l{rows}_{d}"], dictt[f"paid_invoice_{metric}_l{rows}_{d}"], dictt[f"approved_invoice_dollars_{metric}_l{rows}_{d}"], dictt[f"paid_invoice_dollars_{metric}_l{rows}_{d}"], dictt[f"dtp_{metric}_l{rows}_{d}"]]
 
