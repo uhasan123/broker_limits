@@ -202,7 +202,7 @@ with tab1:
         colss=st.columns(2)
         colss[0].write(ageing_cohort_df)
         colss[1].write(limit_cohort_df)
-        st.write(debtor_level.sort_values(by='utilization_rate', ascending=False))
+        st.write(debtor_level.sort_values(by='utilization_rate', ascending=False).reset_index())
         st.session_state.tab1=False
 
 with tab2:
