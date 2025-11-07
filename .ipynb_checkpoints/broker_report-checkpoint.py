@@ -228,7 +228,11 @@ class broker_report:
             
             debtor_client_dict={}
             debtor_client_dict[f'client_count_l{i}_{d}']=debtor_client_level.shape[0]
-            debtor_client_dict[f'top_3_client_share_l{i}_{d}']=debtor_client_level[debtor_client_level['row_number']==3]['share'].iloc[0]
+            try:
+                debtor_client_dict[f'top_3_client_share_l{i}_{d}']=debtor_client_level[debtor_client_level['row_number']==3]['share'].iloc[0]
+            except IndexError as e:
+                n=debtor_client_level.shape[0]
+                debtor_client_dict[f'top_3_client_share_l{i}_{d}']=1
             debtor_client_dict[f'25_perc_share_clients_l{i}_{d}']=debtor_client_level[debtor_client_level['share']>=25]['row_number'].min()
             debtor_client_dict[f'50_perc_share_clients_l{i}_{d}']=debtor_client_level[debtor_client_level['share']>=50]['row_number'].min()
             debtor_client_dict[f'75_perc_share_clients_l{i}_{d}']=debtor_client_level[debtor_client_level['share']>=75]['row_number'].min()
@@ -273,12 +277,30 @@ class broker_report:
             values_mean=[dictt[f"open_invoice_{metric}_l{rows}_{d}"], dictt[f"approved_invoice_{metric}_l{rows}_{d}"], dictt[f"paid_invoice_{metric}_l{rows}_{d}"], dictt[f"approved_invoice_dollars_{metric}_l{rows}_{d}"], dictt[f"paid_invoice_dollars_{metric}_l{rows}_{d}"], dictt[f"dtp_{metric}_l{rows}_{d}"]]
         
             metric='stdev'
-            dictt[f"open_invoice_{metric}_l{rows}_{d}"]=stats.stdev(broker_level_df_new['open_invoices_in_point'])
-            dictt[f"approved_invoice_{metric}_l{rows}_{d}"]=stats.stdev(broker_level_df_new['invoice_approved'])
-            dictt[f"paid_invoice_{metric}_l{rows}_{d}"]=stats.stdev(broker_level_df_new['invoice_paid'])
-            dictt[f"approved_invoice_dollars_{metric}_l{rows}_{d}"]=stats.stdev(broker_level_df_new['invoice_approved_dollars'])
-            dictt[f"paid_invoice_dollars_{metric}_l{rows}_{d}"]=stats.stdev(broker_level_df_new['invoice_paid_dollars'])
-            dictt[f"dtp_{metric}_l{rows}_{d}"]=stats.stdev(broker_level_df_new[broker_level_df_new['dtp'].isna()==False]['dtp'])
+            try:
+                dictt[f"open_invoice_{metric}_l{rows}_{d}"]=stats.stdev(broker_level_df_new['open_invoices_in_point'])
+            except stats.StatisticsError as e:
+                dictt[f"open_invoice_{metric}_l{rows}_{d}"]=0
+            try:
+                dictt[f"approved_invoice_{metric}_l{rows}_{d}"]=stats.stdev(broker_level_df_new['invoice_approved'])
+            except stats.StatisticsError as e:
+                dictt[f"approved_invoice_{metric}_l{rows}_{d}"]=0
+            try:
+                dictt[f"paid_invoice_{metric}_l{rows}_{d}"]=stats.stdev(broker_level_df_new['invoice_paid'])
+            except stats.StatisticsError as e:
+                dictt[f"paid_invoice_{metric}_l{rows}_{d}"]=0
+            try:
+                dictt[f"approved_invoice_dollars_{metric}_l{rows}_{d}"]=stats.stdev(broker_level_df_new['invoice_approved_dollars'])
+            except stats.StatisticsError as e:
+                dictt[f"approved_invoice_dollars_{metric}_l{rows}_{d}"]=0
+            try:
+                dictt[f"paid_invoice_dollars_{metric}_l{rows}_{d}"]=stats.stdev(broker_level_df_new['invoice_paid_dollars'])
+            except stats.StatisticsError as e:
+                dictt[f"paid_invoice_dollars_{metric}_l{rows}_{d}"]=0
+            try:    
+                dictt[f"dtp_{metric}_l{rows}_{d}"]=stats.stdev(broker_level_df_new[broker_level_df_new['dtp'].isna()==False]['dtp'])
+            except stats.StatisticsError as e:
+                dictt[f"dtp_{metric}_l{rows}_{d}"]=0
         
             values_stdev=[dictt[f"open_invoice_{metric}_l{rows}_{d}"], dictt[f"approved_invoice_{metric}_l{rows}_{d}"], dictt[f"paid_invoice_{metric}_l{rows}_{d}"], dictt[f"approved_invoice_dollars_{metric}_l{rows}_{d}"], dictt[f"paid_invoice_dollars_{metric}_l{rows}_{d}"], dictt[f"dtp_{metric}_l{rows}_{d}"]]
 
