@@ -135,13 +135,13 @@ def create_debtor_level_view():
             g['created_date'].isna()==False,
             'id'
         ].nunique(),
-        'invoice_breached_l30': g.loc[
+        'invoice_flagged_l30': g.loc[
             (g['created_date'].isna()==False) & (g['limit_exceeded']==1),
             'id'
         ].nunique()
     })).reset_index()
     
-    debtor_level_view_2['perc_invoices_breached_l30']=debtor_level_view_2['invoice_breached_l30'] / debtor_level_view_2['invoice_created_l30']
+    debtor_level_view_2['perc_invoices_flagged_l30']=debtor_level_view_2['invoice_flagged_l30'] / debtor_level_view_2['invoice_created_l30']
     debtor_level=debtor_level_view.merge(debtor_level_view_2, left_on='id', right_on='debtor_id', how='outer')
     debtor_level['ageing_cohort']=debtor_level['ageing'].apply(lambda x: ageing_cohort(x))
     ageing_cohort_df=debtor_level.groupby('ageing_cohort').agg(broker_count=('id', 'nunique')).reset_index()
@@ -212,14 +212,14 @@ with tab1:
     if st.session_state.tab1==True:
         exhaust_debtors=get_exhausted_debtors()
         debtor_level, ageing_cohort_df,limit_cohort_df=create_debtor_level_view()
-        debtor_level=debtor_level[['id', 'debtor_limit', 'approved_total', 'utilization_rate', 'invoice_created_l30', 'invoice_breached_l30', 'perc_invoices_breached_l30']]
+        debtor_level=debtor_level[['id', 'debtor_limit', 'approved_total', 'utilization_rate', 'invoice_created_l30', 'invoice_flagged_l30', 'perc_invoices_flagged_l30']]
         brokers_exhausted=exhaust_debtors['id'].nunique()
         # st.write('Exhaustion counter', brokers_exhausted)
         st.markdown(f"<h2 style='font-size:28px; color:green;'>Exhaustion counter: {brokers_exhausted}!</h2>", unsafe_allow_html=True)
         colss=st.columns(2)
-        colss[0].write(ageing_cohort_df)
-        colss[1].write(limit_cohort_df)
-        st.write(debtor_level.sort_values(by='utilization_rate', ascending=False).reset_index().drop('index', axis=1))
+        colss[0].dataframe(ageing_cohort_df)
+        colss[1].dataframe(limit_cohort_df)
+        st.write(debtor_level.sort_values(by=['approved_total', 'debtor_limit'], ascending=False).reset_index().drop('index', axis=1))
         st.session_state.tab1=False
 
 with tab2:
