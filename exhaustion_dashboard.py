@@ -4,6 +4,7 @@ import streamlit as st
 import plotly.graph_objects as go
 import ast
 from datetime import date
+from pandas.api.types import CategoricalDtype
 
 from broker_report import broker_report
 
@@ -147,6 +148,14 @@ def create_debtor_level_view():
     debtor_level['limit_cohort']=debtor_level['debtor_limit'].apply(lambda x: limit_cohort(x))
     limit_cohort_df=debtor_level.groupby('limit_cohort').agg(broker_count=('id', 'nunique')).reset_index()
 
+    priority_order = CategoricalDtype(["greater than 21 days", "8 to 20 days", "less than 7 days"], ordered=True)
+    ageing_cohort_df["ageing_cohort"] = ageing_cohort_df["ageing_cohort"].astype(priority_order)
+    ageing_cohort_df = ageing_cohort_df.sort_values("ageing_cohort")
+
+    priority_order_2 = CategoricalDtype(["greater than 100k", "80k to 100k", "60k to 80k", "40k to 60k", "20k to 40k", "10k to 20k", "10k"], ordered=True)
+    limit_cohort_df["limit_cohort"] = limit_cohort_df["limit_cohort"].astype(priority_order_2)
+    limit_cohort_df = limit_cohort_df.sort_values("limit_cohort")
+
     return debtor_level, ageing_cohort_df, limit_cohort_df
 
 def generate_data_for_payment_trend(debtor_id):
@@ -181,6 +190,13 @@ def generate_data_for_payment_trend(debtor_id):
     col_name=[i[0] for i in cur.description]
     brokers_df=pd.DataFrame(results, columns=col_name)
     return invoice_df, debtors_df, brokers_df
+
+st.set_page_config(
+    page_title="Exhaustion Monitoring Dashboard",
+    layout="wide",  # <--- This makes the page use the full width
+    initial_sidebar_state="expanded"  # optional: sidebar expanded by default
+)
+
 
 if 'tab1' not in st.session_state:
     st.session_state.tab1=False
