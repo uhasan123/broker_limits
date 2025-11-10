@@ -12,7 +12,11 @@ def get_exhausted_debtors():
     obj=broker_report()
     conn=obj.make_db_connection()
     conn.autocommit=True
-    query="select id, debtor_limit/100 as debtor_limit, approved_total/100 as approved_total from debtors d where d.approved_total>=d.debtor_limit and d.status = 'active' and d.debtor_limit<>100"
+    query='''select distinct a.*, b.dot from 
+(select id, name, debtor_limit/100 as debtor_limit, approved_total/100 as approved_total from debtors d where d.approved_total>=d.debtor_limit and d.status = 'active' and d.debtor_limit<>100) a
+left join
+(select debtor_id, dot from brokers) b 
+on a.id=b.debtor_id'''
     exhaust_debtors=pd.read_sql_query(query, conn)
     return exhaust_debtors
 
@@ -151,10 +155,12 @@ def create_debtor_level_view():
     priority_order = CategoricalDtype(["greater than 21 days", "8 to 20 days", "less than 7 days"], ordered=True)
     ageing_cohort_df["ageing_cohort"] = ageing_cohort_df["ageing_cohort"].astype(priority_order)
     ageing_cohort_df = ageing_cohort_df.sort_values("ageing_cohort").reset_index()
+    ageing_cohort_df=ageing_cohort_df.drop('index', axis=1)
 
     priority_order_2 = CategoricalDtype(["greater than 100k", "80k to 100k", "60k to 80k", "40k to 60k", "20k to 40k", "10k to 20k", "10k"], ordered=True)
     limit_cohort_df["limit_cohort"] = limit_cohort_df["limit_cohort"].astype(priority_order_2)
     limit_cohort_df = limit_cohort_df.sort_values("limit_cohort").reset_index()
+    limit_cohort_df=limit_cohort_df.drop('index', axis=1)
 
     return debtor_level, ageing_cohort_df, limit_cohort_df
 
@@ -214,7 +220,7 @@ with tab1:
     if st.session_state.tab1==True:
         exhaust_debtors=get_exhausted_debtors()
         debtor_level, ageing_cohort_df,limit_cohort_df=create_debtor_level_view()
-        debtor_level=debtor_level[['id', 'debtor_limit', 'approved_total', 'utilization_rate', 'invoice_created_l30', 'invoice_flagged_l30', 'perc_invoices_flagged_l30']]
+        debtor_level=debtor_level[['id','name', 'debtor_limit', 'approved_total', 'utilization_rate', 'invoice_created_l30', 'invoice_flagged_l30', 'perc_invoices_flagged_l30']]
         brokers_exhausted=exhaust_debtors['id'].nunique()
         # st.write('Exhaustion counter', brokers_exhausted)
         st.markdown(f"<h1 style='font-size:28px; color:green;'>Exhaustion counter: {brokers_exhausted}</h1>", unsafe_allow_html=True)
@@ -228,13 +234,25 @@ with tab2:
     obj=broker_report()
     conn=obj.make_db_connection()
     conn.autocommit=True
+    cols=st.columns([2,2,1])
     
-    debtor_id=st.text_input("debtor id : ", key="debtor_id_t2")
+    debtor_id_=cols[0].text_input("debtor id : ", key="debtor_id_t2")
+    name=cols[1].text_input("name : ", key="name_t2")
+    dot=cols[2].text_input("dot : ", key="dot_t2")
+    
     if st.button("Submit", key='submit_tab2'):
         st.session_state.tab2=True
 
     if st.session_state.tab2==True:
         debtor_limit=get_exhausted_debtors()
+        if name!='':
+            debtor_id=debtor_limit[debtor_limit['name']==name]['debtor_id'].iloc[0]
+        elif dot!='':
+            debtor_id=debtor_limit[debtor_limit['dot']==dot]['debtor_id'].iloc[0]
+        elif debtor_id_!='':
+            debtor_id=debtor_id_
+        else:
+            debtor_id=''
         if debtor_id !='':
             open_invoice_df_l90=calc_open_invoice_volume_l90(debtor_id, conn)
             debtor_limit_df_l90=calc_debtor_limit_l90(debtor_id, conn)
