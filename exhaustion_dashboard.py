@@ -197,6 +197,8 @@ st.set_page_config(
     initial_sidebar_state="expanded"  # optional: sidebar expanded by default
 )
 
+st.title("Exhaustion Monitoring Dashboard")
+
 
 if 'tab1' not in st.session_state:
     st.session_state.tab1=False
@@ -216,7 +218,7 @@ with tab1:
         brokers_exhausted=exhaust_debtors['id'].nunique()
         # st.write('Exhaustion counter', brokers_exhausted)
         st.markdown(f"<h2 style='font-size:28px; color:green;'>Exhaustion counter: {brokers_exhausted}!</h2>", unsafe_allow_html=True)
-        colss=st.columns(2)
+        colss=st.columns([1,1,2])
         colss[0].dataframe(ageing_cohort_df)
         colss[1].dataframe(limit_cohort_df)
         st.write(debtor_level.sort_values(by=['approved_total', 'debtor_limit'], ascending=False).reset_index().drop('index', axis=1))
