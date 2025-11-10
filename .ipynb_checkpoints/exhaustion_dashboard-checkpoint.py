@@ -217,7 +217,7 @@ with tab1:
         debtor_level=debtor_level[['id', 'debtor_limit', 'approved_total', 'utilization_rate', 'invoice_created_l30', 'invoice_flagged_l30', 'perc_invoices_flagged_l30']]
         brokers_exhausted=exhaust_debtors['id'].nunique()
         # st.write('Exhaustion counter', brokers_exhausted)
-        st.markdown(f"<h1 style='font-size:28px; color:green;'>Exhaustion counter: {brokers_exhausted}!</h1>", unsafe_allow_html=True)
+        st.markdown(f"<h1 style='font-size:28px; color:green;'>Exhaustion counter: {brokers_exhausted}</h1>", unsafe_allow_html=True)
         colss=st.columns([1,1,2])
         colss[0].dataframe(ageing_cohort_df)
         colss[1].dataframe(limit_cohort_df)
@@ -251,8 +251,8 @@ with tab2:
             df_l90_=debtor_limit[debtor_limit['id']==debtor_id]
             df_l90_['utilization_rate']=df_l90_['approved_total'] / df_l90_['debtor_limit']
             df_l90_['unnaturality']=df_l90_['approved_total']-df_l90_['debtor_limit']
-            df_l90_['debtor_limit_change']=df_l90_['debtor_limit']-df_l90[df_l90['snapshot_date']==df_l90['snapshot_date'].min()]['approved_amount'].iloc[0]
-            df_l90_['no_of_exhaustions']=df_l90['breach_count'].sum()
+            df_l90_['debtor_limit_change']=((df_l90_['debtor_limit']-df_l90[df_l90['snapshot_date']==df_l90['snapshot_date'].min()]['debtor_limit'].iloc[0])/df_l90_['debtor_limit']) * 100
+            df_l90_['no_of_exhaustions_L90d']=df_l90['breach_count'].sum()
             st.write(df_l90_)
         
             fig = go.Figure([
