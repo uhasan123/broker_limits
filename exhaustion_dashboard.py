@@ -150,11 +150,11 @@ def create_debtor_level_view():
 
     priority_order = CategoricalDtype(["greater than 21 days", "8 to 20 days", "less than 7 days"], ordered=True)
     ageing_cohort_df["ageing_cohort"] = ageing_cohort_df["ageing_cohort"].astype(priority_order)
-    ageing_cohort_df = ageing_cohort_df.sort_values("ageing_cohort")
+    ageing_cohort_df = ageing_cohort_df.sort_values("ageing_cohort").reset_index()
 
     priority_order_2 = CategoricalDtype(["greater than 100k", "80k to 100k", "60k to 80k", "40k to 60k", "20k to 40k", "10k to 20k", "10k"], ordered=True)
     limit_cohort_df["limit_cohort"] = limit_cohort_df["limit_cohort"].astype(priority_order_2)
-    limit_cohort_df = limit_cohort_df.sort_values("limit_cohort")
+    limit_cohort_df = limit_cohort_df.sort_values("limit_cohort").reset_index()
 
     return debtor_level, ageing_cohort_df, limit_cohort_df
 
@@ -217,7 +217,7 @@ with tab1:
         debtor_level=debtor_level[['id', 'debtor_limit', 'approved_total', 'utilization_rate', 'invoice_created_l30', 'invoice_flagged_l30', 'perc_invoices_flagged_l30']]
         brokers_exhausted=exhaust_debtors['id'].nunique()
         # st.write('Exhaustion counter', brokers_exhausted)
-        st.markdown(f"<h2 style='font-size:28px; color:green;'>Exhaustion counter: {brokers_exhausted}!</h2>", unsafe_allow_html=True)
+        st.markdown(f"<h1 style='font-size:28px; color:green;'>Exhaustion counter: {brokers_exhausted}!</h1>", unsafe_allow_html=True)
         colss=st.columns([1,1,2])
         colss[0].dataframe(ageing_cohort_df)
         colss[1].dataframe(limit_cohort_df)
