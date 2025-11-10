@@ -222,7 +222,7 @@ with tab1:
         colss[0].dataframe(ageing_cohort_df)
         colss[1].dataframe(limit_cohort_df)
         st.write(debtor_level.sort_values(by=['approved_total', 'debtor_limit'], ascending=False).reset_index().drop('index', axis=1))
-        st.session_state.tab1=False
+        # st.session_state.tab1=False
 
 with tab2:
     obj=broker_report()
@@ -251,7 +251,7 @@ with tab2:
             df_l90_=debtor_limit[debtor_limit['id']==debtor_id]
             df_l90_['utilization_rate']=df_l90_['approved_total'] / df_l90_['debtor_limit']
             df_l90_['unnaturality']=df_l90_['approved_total']-df_l90_['debtor_limit']
-            df_l90_['debtor_limit_change']=((df_l90_['debtor_limit']-df_l90[df_l90['snapshot_date']==df_l90['snapshot_date'].min()]['debtor_limit'].iloc[0])/df_l90_['debtor_limit']) * 100
+            df_l90_['debtor_limit_perc_change_L90d']=((df_l90_[df_l90_['snapshot_date']==df_l90_['snapshot_date'].max()]['debtor_limit'].iloc[0]-df_l90_[df_l90_['snapshot_date']==df_l90_['snapshot_date'].min()]['debtor_limit'].iloc[0])/df_l90_['debtor_limit']) * 100
             df_l90_['no_of_exhaustions_L90d']=df_l90['breach_count'].sum()
             st.write(df_l90_)
         
@@ -272,7 +272,7 @@ with tab2:
             )
         
             st.plotly_chart(fig, use_container_width=True)
-            st.session_state.tab2=False
+            # st.session_state.tab2=False
 
 with tab3:
     obj=broker_report()
@@ -324,7 +324,7 @@ with tab3:
                 st.write(pivot_table)
                 st.plotly_chart(fig, use_container_width=True)
 
-            st.session_state.tab3=False
+            # st.session_state.tab3=False
 
 
 
