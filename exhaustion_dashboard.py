@@ -198,7 +198,8 @@ with tab1:
         debtor_level, ageing_cohort_df,limit_cohort_df=create_debtor_level_view()
         debtor_level=debtor_level[['id', 'debtor_limit', 'approved_total', 'utilization_rate', 'invoice_created_l30', 'invoice_breached_l30', 'perc_invoices_breached_l30']]
         brokers_exhausted=exhaust_debtors['id'].nunique()
-        st.write('Exhaustion counter', brokers_exhausted)
+        # st.write('Exhaustion counter', brokers_exhausted)
+        st.markdown(f"<h2 style='font-size:28px; color:green;'>Exhaustion counter: {brokers_exhausted}!</h2>", unsafe_allow_html=True)
         colss=st.columns(2)
         colss[0].write(ageing_cohort_df)
         colss[1].write(limit_cohort_df)
