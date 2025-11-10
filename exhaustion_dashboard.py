@@ -251,7 +251,7 @@ with tab2:
             df_l90_=debtor_limit[debtor_limit['id']==debtor_id]
             df_l90_['utilization_rate']=df_l90_['approved_total'] / df_l90_['debtor_limit']
             df_l90_['unnaturality']=df_l90_['approved_total']-df_l90_['debtor_limit']
-            df_l90_['debtor_limit_perc_change_L90d']=(df_l90_['debtor_limit']-df_l90[df_l90['snapshot_date']==df_l90['snapshot_date'].min()]['debtor_limit'].iloc[0])/df_l90_['debtor_limit']) * 100
+            df_l90_['debtor_limit_perc_change_L90d']=(df_l90_['debtor_limit']-df_l90[df_l90['snapshot_date']==df_l90['snapshot_date'].min()]['debtor_limit'].iloc[0])/df_l90_['debtor_limit'] * 100
             df_l90_['no_of_exhaustions_L90d']=df_l90['breach_count'].sum()
             st.write(df_l90_)
         
