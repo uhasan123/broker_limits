@@ -253,6 +253,7 @@ with tab2:
             debtor_id=debtor_id_
         else:
             debtor_id=''
+        print(debtor_id)
         if debtor_id !='':
             open_invoice_df_l90=calc_open_invoice_volume_l90(debtor_id, conn)
             debtor_limit_df_l90=calc_debtor_limit_l90(debtor_id, conn)
