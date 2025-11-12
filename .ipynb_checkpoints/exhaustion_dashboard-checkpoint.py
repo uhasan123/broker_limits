@@ -341,10 +341,10 @@ with tab3:
 
     cols1=st.columns([2,2])
     period=cols1[0].text_input("Period: ", key='step')    
-    value=cols1[0].number_input("Value: ", key="cohort")
+    value=cols1[1].text_input("Value: ", key="cohort")
     if value!='':
-        value=int(value)
         value=value.split(',')
+        value[0]=int(value[0])
         # cohort=ast.literal_eval(cohort)
     if st.button("Submit", key='submit_tab3'):
         st.session_state.tab3_metrics=True
