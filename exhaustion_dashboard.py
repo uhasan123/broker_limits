@@ -378,7 +378,7 @@ with tab3:
 
             days_diff=(broker_level_df['snapshot_date'].iloc[1] - broker_level_df['snapshot_date'].iloc[0]).days
             d1=broker_level_df.iloc[-1]['snapshot_date']
-            d2=broker_level_df.iloc[-1]['snapshot_date']-pd.Timedelta(days=value*days_diff)
+            d2=broker_level_df.iloc[-1]['snapshot_date']-pd.Timedelta(days=value[0]*days_diff)
             st.markdown(f"<h2 style='font-size:28px; color:green;'>The following stats ranges from {d2} and {d1}</h2>", unsafe_allow_html=True)
             
             cols_=st.columns([2,2,2])
