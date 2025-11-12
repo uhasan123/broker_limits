@@ -20,15 +20,16 @@ on a.id=b.debtor_id'''
     exhaust_debtors=pd.read_sql_query(query, conn)
     return exhaust_debtors
 
-def get_all_debtors():
-    obj=broker_report()
-    conn=obj.make_db_connection()
-    conn.autocommit=True
+def get_all_debtors(debtor_id, conn):
+    # obj=broker_report()
+    # conn=obj.make_db_connection()
+    # conn.autocommit=True
     query='''select distinct a.*, b.dot from 
-(select id, name, debtor_limit/100 as debtor_limit, approved_total/100 as approved_total from debtors d where d.status = 'active' and d.debtor_limit<>100) a
+(select id, name, debtor_limit/100 as debtor_limit, approved_total/100 as approved_total from debtors d where d.id='{debtor_id}') a
 left join
 (select debtor_id, dot from brokers) b 
 on a.id=b.debtor_id'''
+    query=query.format(debtor_id=debtor_id)
     exhaust_debtors=pd.read_sql_query(query, conn)
     return exhaust_debtors
 
@@ -256,7 +257,6 @@ with tab2:
         st.session_state.tab2=True
 
     if st.session_state.tab2==True:
-        debtor_limit=get_all_debtors()
 
         if name!='':
             # debtor_id=debtor_limit[debtor_limit['name']==name]['id'].iloc[0]
@@ -278,6 +278,7 @@ with tab2:
         if debtor_id !='':
             open_invoice_df_l90=calc_open_invoice_volume_l90(debtor_id, conn)
             debtor_limit_df_l90=calc_debtor_limit_l90(debtor_id, conn)
+            debtor_limit=get_all_debtors(debtor_id, conn)
     
         # conn.close()
         # tunnel.stop()
@@ -288,7 +289,7 @@ with tab2:
             df_l90['limit_exceed_shift']=df_l90['limit_exceed'].shift(-1)
             df_l90['breach_count']=df_l90.apply(lambda x: 1 if (x['limit_exceed']==False) & (x['limit_exceed_shift']==True) else 0, axis=1)
         
-            df_l90_=debtor_limit[debtor_limit['id']==debtor_id]
+            df_l90_=debtor_limit
             df_l90_['utilization_rate']=df_l90_['approved_total'] / df_l90_['debtor_limit']
             df_l90_['unnaturality']=df_l90_['approved_total']-df_l90_['debtor_limit']
             df_l90_['max_limit_L90d']=df_l90['debtor_limit'].max()
