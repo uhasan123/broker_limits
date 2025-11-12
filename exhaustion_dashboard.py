@@ -96,12 +96,14 @@ def sum_until_zero(g):
         stop = zero_idx[0]
         return g.loc[g.index < stop, 'is_exhausted'].sum()
 def ageing_cohort(x):
-    if x<=7:
-        return 'less than 7 days'
-    elif (x>7) & (x<=20):
-        return '8 to 20 days'
-    elif x>20:
-        return 'greater than 21 days'
+    if x==1:
+        return 'brokers exhausted today'
+    elif x<=7:
+        return 'brokers exhausted within the last 7 days'
+    elif x<=15:
+        return 'brokers exhausted within the last 15 days'
+    elif x>15:
+        return 'brokers exhausted for more than 15 days'
     else:
         return None
 def limit_cohort(x):
@@ -160,12 +162,14 @@ def create_debtor_level_view():
     
     debtor_level_view_2['perc_invoices_flagged_l30']=debtor_level_view_2['invoice_flagged_l30'] / debtor_level_view_2['invoice_created_l30']
     debtor_level=debtor_level_view.merge(debtor_level_view_2, left_on='id', right_on='debtor_id', how='outer')
+
+    #heree
     debtor_level['ageing_cohort']=debtor_level['ageing'].apply(lambda x: ageing_cohort(x))
     ageing_cohort_df=debtor_level.groupby('ageing_cohort').agg(broker_count=('id', 'nunique')).reset_index()
     debtor_level['limit_cohort']=debtor_level['debtor_limit'].apply(lambda x: limit_cohort(x))
     limit_cohort_df=debtor_level.groupby('limit_cohort').agg(broker_count=('id', 'nunique')).reset_index()
 
-    priority_order = CategoricalDtype(["greater than 21 days", "8 to 20 days", "less than 7 days"], ordered=True)
+    priority_order = CategoricalDtype(["brokers exhausted today", "brokers exhausted within the last 7 days", "brokers exhausted within the last 15 days", "brokers exhausted for more than 15 days"], ordered=True)
     ageing_cohort_df["ageing_cohort"] = ageing_cohort_df["ageing_cohort"].astype(priority_order)
     ageing_cohort_df = ageing_cohort_df.sort_values("ageing_cohort").reset_index()
     ageing_cohort_df=ageing_cohort_df.drop('index', axis=1)
