@@ -331,6 +331,8 @@ with tab3:
 
     if debtor_id_!='':
         debtor_id=debtor_id_
+    else:
+        debtor_id=''
 
     if debtor_id !='':
         invoice_df, debtors_df, brokers_df=generate_data_for_payment_trend(debtor_id)
