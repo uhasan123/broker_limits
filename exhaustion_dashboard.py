@@ -362,7 +362,7 @@ with tab3:
             pivot_table, df_t, pivot_table_client_conc=broker_report.generate_report(broker_level_df, broker_profile_report=True, cohort=value,payment_trend_count=5, payment_trend_step='default', debtors_df=debtors_df, brokers_df=brokers_df, invoice_df=invoice_df)
             st.write('Debtors Info')
             st.write(df_t)
-            cols_=st.columns([2,2])
+            cols_=st.columns([1,1,2])
             cols_[0].write('Metrics Averages and Standard Deviation')
             cols_[0].write(pivot_table)
             cols_[1].write('Client Concentration')
@@ -370,9 +370,9 @@ with tab3:
 
     st.markdown(f"<h1 style='font-size:28px; color:green;'>Broker Payment Trend</h1>", unsafe_allow_html=True)
 
-    cols1=st.columns([2,2])
+    cols1=st.columns([1,1,2])
     period=cols1[0].text_input("Period: ", key='payment_trend_step')    
-    value=int(cols1[0].number_input("Value: ", key="payment_trend_count"))
+    value=int(cols1[1].number_input("Value: ", key="payment_trend_count"))
 
         # cohort=ast.literal_eval(cohort)
     if st.button("Submit", key='submit_tab3_trend'):
