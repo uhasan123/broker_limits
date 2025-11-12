@@ -163,9 +163,17 @@ def create_debtor_level_view():
     debtor_level_view_2['perc_invoices_flagged_l30']=debtor_level_view_2['invoice_flagged_l30'] / debtor_level_view_2['invoice_created_l30']
     debtor_level=debtor_level_view.merge(debtor_level_view_2, left_on='id', right_on='debtor_id', how='outer')
 
-    #heree
-    debtor_level['ageing_cohort']=debtor_level['ageing'].apply(lambda x: ageing_cohort(x))
-    ageing_cohort_df=debtor_level.groupby('ageing_cohort').agg(broker_count=('id', 'nunique')).reset_index()
+    # debtor_level['ageing_cohort']=debtor_level['ageing'].apply(lambda x: ageing_cohort(x))
+    # ageing_cohort_df=debtor_level.groupby('ageing_cohort').agg(broker_count=('id', 'nunique')).reset_index()
+    ageing_cohort_df=pd.DataFrame()
+    
+    ageing_cohort_df['ageing_cohort']=["brokers exhausted today", "brokers exhausted within the last 7 days", "brokers exhausted within the last 15 days", "brokers exhausted for more than 15 days"]
+    ltoday=debtor_level[debtor_level['ageing_cohort']==1]
+    l7d=debtor_level[debtor_level['ageing_cohort']<=7]
+    l15d=debtor_level[debtor_level['ageing_cohort']<=15]
+    m15d=debtor_level[debtor_level['ageing_cohort']>15]
+    ageing_cohort_df['broker_count']=[ltoday, l7d, l15d, m15d]
+    
     debtor_level['limit_cohort']=debtor_level['debtor_limit'].apply(lambda x: limit_cohort(x))
     limit_cohort_df=debtor_level.groupby('limit_cohort').agg(broker_count=('id', 'nunique')).reset_index()
 
