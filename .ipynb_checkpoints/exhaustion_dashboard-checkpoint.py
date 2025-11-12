@@ -260,7 +260,7 @@ with tab2:
 
         if name!='':
             # debtor_id=debtor_limit[debtor_limit['name']==name]['id'].iloc[0]
-            query="select id, dot from debtors where name='{name}'"
+            query="select id, name from debtors where name='{name}'"
             query=query.format(name=name)
             x=pd.read_sql_query(query, conn)
             debtor_id=x['id'].iloc[0]
