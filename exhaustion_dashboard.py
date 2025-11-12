@@ -362,12 +362,13 @@ with tab3:
             pivot_table, df_t, pivot_table_client_conc=broker_report.generate_report(broker_level_df, broker_profile_report=True, cohort=value,payment_trend_count=5, payment_trend_step='default', debtors_df=debtors_df, brokers_df=brokers_df, invoice_df=invoice_df)
             st.write('Debtors Info')
             st.write(df_t)
-            st.write('Metrics Aevrages and Standard Deviation')
-            st.write(pivot_table)
+            cols_=st.columns([2,2])
+            st.write('Metrics Averages and Standard Deviation')
+            cols_[0].write(pivot_table)
             st.write('Client Concentration')
-            st.write(pivot_table_client_conc)
+            cols_[1].write(pivot_table_client_conc)
 
-    st.markdown(f"<h1 style='font-size:28px; color:green;'>Broker Pyament Trend</h1>", unsafe_allow_html=True)
+    st.markdown(f"<h1 style='font-size:28px; color:green;'>Broker Payment Trend</h1>", unsafe_allow_html=True)
 
     cols1=st.columns([2,2])
     period=cols1[0].text_input("Period: ", key='payment_trend_step')    
@@ -411,40 +412,40 @@ with tab3:
 
 
     
-    if st.session_state.tab3_trend==True:
-        if debtor_id !='':
-            invoice_df, debtors_df, brokers_df=generate_data_for_payment_trend(debtor_id)
-            if generate_broker_report:
-                date_today=date.today()
-                date_last_year=date_today - pd.Timedelta(days=365)
-                # start_date=(date_last_year + pd.Timedelta(days=(8-date_last_year.isoweekday())%7) + pd.Timedelta(days=7))-pd.Timedelta(days=1) # for weekly
-                start_date=invoice_df['approved_date'].min().date() # for monthly
-                end_date=date_today
+    # if st.session_state.tab3_trend==True:
+    #     if debtor_id !='':
+    #         invoice_df, debtors_df, brokers_df=generate_data_for_payment_trend(debtor_id)
+    #         if generate_broker_report:
+    #             date_today=date.today()
+    #             date_last_year=date_today - pd.Timedelta(days=365)
+    #             # start_date=(date_last_year + pd.Timedelta(days=(8-date_last_year.isoweekday())%7) + pd.Timedelta(days=7))-pd.Timedelta(days=1) # for weekly
+    #             start_date=invoice_df['approved_date'].min().date() # for monthly
+    #             end_date=date_today
                 
-                broker_level_df=broker_report.generate_segment_level_data(start_date, end_date, debtors_df, brokers_df, invoice_df, step=step)
-                pivot_table, df_t, pivot_table_client_conc=broker_report.generate_report(broker_level_df, broker_profile_report=generate_broker_report, cohort=cohort,payment_trend_count=payment_trend_count, payment_trend_step=payment_trend_step, debtors_df=debtors_df, brokers_df=brokers_df, invoice_df=invoice_df)
-                st.write(df_t)
-                st.write(pivot_table)
-                st.write(pivot_table_client_conc)
+    #             broker_level_df=broker_report.generate_segment_level_data(start_date, end_date, debtors_df, brokers_df, invoice_df, step=step)
+    #             pivot_table, df_t, pivot_table_client_conc=broker_report.generate_report(broker_level_df, broker_profile_report=generate_broker_report, cohort=cohort,payment_trend_count=payment_trend_count, payment_trend_step=payment_trend_step, debtors_df=debtors_df, brokers_df=brokers_df, invoice_df=invoice_df)
+    #             st.write(df_t)
+    #             st.write(pivot_table)
+    #             st.write(pivot_table_client_conc)
 
-            else:
-                date_today=date.today()
-                date_last_year=date_today - pd.Timedelta(days=365)
-                start_date=(date_last_year + pd.Timedelta(days=(8-date_last_year.isoweekday())%7) + pd.Timedelta(days=7))-pd.Timedelta(days=1) # for weekly
-                # start_date=invoice_df['approved_date'].min().date() # for monthly
-                end_date=date_today
+    #         else:
+    #             date_today=date.today()
+    #             date_last_year=date_today - pd.Timedelta(days=365)
+    #             start_date=(date_last_year + pd.Timedelta(days=(8-date_last_year.isoweekday())%7) + pd.Timedelta(days=7))-pd.Timedelta(days=1) # for weekly
+    #             # start_date=invoice_df['approved_date'].min().date() # for monthly
+    #             end_date=date_today
                 
-                broker_level=broker_report.generate_segment_level_data(start_date, end_date, debtors_df, brokers_df, invoice_df, step=step)
-                broker_level_current=broker_report.generate_segment_level_data(start_date=None, end_date=end_date, debtors_df=debtors_df, brokers_df=brokers_df, invoice_df=invoice_df, step='current')
-                # broker_level_df=broker_level[broker_level['dtp'].isna()==False]
-                broker_level_df=pd.concat([broker_level, broker_level_current], ignore_index=True)
-                # broker_level_df.head()
-                pivot_table, df_t, pivot_table_client_conc=broker_report.generate_report(broker_level_df, broker_profile_report=generate_broker_report, cohort=cohort,payment_trend_count=payment_trend_count, payment_trend_step=payment_trend_step, debtors_df=debtors_df, brokers_df=brokers_df, invoice_df=invoice_df)
-                fig=broker_report.payment_trend_graph(df_t.T.reset_index())
-                st.write(pivot_table)
-                st.plotly_chart(fig, use_container_width=True)
+    #             broker_level=broker_report.generate_segment_level_data(start_date, end_date, debtors_df, brokers_df, invoice_df, step=step)
+    #             broker_level_current=broker_report.generate_segment_level_data(start_date=None, end_date=end_date, debtors_df=debtors_df, brokers_df=brokers_df, invoice_df=invoice_df, step='current')
+    #             # broker_level_df=broker_level[broker_level['dtp'].isna()==False]
+    #             broker_level_df=pd.concat([broker_level, broker_level_current], ignore_index=True)
+    #             # broker_level_df.head()
+    #             pivot_table, df_t, pivot_table_client_conc=broker_report.generate_report(broker_level_df, broker_profile_report=generate_broker_report, cohort=cohort,payment_trend_count=payment_trend_count, payment_trend_step=payment_trend_step, debtors_df=debtors_df, brokers_df=brokers_df, invoice_df=invoice_df)
+    #             fig=broker_report.payment_trend_graph(df_t.T.reset_index())
+    #             st.write(pivot_table)
+    #             st.plotly_chart(fig, use_container_width=True)
 
-            st.session_state.tab3=False
+    #         st.session_state.tab3=False
 
 
 
