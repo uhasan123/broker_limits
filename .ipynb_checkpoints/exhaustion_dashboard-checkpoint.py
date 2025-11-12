@@ -352,7 +352,7 @@ with tab3:
     st.markdown(f"<h1 style='font-size:28px; color:green;'>Broker Profile</h1>", unsafe_allow_html=True)
 
     cols1=st.columns([1,1,2])
-    period=cols1[0].text_input("Period: ", key='step')    
+    period=cols1[0].selectbox("Period: ", ('monthly', 'weekly'), key='step')    
     value=cols1[1].text_input("Value: ", key="cohort")
     if value!='':
         value=value.split(',')
@@ -383,7 +383,7 @@ with tab3:
     st.markdown(f"<h1 style='font-size:28px; color:green;'>Broker Payment Trend</h1>", unsafe_allow_html=True)
 
     cols1=st.columns([1,1,2])
-    period=cols1[0].text_input("Period: ", key='payment_trend_step')    
+    period=cols1[0].selectbox("Period: ", ('monthly', 'weekly', 'daily'), key='payment_trend_step')    
     value=int(cols1[1].number_input("Value: ", key="payment_trend_count"))
 
         # cohort=ast.literal_eval(cohort)
