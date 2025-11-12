@@ -99,9 +99,9 @@ def ageing_cohort(x):
     if x==1:
         return 'brokers exhausted today'
     if x<=7:
-        return 'brokers exhausted within the last 7 days'
+        return 'brokers exhausted since the last 7 days'
     if x<=15:
-        return 'brokers exhausted within the last 15 days'
+        return 'brokers exhausted since the last 15 days'
     if x>15:
         return 'brokers exhausted for more than 15 days'
     # else:
@@ -177,7 +177,7 @@ def create_debtor_level_view():
     debtor_level['limit_cohort']=debtor_level['debtor_limit'].apply(lambda x: limit_cohort(x))
     limit_cohort_df=debtor_level.groupby('limit_cohort').agg(broker_count=('id', 'nunique')).reset_index()
 
-    priority_order = CategoricalDtype(["brokers exhausted today", "brokers exhausted within the last 7 days", "brokers exhausted within the last 15 days", "brokers exhausted for more than 15 days"], ordered=True)
+    priority_order = CategoricalDtype(["brokers exhausted today", "brokers exhausted since the last 7 days", "brokers exhausted since the last 15 days", "brokers exhausted for more than 15 days"], ordered=True)
     ageing_cohort_df["ageing_cohort"] = ageing_cohort_df["ageing_cohort"].astype(priority_order)
     ageing_cohort_df = ageing_cohort_df.sort_values("ageing_cohort").reset_index()
     ageing_cohort_df=ageing_cohort_df.drop('index', axis=1)
