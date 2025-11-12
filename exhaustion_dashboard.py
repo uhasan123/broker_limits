@@ -168,10 +168,10 @@ def create_debtor_level_view():
     ageing_cohort_df=pd.DataFrame()
     
     ageing_cohort_df['ageing_cohort']=["brokers exhausted today", "brokers exhausted within the last 7 days", "brokers exhausted within the last 15 days", "brokers exhausted for more than 15 days"]
-    ltoday=debtor_level[debtor_level['ageing']==1]
-    l7d=debtor_level[debtor_level['ageing']<=7]
-    l15d=debtor_level[debtor_level['ageing']<=15]
-    m15d=debtor_level[debtor_level['ageing']>15]
+    ltoday=debtor_level[debtor_level['ageing']==1]['id'].nunique()
+    l7d=debtor_level[debtor_level['ageing']<=7]['id'].nunique()
+    l15d=debtor_level[debtor_level['ageing']<=15]['id'].nunique()
+    m15d=debtor_level[debtor_level['ageing']>15]['id'].nunique()
     ageing_cohort_df['broker_count']=[ltoday, l7d, l15d, m15d]
     
     debtor_level['limit_cohort']=debtor_level['debtor_limit'].apply(lambda x: limit_cohort(x))
