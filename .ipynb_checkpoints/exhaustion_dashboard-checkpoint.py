@@ -167,7 +167,7 @@ def create_debtor_level_view():
     # ageing_cohort_df=debtor_level.groupby('ageing_cohort').agg(broker_count=('id', 'nunique')).reset_index()
     ageing_cohort_df=pd.DataFrame()
     
-    ageing_cohort_df['ageing_cohort']=["brokers exhausted today", "brokers exhausted within the last 7 days", "brokers exhausted within the last 15 days", "brokers exhausted for more than 15 days"]
+    ageing_cohort_df['ageing_cohort']=["brokers exhausted today", "brokers exhausted since the last 7 days", "brokers exhausted since the last 15 days", "brokers exhausted for more than 15 days"]
     ltoday=debtor_level[debtor_level['ageing']==1]['id'].nunique()
     l7d=debtor_level[debtor_level['ageing']<=7]['id'].nunique()
     l15d=debtor_level[debtor_level['ageing']<=15]['id'].nunique()
