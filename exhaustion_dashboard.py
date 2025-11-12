@@ -253,13 +253,13 @@ with tab2:
             # debtor_id=debtor_limit[debtor_limit['name']==name]['id'].iloc[0]
             query="select id, dot from debtors where name='{name}'"
             query=query.format(name=name)
-            x=pd.read_sql_query(query)
+            x=pd.read_sql_query(query, conn)
             debtor_id=x['id'].iloc[0]
         elif dot!='':
             # debtor_id=debtor_limit[debtor_limit['dot']==dot]['id'].iloc[0]
             query="select debtor_id, dot from brokers where dot='{dot}'"
             query=query.format(dot=dot)
-            x=pd.read_sql_query(query)
+            x=pd.read_sql_query(query, conn)
             debtor_id=x['debtor_id'].iloc[0]
         elif debtor_id_!='':
             debtor_id=debtor_id_
