@@ -362,7 +362,7 @@ with tab3:
             pivot_table, df_t, pivot_table_client_conc=broker_report.generate_report(broker_level_df, broker_profile_report=True, cohort=value,payment_trend_count=5, payment_trend_step='default', debtors_df=debtors_df, brokers_df=brokers_df, invoice_df=invoice_df)
             st.write('Debtors Info')
             st.write(df_t)
-            cols_=st.columns([1,1,2])
+            cols_=st.columns([2,2,2])
             cols_[0].write('Metrics Averages and Standard Deviation')
             cols_[0].write(pivot_table)
             cols_[1].write('Client Concentration')
