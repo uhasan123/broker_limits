@@ -329,7 +329,19 @@ with tab3:
     name=cols[1].text_input("name : ", key="name_t3")
     dot=cols[2].text_input("dot : ", key="dot_t3")
 
-    if debtor_id_!='':
+    if name!='':
+        # debtor_id=debtor_limit[debtor_limit['name']==name]['id'].iloc[0]
+        query="select id, name from debtors where name='{name}'"
+        query=query.format(name=name)
+        x=pd.read_sql_query(query, conn)
+        debtor_id=x['id'].iloc[0]
+    elif dot!='':
+        # debtor_id=debtor_limit[debtor_limit['dot']==dot]['id'].iloc[0]
+        query="select debtor_id, dot from brokers where dot='{dot}'"
+        query=query.format(dot=dot)
+        x=pd.read_sql_query(query, conn)
+        debtor_id=x['debtor_id'].iloc[0]
+    elif debtor_id_!='':
         debtor_id=debtor_id_
     else:
         debtor_id=''
