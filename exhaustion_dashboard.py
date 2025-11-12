@@ -329,6 +329,9 @@ with tab3:
     name=cols[1].text_input("name : ", key="name_t3")
     dot=cols[2].text_input("dot : ", key="dot_t3")
 
+    if debtor_id_!='':
+        debtor_id=debtor_id_
+
     if debtor_id !='':
         invoice_df, debtors_df, brokers_df=generate_data_for_payment_trend(debtor_id)
 
