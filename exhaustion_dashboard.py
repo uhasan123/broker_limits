@@ -374,6 +374,13 @@ with tab3:
             pivot_table, df_t, pivot_table_client_conc=broker_report.generate_report(broker_level_df, broker_profile_report=True, cohort=value,payment_trend_count=5, payment_trend_step='default', debtors_df=debtors_df, brokers_df=brokers_df, invoice_df=invoice_df)
             st.write('Debtors Info')
             st.write(df_t)
+            #############
+
+            days_diff=(broker_level_df['snapshot_date'].iloc[1] - broker_level_df['snapshot_date'].iloc[0]).days
+            d1=broker_level_df.iloc[-1]['snapshot_date']
+            d2=broker_level_df.iloc[-1]['snapshot_date']-pd.Timedelta(days=value*days_diff)
+            st.markdown(f"<h2 style='font-size:28px; color:green;'>The following stats ranges from {d2} and {d1}</h2>", unsafe_allow_html=True)
+            
             cols_=st.columns([2,2,2])
             cols_[0].write('Metrics Averages and Standard Deviation')
             pivot_table=pivot_table.reset_index()
