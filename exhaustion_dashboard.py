@@ -339,7 +339,7 @@ with tab3:
 
     st.markdown(f"<h1 style='font-size:28px; color:green;'>Broker Profile</h1>", unsafe_allow_html=True)
 
-    cols1=st.columns([2,2])
+    cols1=st.columns([1,1,2])
     period=cols1[0].text_input("Period: ", key='step')    
     value=cols1[1].text_input("Value: ", key="cohort")
     if value!='':
@@ -363,9 +363,9 @@ with tab3:
             st.write('Debtors Info')
             st.write(df_t)
             cols_=st.columns([2,2])
-            st.write('Metrics Averages and Standard Deviation')
+            cols_[0].write('Metrics Averages and Standard Deviation')
             cols_[0].write(pivot_table)
-            st.write('Client Concentration')
+            cols_[1].write('Client Concentration')
             cols_[1].write(pivot_table_client_conc)
 
     st.markdown(f"<h1 style='font-size:28px; color:green;'>Broker Payment Trend</h1>", unsafe_allow_html=True)
