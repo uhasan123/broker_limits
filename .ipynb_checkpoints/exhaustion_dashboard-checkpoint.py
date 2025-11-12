@@ -378,11 +378,13 @@ with tab3:
             cols_[0].write('Metrics Averages and Standard Deviation')
             pivot_table=pivot_table.reset_index()
             pivot_table.columns = [col[0] if col[0] != '' else col[1] for col in pivot_table.columns]
+            pivot_table=pivot_table.reset_index().drop('index', axis=1)
             cols_[0].write(pivot_table)
             cols_[1].write('Client Concentration')
             pivot_table_client_conc=pivot_table_client_conc.reset_index()
             pivot_table_client_conc.columns = [col[0] if col[0] != '' else col[1] for col in pivot_table_client_conc.columns]
             pivot_table_client_conc=pivot_table_client_conc.rename(columns={'m':'metrics', 'l':'count'})
+            pivot_table_client_conc=pivot_table_client_conc.reset_index().drop('index', axis=1)
             cols_[1].write(pivot_table_client_conc)
 
     st.markdown(f"<h1 style='font-size:28px; color:green;'>Broker Payment Trend</h1>", unsafe_allow_html=True)
