@@ -228,7 +228,7 @@ if 'tab3_metrics' not in st.session_state:
 if 'tab3_trend' not in st.session_state:
     st.session_state.tab3_trend=False
     
-tab1, tab2, tab3=st.tabs(['TAB 1', 'TAB 2', 'TAB 3'])
+tab1, tab2, tab3=st.tabs(['Exhausted Brokers', 'Debtor Limit and Open Invocie Comparison', 'Broker Profile and Payment Trend'])
 with tab1:
     if st.button("Refresh", key='refresh_tab1'):
         st.session_state.tab1=True
