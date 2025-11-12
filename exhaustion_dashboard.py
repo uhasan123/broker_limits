@@ -244,16 +244,28 @@ with tab2:
         st.session_state.tab2=True
 
     if st.session_state.tab2==True:
-        debtor_limit=get_exhausted_debtors()
+        # debtor_limit=get_exhausted_debtors()
+        obj=broker_report()
+        conn=obj.make_db_connection()
+        conn.autocommit=True
+
         if name!='':
-            debtor_id=debtor_limit[debtor_limit['name']==name]['debtor_id'].iloc[0]
+            # debtor_id=debtor_limit[debtor_limit['name']==name]['id'].iloc[0]
+            query="select id, dot from debtors where name='{name}'"
+            query=query.format(name=name)
+            x=pd.read_sql_query(query)
+            debtor_id=x['id'].iloc[0]
         elif dot!='':
-            debtor_id=debtor_limit[debtor_limit['dot']==dot]['debtor_id'].iloc[0]
+            # debtor_id=debtor_limit[debtor_limit['dot']==dot]['id'].iloc[0]
+            query="select debtor_id, dot from brokers where dot='{dot}'"
+            query=query.format(dot=dot)
+            x=pd.read_sql_query(query)
+            debtor_id=x['debtor_id'].iloc[0]
         elif debtor_id_!='':
             debtor_id=debtor_id_
         else:
             debtor_id=''
-        print(debtor_id)
+        # print(debtor_id)
         if debtor_id !='':
             open_invoice_df_l90=calc_open_invoice_volume_l90(debtor_id, conn)
             debtor_limit_df_l90=calc_debtor_limit_l90(debtor_id, conn)
