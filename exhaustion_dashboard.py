@@ -98,14 +98,14 @@ def sum_until_zero(g):
 def ageing_cohort(x):
     if x==1:
         return 'brokers exhausted today'
-    elif x<=7:
+    if x<=7:
         return 'brokers exhausted within the last 7 days'
-    elif x<=15:
+    if x<=15:
         return 'brokers exhausted within the last 15 days'
-    elif x>15:
+    if x>15:
         return 'brokers exhausted for more than 15 days'
-    else:
-        return None
+    # else:
+    #     return None
 def limit_cohort(x):
     if x==10000:
         return '10k'
@@ -243,7 +243,7 @@ with tab1:
         brokers_exhausted=exhaust_debtors['id'].nunique()
         # st.write('Exhaustion counter', brokers_exhausted)
         st.markdown(f"<h1 style='font-size:28px; color:green;'>Exhaustion counter: {brokers_exhausted}</h1>", unsafe_allow_html=True)
-        colss=st.columns([1,1,2])
+        colss=st.columns([2,1,2])
         colss[0].dataframe(ageing_cohort_df)
         colss[1].dataframe(limit_cohort_df)
         st.write(debtor_level.sort_values(by=['approved_total', 'debtor_limit'], ascending=False).reset_index().drop('index', axis=1))
