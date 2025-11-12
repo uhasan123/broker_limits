@@ -416,6 +416,8 @@ with tab3:
             broker_level=broker_report.generate_segment_level_data(start_date, end_date, debtors_df, brokers_df, invoice_df, step=period)
             if period!='daily':
                 broker_level_current=broker_report.generate_segment_level_data(start_date=None, end_date=end_date, debtors_df=debtors_df, brokers_df=brokers_df, invoice_df=invoice_df, step='current')
+            else:
+                broker_level_current=None
             # broker_level_df=broker_level[broker_level['dtp'].isna()==False]
             broker_level_df=pd.concat([broker_level, broker_level_current], ignore_index=True)
             # broker_level_df.head()
