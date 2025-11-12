@@ -223,8 +223,10 @@ if 'tab1' not in st.session_state:
     st.session_state.tab1=False
 if 'tab2' not in st.session_state:
     st.session_state.tab2=False
-if 'tab3' not in st.session_state:
-    st.session_state.tab3=False
+if 'tab3_metrics' not in st.session_state:
+    st.session_state.tab3_metrics=False
+if 'tab3_trend' not in st.session_state:
+    st.session_state.tab3_trend=False
     
 tab1, tab2, tab3=st.tabs(['TAB 1', 'TAB 2', 'TAB 3'])
 with tab1:
@@ -322,19 +324,89 @@ with tab3:
     conn=obj.make_db_connection()
     conn.autocommit=True
 
-    debtor_id=st.text_input("debtor id : ", key="debtor_id_t3")
-    cohort=st.text_input("cohort: ", key="cohort")
-    payment_trend_count=int(st.number_input("payment trend count: ", key='payment_trend_count'))
-    payment_trend_step=st.text_input("payment trend step: ", key='payment_trend_step')
-    step=st.text_input("step: ", key='step')
-    generate_broker_report=st.checkbox("generate_broker_report")
-    if cohort!='':
-        cohort=ast.literal_eval(cohort)
+    cols=st.columns([2,2,1])
+    debtor_id_=cols[0].text_input("debtor id : ", key="debtor_id_t3")
+    name=cols[1].text_input("name : ", key="name_t3")
+    dot=cols[2].text_input("dot : ", key="dot_t3")
 
+    if debtor_id !='':
+        invoice_df, debtors_df, brokers_df=generate_data_for_payment_trend(debtor_id)
+
+    st.markdown(f"<h1 style='font-size:28px; color:green;'>Broker Profile</h1>", unsafe_allow_html=True)
+
+    cols1=st.columns([2,2])
+    period=cols1[0].text_input("Period: ", key='step')    
+    value=cols1[0].number_input("Value: ", key="cohort")
+    if value!='':
+        value=int(value)
+        value=value.split(',')
+        # cohort=ast.literal_eval(cohort)
     if st.button("Submit", key='submit_tab3'):
-        st.session_state.tab3=True
-        
-    if st.session_state.tab3==True:
+        st.session_state.tab3_metrics=True
+
+    if st.session_state.tab3_metrics==True:
+        if debtor_id !='':
+            # invoice_df, debtors_df, brokers_df=generate_data_for_payment_trend(debtor_id)
+            date_today=date.today()
+            date_last_year=date_today - pd.Timedelta(days=365)
+            # start_date=(date_last_year + pd.Timedelta(days=(8-date_last_year.isoweekday())%7) + pd.Timedelta(days=7))-pd.Timedelta(days=1) # for weekly
+            start_date=invoice_df['approved_date'].min().date() # for monthly
+            end_date=date_today
+            
+            broker_level_df=broker_report.generate_segment_level_data(start_date, end_date, debtors_df, brokers_df, invoice_df, step=period)
+            pivot_table, df_t, pivot_table_client_conc=broker_report.generate_report(broker_level_df, broker_profile_report=True, cohort=value,payment_trend_count=5, payment_trend_step='default', debtors_df=debtors_df, brokers_df=brokers_df, invoice_df=invoice_df)
+            st.write('Debtors Info')
+            st.write(df_t)
+            st.write('Metrics Aevrages and Standard Deviation')
+            st.write(pivot_table)
+            st.write('Client Concentration')
+            st.write(pivot_table_client_conc)
+
+    st.markdown(f"<h1 style='font-size:28px; color:green;'>Broker Pyament Trend</h1>", unsafe_allow_html=True)
+
+    cols1=st.columns([2,2])
+    period=cols1[0].text_input("Period: ", key='payment_trend_step')    
+    value=int(cols1[0].number_input("Value: ", key="payment_trend_count"))
+
+        # cohort=ast.literal_eval(cohort)
+    if st.button("Submit", key='submit_tab3_trend'):
+        st.session_state.tab3_trend=True
+
+    if st.session_state.tab3_trend==True:
+        if debtor_id!='':
+            date_today=date.today()
+            date_last_year=date_today - pd.Timedelta(days=365)
+            start_date=(date_last_year + pd.Timedelta(days=(8-date_last_year.isoweekday())%7) + pd.Timedelta(days=7))-pd.Timedelta(days=1) # for weekly
+            # start_date=invoice_df['approved_date'].min().date() # for monthly
+            end_date=date_today
+            
+            broker_level=broker_report.generate_segment_level_data(start_date, end_date, debtors_df, brokers_df, invoice_df, step=period)
+            broker_level_current=broker_report.generate_segment_level_data(start_date=None, end_date=end_date, debtors_df=debtors_df, brokers_df=brokers_df, invoice_df=invoice_df, step='current')
+            # broker_level_df=broker_level[broker_level['dtp'].isna()==False]
+            broker_level_df=pd.concat([broker_level, broker_level_current], ignore_index=True)
+            # broker_level_df.head()
+            # pivot_table, df_t, pivot_table_client_conc=broker_report.generate_report(broker_level_df, broker_profile_report=generate_broker_report, cohort=cohort,payment_trend_count=payment_trend_count, payment_trend_step=payment_trend_step, debtors_df=debtors_df, brokers_df=brokers_df, invoice_df=invoice_df)
+            df_t=broker_report.payment_trend(broker_level_df, count=value, step='default', debtors_df=debtors_df, brokers_df=brokers_df, invoice_df=invoice_df)
+            fig=broker_report.payment_trend_graph(df_t.T.reset_index())
+            st.write(pivot_table)
+            st.plotly_chart(fig, use_container_width=True)
+            
+    
+    # payment_trend_count=int(st.number_input("payment trend count: ", key='payment_trend_count'))
+    # payment_trend_step=st.text_input("payment trend step: ", key='payment_trend_step')
+    
+    # generate_broker_report=st.checkbox("generate_broker_report")
+
+
+
+
+
+
+
+
+
+    
+    if st.session_state.tab3_trend==True:
         if debtor_id !='':
             invoice_df, debtors_df, brokers_df=generate_data_for_payment_trend(debtor_id)
             if generate_broker_report:
