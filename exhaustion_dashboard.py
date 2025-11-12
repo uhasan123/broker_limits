@@ -20,6 +20,18 @@ on a.id=b.debtor_id'''
     exhaust_debtors=pd.read_sql_query(query, conn)
     return exhaust_debtors
 
+def get_all_debtors():
+    obj=broker_report()
+    conn=obj.make_db_connection()
+    conn.autocommit=True
+    query='''select distinct a.*, b.dot from 
+(select id, name, debtor_limit/100 as debtor_limit, approved_total/100 as approved_total from debtors d where d.status = 'active' and d.debtor_limit<>100) a
+left join
+(select debtor_id, dot from brokers) b 
+on a.id=b.debtor_id'''
+    exhaust_debtors=pd.read_sql_query(query, conn)
+    return exhaust_debtors
+
 def calc_open_invoice_volume(conn):
     with open('calc_open_invoice_volume.sql', 'r') as file:
         query=file.read()
@@ -244,10 +256,7 @@ with tab2:
         st.session_state.tab2=True
 
     if st.session_state.tab2==True:
-        # debtor_limit=get_exhausted_debtors()
-        obj=broker_report()
-        conn=obj.make_db_connection()
-        conn.autocommit=True
+        debtor_limit=get_all_debtors()
 
         if name!='':
             # debtor_id=debtor_limit[debtor_limit['name']==name]['id'].iloc[0]
