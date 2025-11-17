@@ -17,7 +17,7 @@ class broker_limit:
         else:
             return None
 
-    def run_broker_limit_model(self):
+    def run_broker_limit_model(self, cohort_size, threshold):
         base_dir = os.path.dirname(os.path.abspath(__file__))
         sql_path = os.path.join(base_dir, "broker_limit_query.sql")
         with open(sql_path, 'r') as file:
@@ -31,14 +31,27 @@ class broker_limit:
 
         broker_limit_df['change']=broker_limit_df['debtor_limit']==broker_limit_df['adjusted_broker_limit_2']
 
-        broker_limits=broker_limit_df[broker_limit_df['change']==False][['id', 'adjusted_broker_limit_2']]
-        broker_limits=broker_limits.rename(columns={'adjusted_broker_limit_2':'broker_limit'})
+        ## incorporate less recent payment logic
+        pay_df=self.generate_payment_data(cohort_size, threshold)
 
-        return broker_limit_df, broker_limits
+        broker_limit_df_2=broker_limit_df.merge(pay_df['debtor_id'], left_on='id', right_on='debtor_id', how='left')
+        broker_limit_df_2=broker_limit_df_2.rename(columns={'debtor_id': 'no_limit_increase_id'})
+        broker_limit_df_2['no_limit_increase_id']=broker_limit_df_2['no_limit_increase_id'].astype(str)
+        broker_limit_df_2['is_limit_increase']=broker_limit_df_2['adjusted_broker_limit_2']>broker_limit_df_2['debtor_limit']
+        broker_limit_df_2['exclude_from_limit_change']=broker_limit_df_2.apply(lambda x: 1 if ((x['is_limit_increase']==True) & (x['no_limit_increase_id']!='nan')) else 0, axis=1)
+        broker_limit_df_2['final_limit_change']=broker_limit_df_2.apply(lambda x: 1 if ((x['change']==False) & (x['exclude_from_limit_change']==0)) else 0, axis=1)
+
+        broker_limits_before_filter=broker_limit_df_2[broker_limit_df_2['change']==False][['id', 'adjusted_broker_limit_2']]
+        broker_limits_before_filter=broker_limits_before_filter.rename(columns={'adjusted_broker_limit_2':'broker_limit'})        
+        
+        broker_limits_after_filter=broker_limit_df_2[broker_limit_df_2['final_limit_change']==1][['id', 'adjusted_broker_limit_2']]
+        broker_limits_after_filter=broker_limits_after_filter.rename(columns={'adjusted_broker_limit_2':'broker_limit'})
+
+        return broker_limit_df_2, broker_limits_before_filter, broker_limits_after_filter
 
     def broker_limit_audit(self, destination_path):
         broker_new_limits=pd.read_excel(destination_path)
-        broker_limits_changed=broker_new_limits[broker_new_limits['change']==False]
+        broker_limits_changed=broker_new_limits[broker_new_limits['final_limit_change']==1]
         brokers=tuple(broker_limits_changed['id'])
 
         query = "select id, debtor_limit from debtors d where id in %s"
@@ -53,6 +66,28 @@ class broker_limit:
 
         debtors_df_2['limit_audit']=debtors_df_2['debtor_limit']==debtors_df_2['adjusted_broker_limit_2']
         return debtors_df_2, debtors_df_2['limit_audit'].value_counts().reset_index()
+
+    def generate_payment_data(self, cohort_size, threshold):
+        query=f''' select * from
+        (select i.*, d.debtor_limit, i.open_invoice_volume/d.debtor_limit as util_rate, i.open_invoice_volume-d.debtor_limit as unnaturality
+        from
+        (select debtor_id,
+        sum(case when paid_date <=current_date and paid_date >= current_date-interval '{cohort_size} weeks' then approved_accounts_receivable_amount/100 else 0 end) as paid_0_{cohort_size},
+        sum(case when paid_date <current_date-interval '{cohort_size} weeks' and paid_date >= current_date-interval '{cohort_size*2} weeks' then approved_accounts_receivable_amount/100 else 0 end) as paid_{cohort_size}_{cohort_size*2},
+        sum(case when approved_date is not null and paid_date is null then approved_accounts_receivable_amount/100 else 0 end) as open_invoice_volume
+        from invoices
+        group by debtor_id) i 
+        left join
+        (select id, debtor_limit/100 as debtor_limit from debtors where status='active') d 
+        on i.debtor_id=d.id
+        where d.debtor_limit is not null) a'''
+
+        query=query.format(cohort_size=cohort_size)
+
+        df=pd.read_sql_query(query, self.conn)
+        df['payment_decline_perc']=(df[f'paid_{cohort_size}_{cohort_size*2}']-df[f'paid_0_{cohort_size}'])/df[f'paid_{cohort_size}_{cohort_size*2}']
+        df=df[df['payment_decline_perc']>=threshold]
+        return df
 
 
 
