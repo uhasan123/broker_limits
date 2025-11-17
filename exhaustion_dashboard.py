@@ -5,6 +5,7 @@ import plotly.graph_objects as go
 import ast
 from datetime import date
 from pandas.api.types import CategoricalDtype
+from psycopg2 import errors
 
 from broker_report import broker_report
 
@@ -66,7 +67,7 @@ def calc_debtor_limit():
     with open('calc_debtor_limit.sql', 'r') as file:
         query=file.read()
     
-    debtor_limit_df=pd.read_sql_query(query)
+    debtor_limit_df=pd.read_sql_query(query, conn)
     debtor_limit_df = debtor_limit_df.drop_duplicates(subset=['original_id', 'snapshot_date'], keep='first')
     debtor_limit_df['debtor_limit']=debtor_limit_df['debtor_limit']/100
     debtor_limit_df=debtor_limit_df[['original_id', 'snapshot_date', 'debtor_limit']]
@@ -97,6 +98,7 @@ def calc_broker_limit_breach():
         query=file.read()
 
     broker_limit_breach_df=pd.read_sql_query(query, conn)
+    broker_limit_breach_df['created_at'] = pd.to_datetime(broker_limit_breach_df['created_at'], errors='coerce')
     broker_limit_breach_df['created_date']=broker_limit_breach_df['created_at'].dt.date
     # conn.close()
     # tunnel.stop()
@@ -248,14 +250,23 @@ def extract_debtor_id_from_name_or_dot(typee, value):
         query="select id, name from debtors where name='{name}'"
         query=query.format(name=value)
         x=pd.read_sql_query(query, conn)
-        debtor_id=x['id'].iloc[0]
-        return debtor_id
+        if len(x)>0:
+            debtor_id=x['id'].iloc[0]
+            return debtor_id
+        else:
+            st.write("No debtor with this name")
+            return ''
+    
     elif typee=='dot':
         query="select debtor_id, dot from brokers where dot='{dot}'"
         query=query.format(dot=value)
         x=pd.read_sql_query(query, conn)
-        debtor_id=x['debtor_id'].iloc[0]
-        return debtor_id
+        if len(x)>0:
+            debtor_id=x['id'].iloc[0]
+            return debtor_id
+        else:
+            st.write("No debtor with this dot")
+            return ''
     else:
         return None
     
