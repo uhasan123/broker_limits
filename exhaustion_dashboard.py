@@ -20,10 +20,10 @@ on a.id=b.debtor_id'''
     exhaust_debtors=pd.read_sql_query(query, conn)
     return exhaust_debtors
 
-def get_all_debtors(debtor_id, conn):
-    # obj=broker_report()
-    # conn=obj.make_db_connection()
-    # conn.autocommit=True
+def get_all_debtors(debtor_id):
+    obj=broker_report()
+    conn=obj.make_db_connection()
+    conn.autocommit=True
     query='''select distinct a.*, b.dot from 
 (select id, name, debtor_limit/100 as debtor_limit, approved_total/100 as approved_total from debtors d where d.id='{debtor_id}') a
 left join
@@ -33,7 +33,10 @@ on a.id=b.debtor_id'''
     exhaust_debtors=pd.read_sql_query(query, conn)
     return exhaust_debtors
 
-def calc_open_invoice_volume(conn):
+def calc_open_invoice_volume():
+    obj=broker_report()
+    conn=obj.make_db_connection()
+    conn.autocommit=True
     with open('calc_open_invoice_volume.sql', 'r') as file:
         query=file.read()
 
@@ -42,7 +45,10 @@ def calc_open_invoice_volume(conn):
     # conn.close()
     # tunnel.stop()
     return open_invoice_df
-def calc_open_invoice_volume_l90(debtor_id, conn):
+def calc_open_invoice_volume_l90(debtor_id):
+    obj=broker_report()
+    conn=obj.make_db_connection()
+    conn.autocommit=True
     with open('calc_open_invoice_volume_l90.sql', 'r') as file:
         query=file.read()
     query=query.format(debtor_id=debtor_id)
@@ -53,18 +59,24 @@ def calc_open_invoice_volume_l90(debtor_id, conn):
     # tunnel.stop()
     return open_invoice_df_l90
 
-def calc_debtor_limit(conn):
+def calc_debtor_limit():
+    obj=broker_report()
+    conn=obj.make_db_connection()
+    conn.autocommit=True
     with open('calc_debtor_limit.sql', 'r') as file:
         query=file.read()
     
-    debtor_limit_df=pd.read_sql_query(query, conn)
+    debtor_limit_df=pd.read_sql_query(query)
     debtor_limit_df = debtor_limit_df.drop_duplicates(subset=['original_id', 'snapshot_date'], keep='first')
     debtor_limit_df['debtor_limit']=debtor_limit_df['debtor_limit']/100
     debtor_limit_df=debtor_limit_df[['original_id', 'snapshot_date', 'debtor_limit']]
     # conn.close()
     # tunnel.stop()
     return debtor_limit_df
-def calc_debtor_limit_l90(debtor_id, conn):
+def calc_debtor_limit_l90(debtor_id):
+    obj=broker_report()
+    conn=obj.make_db_connection()
+    conn.autocommit=True
     with open('calc_debtor_limit_l90.sql', 'r') as file:
         query=file.read()
     query=query.format(debtor_id=debtor_id)
@@ -77,7 +89,10 @@ def calc_debtor_limit_l90(debtor_id, conn):
     # tunnel.stop()
     return debtor_limit_df_l90
 
-def calc_broker_limit_breach(conn):
+def calc_broker_limit_breach():
+    obj=broker_report()
+    conn=obj.make_db_connection()
+    conn.autocommit=True
     with open('broker_limit_breach_query.sql', 'r') as file:
         query=file.read()
 
@@ -125,12 +140,12 @@ def limit_cohort(x):
         return None
 
 def create_debtor_level_view():
-    obj=broker_report()
-    conn=obj.make_db_connection()
-    conn.autocommit=True
-    open_invoice_df=calc_open_invoice_volume(conn)
-    debtor_limit_df=calc_debtor_limit(conn)
-    broker_limit_breach_df=calc_broker_limit_breach(conn)
+    # obj=broker_report()
+    # conn=obj.make_db_connection()
+    # conn.autocommit=True
+    open_invoice_df=calc_open_invoice_volume()
+    debtor_limit_df=calc_debtor_limit()
+    broker_limit_breach_df=calc_broker_limit_breach()
 
     # conn.close()
     # tunnel.stop()
@@ -190,6 +205,9 @@ def create_debtor_level_view():
     return debtor_level, ageing_cohort_df, limit_cohort_df
 
 def generate_data_for_payment_trend(debtor_id):
+    obj=broker_report()
+    conn=obj.make_db_connection()
+    conn.autocommit=True
     for attempt in range(3):
         try:
             query = "select * from invoices i where debtor_id=%s and i.approved_date is not null"
@@ -221,6 +239,26 @@ def generate_data_for_payment_trend(debtor_id):
     col_name=[i[0] for i in cur.description]
     brokers_df=pd.DataFrame(results, columns=col_name)
     return invoice_df, debtors_df, brokers_df
+
+def extract_debtor_id_from_name_or_dot(typee, value):
+    obj=broker_report()
+    conn=obj.make_db_connection()
+    conn.autocommit=True
+    if typee=='name':
+        query="select id, name from debtors where name='{name}'"
+        query=query.format(name=value)
+        x=pd.read_sql_query(query, conn)
+        debtor_id=x['id'].iloc[0]
+        return debtor_id
+    elif typee=='dot':
+        query="select debtor_id, dot from brokers where dot='{dot}'"
+        query=query.format(dot=value)
+        x=pd.read_sql_query(query, conn)
+        debtor_id=x['debtor_id'].iloc[0]
+        return debtor_id
+    else:
+        return None
+    
 
 st.set_page_config(
     page_title="Exhaustion Monitoring Dashboard",
@@ -258,9 +296,6 @@ with tab1:
         st.session_state.tab1=False
 
 with tab2:
-    obj=broker_report()
-    conn=obj.make_db_connection()
-    conn.autocommit=True
     cols=st.columns([2,2,1])
     
     debtor_id_=cols[0].text_input("debtor id : ", key="debtor_id_t2")
@@ -274,25 +309,19 @@ with tab2:
 
         if name!='':
             # debtor_id=debtor_limit[debtor_limit['name']==name]['id'].iloc[0]
-            query="select id, name from debtors where name='{name}'"
-            query=query.format(name=name)
-            x=pd.read_sql_query(query, conn)
-            debtor_id=x['id'].iloc[0]
+            debtor_id=extract_debtor_id_from_name_or_dot('name', name)
         elif dot!='':
             # debtor_id=debtor_limit[debtor_limit['dot']==dot]['id'].iloc[0]
-            query="select debtor_id, dot from brokers where dot='{dot}'"
-            query=query.format(dot=dot)
-            x=pd.read_sql_query(query, conn)
-            debtor_id=x['debtor_id'].iloc[0]
+            debtor_id=extract_debtor_id_from_name_or_dot('dot', dot)
         elif debtor_id_!='':
             debtor_id=debtor_id_
         else:
             debtor_id=''
         # print(debtor_id)
         if debtor_id !='':
-            open_invoice_df_l90=calc_open_invoice_volume_l90(debtor_id, conn)
-            debtor_limit_df_l90=calc_debtor_limit_l90(debtor_id, conn)
-            debtor_limit=get_all_debtors(debtor_id, conn)
+            open_invoice_df_l90=calc_open_invoice_volume_l90(debtor_id)
+            debtor_limit_df_l90=calc_debtor_limit_l90(debtor_id)
+            debtor_limit=get_all_debtors(debtor_id)
     
         # conn.close()
         # tunnel.stop()
@@ -332,9 +361,9 @@ with tab2:
             st.session_state.tab2=False
 
 with tab3:
-    obj=broker_report()
-    conn=obj.make_db_connection()
-    conn.autocommit=True
+    # obj=broker_report()
+    # conn=obj.make_db_connection()
+    # conn.autocommit=True
 
     cols=st.columns([2,2,1])
     debtor_id_=cols[0].text_input("debtor id : ", key="debtor_id_t3")
@@ -343,16 +372,10 @@ with tab3:
 
     if name!='':
         # debtor_id=debtor_limit[debtor_limit['name']==name]['id'].iloc[0]
-        query="select id, name from debtors where name='{name}'"
-        query=query.format(name=name)
-        x=pd.read_sql_query(query, conn)
-        debtor_id=x['id'].iloc[0]
+        debtor_id=extract_debtor_id_from_name_or_dot('name', name)
     elif dot!='':
         # debtor_id=debtor_limit[debtor_limit['dot']==dot]['id'].iloc[0]
-        query="select debtor_id, dot from brokers where dot='{dot}'"
-        query=query.format(dot=dot)
-        x=pd.read_sql_query(query, conn)
-        debtor_id=x['debtor_id'].iloc[0]
+        debtor_id=extract_debtor_id_from_name_or_dot('dot', dot)
     elif debtor_id_!='':
         debtor_id=debtor_id_
     else:
