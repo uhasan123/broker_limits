@@ -42,7 +42,7 @@ temp = tempfile.NamedTemporaryFile(delete=False, suffix=".json")
 with open(temp.name, 'w') as f:
     json.dump(google_credentials, f)
 # temp.write(google_credentials.encode())
-credentials=temp.name
+credentials_=temp.name
 temp.close()
 
 def connect_to_gsheet(creds_json,spreadsheet_name,sheet_name):
@@ -56,7 +56,7 @@ def connect_to_gsheet(creds_json,spreadsheet_name,sheet_name):
     
 SPREADSHEET_NAME = 'Sample'
 SHEET_NAME = 'Sheet1'
-CREDENTIALS_FILE = credentials
+CREDENTIALS_FILE = credentials_
 
 sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name=SHEET_NAME)
 x=sheet_by_name.get_all_records()
