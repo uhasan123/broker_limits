@@ -155,8 +155,11 @@ class broker_report:
                    ).reset_index()
 
         not_paid_df=invoice_df[(invoice_df['paid_date'].isna()) & (invoice_df['approved_date'].isna()==False)]
-        not_paid_df['avg_ageing'] = not_paid_df.apply(lambda x: (end_date - x['approved_date']).days, axis=1)
-        broker_level['avg_ageing']=not_paid_df['avg_ageing'].mean()
+        if len(not_paid_df)>0:
+            not_paid_df['avg_ageing'] = not_paid_df.apply(lambda x: (end_date - x['approved_date']).days, axis=1)
+            broker_level['avg_ageing']=not_paid_df['avg_ageing'].mean()
+        else:
+            broker_level['avg_ageing']=None
 
         return broker_level
 
@@ -360,7 +363,7 @@ class broker_report:
     ])
     
         fig.update_layout(
-            title="Broker Weekly Invoice Trend",
+            title="Broker Daily Invoice Trend",
             xaxis_title="Date",
             yaxis_title="Open invoices amount",
             template="plotly_white",
