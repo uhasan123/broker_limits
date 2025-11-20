@@ -20,12 +20,16 @@ class broker_report:
         self.db_name = os.getenv("db_name")
         self.db_user = os.getenv("db_user")
         self.db_password = os.getenv("db_password")
+        # self.google_creds=os.getenv('google_credentials')
 
         temp = tempfile.NamedTemporaryFile(delete=False, suffix=".pem")
         temp.write(self.ssh_key_temp.encode())
-        temp.close()
-
         self.ssh_key=temp.name
+        
+        # temp = tempfile.NamedTemporaryFile(delete=False, suffix=".json")
+        # temp.write(self.google_creds.encode())
+        # self.credentials=temp.name
+        temp.close()
 
     def make_db_connection(self):
 

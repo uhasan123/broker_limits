@@ -20,6 +20,13 @@ st.set_page_config(
 
 st.title("Exhaustion Monitoring Dashboard")
 
+google_creds=os.getenv('google_credentials')
+temp = tempfile.NamedTemporaryFile(delete=False, suffix=".json")
+temp.write(google_creds.encode())
+temp.close()
+
+credentials=temp.name
+
 def connect_to_gsheet(creds_json,spreadsheet_name,sheet_name):
     scope = ["https://spreadsheets.google.com/feeds", 'https://www.googleapis.com/auth/spreadsheets',
              "https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/drive"]
@@ -31,7 +38,7 @@ def connect_to_gsheet(creds_json,spreadsheet_name,sheet_name):
     
 SPREADSHEET_NAME = 'Sample'
 SHEET_NAME = 'Sheet1'
-CREDENTIALS_FILE = './credentials.json'
+CREDENTIALS_FILE = credentials #'./credentials.json'
 
 sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name=SHEET_NAME)
 x=sheet_by_name.get_all_records()
