@@ -6,6 +6,7 @@ import ast
 from datetime import date
 from pandas.api.types import CategoricalDtype
 from psycopg2 import errors
+import tempfile
 
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
