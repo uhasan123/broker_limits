@@ -36,7 +36,7 @@ universe_domain=os.getenv('universe_domain')
 
 google_credentials={'type':typee, 'project_id':project_id, 'private_key_id':private_key_id, 'private_key':private_key, 'client_email':client_email, 'client_id':client_id, 'auth_uri':auth_uri, 'token_uri':token_uri, 'auth_provider_x509_cert_url':auth_provider_x509_cert_url, 'client_x509_cert_url':client_x509_cert_url, 'universe_domain':universe_domain}
 
-# st.write(google_credentials)
+st.write(google_credentials)
 
 temp = tempfile.NamedTemporaryFile(delete=False, suffix=".json")
 with open(temp.name, 'w') as f:
@@ -44,7 +44,7 @@ with open(temp.name, 'w') as f:
 # temp.write(google_credentials.encode())
 credentials_=temp.name
 temp.close()
-
+st.write(credentials_)
 def connect_to_gsheet(creds_json,spreadsheet_name,sheet_name):
     scope = ["https://spreadsheets.google.com/feeds", 'https://www.googleapis.com/auth/spreadsheets',
              "https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/drive"]
