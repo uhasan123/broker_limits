@@ -8,3 +8,5 @@ statistics
 plotly
 openpyxl
 paramiko<3.4
+oauth2client
+gspread
