@@ -41,7 +41,7 @@ st.write(google_credentials)
 
 temp = tempfile.NamedTemporaryFile(delete=False, suffix=".json")
 with open(temp.name, 'w') as f:
-    json.dump(gc, f)
+    json.dump(google_credentials, f)
 # temp.write(google_credentials.encode())
 credentials_=temp.name
 temp.close()
