@@ -22,6 +22,9 @@ st.set_page_config(
 
 st.title("Exhaustion Monitoring Dashboard")
 
+if 'tab1_test' not in st.session_state:
+    st.session_state.tab1_test=False
+
 # gc=dict(os.getenv('gc'))
 # typee=os.getenv('type')
 # project_id=os.getenv('project_id')
@@ -59,9 +62,12 @@ SPREADSHEET_NAME = 'Sample'
 SHEET_NAME = 'Sheet1'
 CREDENTIALS_FILE = './crendentials.json'
 
-sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name=SHEET_NAME)
-x=sheet_by_name.get_all_records()
-df=pd.DataFrame(x)
-brokers_exhausted=df['id'].nunique()
-st.markdown(f"<h1 style='font-size:28px; color:green;'>Exhaustion counter: {brokers_exhausted}</h1>", unsafe_allow_html=True)
-# st.write(df)
+if st.button("Refresh", key='refresh_test'):
+    st.session_state.tab1_test=True
+if st.session_state.tab1_test==True:
+    sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name=SHEET_NAME)
+    x=sheet_by_name.get_all_records()
+    df=pd.DataFrame(x)
+    brokers_exhausted=df['id'].nunique()
+    st.markdown(f"<h1 style='font-size:28px; color:green;'>Exhaustion counter: {brokers_exhausted}</h1>", unsafe_allow_html=True)
+    # st.write(df)
