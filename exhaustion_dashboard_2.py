@@ -23,29 +23,29 @@ st.set_page_config(
 st.title("Exhaustion Monitoring Dashboard")
 
 # gc=dict(os.getenv('gc'))
-typee=os.getenv('type')
-project_id=os.getenv('project_id')
-private_key_id=os.getenv('private_key_id')
-private_key=os.getenv('private_key').replace("\\\\n", "\n")
-client_email=os.getenv('client_email')
-client_id=os.getenv('client_id')
-auth_uri=os.getenv('auth_uri')
-token_uri=os.getenv('token_uri')
-auth_provider_x509_cert_url=os.getenv('auth_provider_x509_cert_url')
-client_x509_cert_url=os.getenv('client_x509_cert_url')
-universe_domain=os.getenv('universe_domain')
+# typee=os.getenv('type')
+# project_id=os.getenv('project_id')
+# private_key_id=os.getenv('private_key_id')
+# private_key=os.getenv('private_key').replace("\\\\n", "\n")
+# client_email=os.getenv('client_email')
+# client_id=os.getenv('client_id')
+# auth_uri=os.getenv('auth_uri')
+# token_uri=os.getenv('token_uri')
+# auth_provider_x509_cert_url=os.getenv('auth_provider_x509_cert_url')
+# client_x509_cert_url=os.getenv('client_x509_cert_url')
+# universe_domain=os.getenv('universe_domain')
 
 google_credentials={'type':typee, 'project_id':project_id, 'private_key_id':private_key_id, 'private_key':private_key, 'client_email':client_email, 'client_id':client_id, 'auth_uri':auth_uri, 'token_uri':token_uri, 'auth_provider_x509_cert_url':auth_provider_x509_cert_url, 'client_x509_cert_url':client_x509_cert_url, 'universe_domain':universe_domain}
 
-st.write(google_credentials)
+# st.write(google_credentials)
 
-temp = tempfile.NamedTemporaryFile(delete=False, suffix=".json")
-with open(temp.name, 'w') as f:
-    json.dump(google_credentials, f)
-# temp.write(google_credentials.encode())
-credentials_=temp.name
-temp.close()
-st.write(credentials_)
+# temp = tempfile.NamedTemporaryFile(delete=False, suffix=".json")
+# with open(temp.name, 'w') as f:
+#     json.dump(google_credentials, f)
+# # temp.write(google_credentials.encode())
+# credentials_=temp.name
+# temp.close()
+# st.write(credentials_)
 def connect_to_gsheet(creds_json,spreadsheet_name,sheet_name):
     scope = ["https://spreadsheets.google.com/feeds", 'https://www.googleapis.com/auth/spreadsheets',
              "https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/drive"]
@@ -57,7 +57,7 @@ def connect_to_gsheet(creds_json,spreadsheet_name,sheet_name):
     
 SPREADSHEET_NAME = 'Sample'
 SHEET_NAME = 'Sheet1'
-CREDENTIALS_FILE = credentials_
+CREDENTIALS_FILE = './credentials.json'
 
 sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name=SHEET_NAME)
 x=sheet_by_name.get_all_records()
