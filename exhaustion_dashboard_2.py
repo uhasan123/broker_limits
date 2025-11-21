@@ -62,4 +62,6 @@ CREDENTIALS_FILE = './crendentials.json'
 sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name=SHEET_NAME)
 x=sheet_by_name.get_all_records()
 df=pd.DataFrame(x)
-st.write(df)
+brokers_exhausted=df['id'].nunique()
+st.markdown(f"<h1 style='font-size:28px; color:green;'>Exhaustion counter: {brokers_exhausted}</h1>", unsafe_allow_html=True)
+# st.write(df)
