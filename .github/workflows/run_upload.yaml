@@ -4,6 +4,9 @@ on:
   schedule:
     - cron: "0 * * * *"   # Runs at the start of every hour
   workflow_dispatch:      # Allows manual trigger
+  push:
+    branches:
+      - google_sheet_integration
 
 jobs:
   run-script:
