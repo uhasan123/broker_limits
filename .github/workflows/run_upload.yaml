@@ -12,14 +12,14 @@ jobs:
   run-script:
     runs-on: ubuntu-latest
     env:
-      SSH_HOST: ${{ vars.SSH_HOST }}
-      SSH_USER: ${{ vars.SSH_USER }}
-      DB_HOST: ${{ vars.DB_HOST }}
-      DB_PORT: ${{ vars.DB_PORT }}
-      DB_NAME: ${{ vars.DB_NAME }}
-      DB_USER: ${{ vars.DB_USER }}
-      DB_PASSWORD: ${{ vars.DB_PASSWORD }}
-      SSH_KEY: ${{ vars.SSH_KEY }}
+      ssh_host: ${{ vars.SSH_HOST }}
+      ssh_user: ${{ vars.SSH_USER }}
+      db_host: ${{ vars.DB_HOST }}
+      db_port: ${{ vars.DB_PORT }}
+      db_name: ${{ vars.DB_NAME }}
+      db_user: ${{ vars.DB_USER }}
+      db_password: ${{ vars.DB_PASSWORD }}
+      ssh_key: ${{ vars.SSH_KEY }}
 
     steps:
       - name: Checkout repository
