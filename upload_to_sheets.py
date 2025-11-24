@@ -5,7 +5,7 @@ import pandas as pd
 import sys
 import os
 # import schedule
-import time
+# import time
 
 # sys.path.append('C://Users//Lenovo//Documents//Work//github_code//broker_limits')
 from broker_report import broker_report
@@ -31,7 +31,7 @@ on a.id=b.debtor_id'''
 # def job():
 SPREADSHEET_NAME = 'Sample'
 SHEET_NAME = 'Sheet1'
-CREDENTIALS_FILE = './credentials.json'
+CREDENTIALS_FILE = './crendentials.json'
 
 sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name=SHEET_NAME)
 
