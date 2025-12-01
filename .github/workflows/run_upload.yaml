@@ -20,6 +20,7 @@ jobs:
       db_user: ${{ vars.DB_USER }}
       db_password: ${{ vars.DB_PASSWORD }}
       ssh_key: ${{ vars.SSH_KEY }}
+      private_key_json: ${{ secrets.PRIVATE_KEY_JSON }}
 
     steps:
       - name: Checkout repository
