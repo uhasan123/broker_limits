@@ -10,7 +10,8 @@ import tempfile
 import json
 
 import gspread
-from oauth2client.service_account import ServiceAccountCredentials
+# from oauth2client.service_account import ServiceAccountCredentials
+from google.oauth2.service_account import Credentials
 
 from broker_report import broker_report
 
@@ -51,7 +52,8 @@ def connect_to_gsheet(creds_json,spreadsheet_name,sheet_name):
     scope = ["https://spreadsheets.google.com/feeds", 'https://www.googleapis.com/auth/spreadsheets',
              "https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/drive"]
     
-    credentials = ServiceAccountCredentials.from_json_keyfile_name(creds_json, scope)
+    # credentials = ServiceAccountCredentials.from_json_keyfile_name(creds_json, scope)
+    credentials = Credentials.from_service_account_file(creds_json, scopes=scope)
     client = gspread.authorize(credentials)
     spreadsheet = client.open(spreadsheet_name)  # Access the first sheet
     return spreadsheet.worksheet(sheet_name)
