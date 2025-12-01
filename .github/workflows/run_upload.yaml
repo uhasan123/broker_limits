@@ -6,7 +6,7 @@ on:
   workflow_dispatch:      # Allows manual trigger
   push:
     branches:
-      - google_sheet_integration
+      - main
 
 jobs:
   run-script:
