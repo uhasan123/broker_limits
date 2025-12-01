@@ -42,7 +42,7 @@ if 'tab1_test' not in st.session_state:
 
 # st.write(google_credentials)
 
-gcp_secrets = os.getenv("gcp_service_account")
+gcp_secrets = st.secrets["gcp_service_account"]
 json_str = json.dumps(dict(gcp_secrets))
 
 # st.write("Has private key:", "private_key" in os.getenv["gcp_service_account"])
