@@ -29,9 +29,16 @@ on a.id=b.debtor_id'''
     return exhaust_debtors
 
 # def job():
+private_key_json=os.getenv('private_key_json')
+
+with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as tmp:
+    tmp.write(private_key_json.encode())  # write bytes
+    tmp.flush()
+    creds_path = tmp.name
+    
 SPREADSHEET_NAME = 'Sample'
 SHEET_NAME = 'Sheet1'
-CREDENTIALS_FILE = './crendentials.json'
+CREDENTIALS_FILE = creds_path # './crendentials.json'
 
 sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name=SHEET_NAME)
 
