@@ -42,7 +42,7 @@ if 'tab1_test' not in st.session_state:
 
 # st.write(google_credentials)
 
-gcp_secrets = st.secrets["gcp_service_account"]
+gcp_secrets = os.getenv["gcp_service_account"]
 json_str = json.dumps(dict(gcp_secrets))
     
 def connect_to_gsheet(creds_json,spreadsheet_name,sheet_name):
