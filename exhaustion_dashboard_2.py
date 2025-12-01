@@ -54,7 +54,7 @@ def connect_to_gsheet(creds_json,spreadsheet_name,sheet_name):
     spreadsheet = client.open(spreadsheet_name)  # Access the first sheet
     return spreadsheet.worksheet(sheet_name)
     
-private_key_json=os.getenv('private_key_json')
+# private_key_json=os.getenv('private_key_json')
 
 with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as tmp:
     tmp.write(json_str.encode())
