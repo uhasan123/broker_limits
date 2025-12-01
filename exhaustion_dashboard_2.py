@@ -58,9 +58,16 @@ def connect_to_gsheet(creds_json,spreadsheet_name,sheet_name):
     spreadsheet = client.open(spreadsheet_name)  # Access the first sheet
     return spreadsheet.worksheet(sheet_name)
     
+private_key_json=os.getenv('private_key_json')
+
+with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as tmp:
+    tmp.write(private_key_json.encode())  # write bytes
+    tmp.flush()
+    creds_path = tmp.name
+    
 SPREADSHEET_NAME = 'Sample'
 SHEET_NAME = 'Sheet1'
-CREDENTIALS_FILE = './crendentials.json'
+CREDENTIALS_FILE = creds_path
 
 if st.button("Refresh", key='refresh_test'):
     st.session_state.tab1_test=True
