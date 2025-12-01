@@ -45,7 +45,7 @@ if 'tab1_test' not in st.session_state:
 gcp_secrets = st.secrets["gcp_service_account"]
 json_str = json.dumps(dict(gcp_secrets))
 
-st.write(st.secrets["gcp_service_account"])
+# st.write(st.secrets["gcp_service_account"])
     
 def connect_to_gsheet(creds_json,spreadsheet_name,sheet_name):
     scope = ["https://spreadsheets.google.com/feeds", 'https://www.googleapis.com/auth/spreadsheets',
