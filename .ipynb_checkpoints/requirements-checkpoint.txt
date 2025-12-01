@@ -1,0 +1,12 @@
+pip==25.3
+streamlit==1.39.0
+sshtunnel
+pandas
+psycopg2-binary
+datetime
+statistics
+plotly
+openpyxl
+paramiko<3.4
+oauth2client
+gspread
