@@ -42,13 +42,9 @@ if 'tab1_test' not in st.session_state:
 
 # st.write(google_credentials)
 
-# temp = tempfile.NamedTemporaryFile(delete=False, suffix=".json")
-# with open(temp.name, 'w') as f:
-#     json.dump(google_credentials, f)
-# # temp.write(google_credentials.encode())
-# credentials_=temp.name
-# temp.close()
-# st.write(credentials_)
+gcp_secrets = st.secrets["gcp_service_account"]
+json_str = json.dumps(dict(gcp_secrets))
+    
 def connect_to_gsheet(creds_json,spreadsheet_name,sheet_name):
     scope = ["https://spreadsheets.google.com/feeds", 'https://www.googleapis.com/auth/spreadsheets',
              "https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/drive"]
@@ -61,7 +57,7 @@ def connect_to_gsheet(creds_json,spreadsheet_name,sheet_name):
 private_key_json=os.getenv('private_key_json')
 
 with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as tmp:
-    tmp.write(private_key_json.encode())  # write bytes
+    tmp.write(json_str.encode())
     tmp.flush()
     creds_path = tmp.name
     
