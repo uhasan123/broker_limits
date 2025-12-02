@@ -1,9 +1,9 @@
--- with debtor_invoices as (
---     select distinct id, created_at from invoices where debtor_id='{debtor_id}'
--- )
+with debtor_invoices as (
+    select distinct id, created_at from invoices where debtor_id='{debtor_id}'
+)
 
 
-with cal_debtor_weekly_open_invoice_volume as --here
+,cal_debtor_weekly_open_invoice_volume as --here
 (
 select
 d.id,
@@ -16,7 +16,7 @@ d.debtor_limit/100 as debtor_limit,
 gs::date snapshot_date,
 sum(i.approved_accounts_receivable_amount/100.0) as approved_amount
 from
-(select * from debtors) d 
+(select * from debtors where id='{debtor_id}') d 
 cross join
 generate_series(current_date-90, current_date, interval '1 day') gs
 left join invoices i
