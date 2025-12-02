@@ -14,6 +14,7 @@ from broker_report import broker_report
 import gspread
 # from oauth2client.service_account import ServiceAccountCredentials
 from google.oauth2.service_account import Credentials
+from auth import login, callback
 
 def get_exhausted_debtors():
     obj=broker_report()
@@ -206,6 +207,24 @@ st.set_page_config(
 )
 
 st.title("Exhaustion Monitoring Dashboard")
+
+# Check login state
+if "user" not in st.session_state:
+
+    # If redirected from Google
+    if "code" in st.query_params:
+        callback()
+    else:
+        login()
+        st.stop()
+
+# Logged-in User
+user = st.session_state["user"]
+
+st.sidebar.image(user["picture"], width=50)
+st.sidebar.write(user["email"])
+
+st.title("🎉 Welcome, " + user["name"])
 
 
 if 'tab1' not in st.session_state:
