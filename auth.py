@@ -2,9 +2,9 @@ import streamlit as st
 from requests_oauthlib import OAuth2Session
 import os
 
-CLIENT_ID = st.secrets["google"]["client_id"]
-CLIENT_SECRET = st.secrets["google"]["client_secret"]
-REDIRECT_URI = st.secrets["google"]["redirect_uri"]
+CLIENT_ID = st.secrets["google_auth"]["client_id"]
+CLIENT_SECRET = st.secrets["google_auth"]["client_secret"]
+REDIRECT_URI = st.secrets["google_auth"]["redirect_uri"]
 
 AUTHORIZATION_BASE_URL = "https://accounts.google.com/o/oauth2/v2/auth"
 TOKEN_URL = "https://oauth2.googleapis.com/token"
