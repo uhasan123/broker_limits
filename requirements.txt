@@ -10,3 +10,6 @@ openpyxl
 paramiko<3.4
 oauth2client
 gspread
+streamlit-authenticator
+oauthlib
+requests-oauthlib
