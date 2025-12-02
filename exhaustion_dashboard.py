@@ -7,6 +7,7 @@ from datetime import date
 from pandas.api.types import CategoricalDtype
 from psycopg2 import errors
 import json
+import tempfile
 
 from broker_report import broker_report
 
