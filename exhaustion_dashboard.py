@@ -9,6 +9,10 @@ from psycopg2 import errors
 
 from broker_report import broker_report
 
+import gspread
+# from oauth2client.service_account import ServiceAccountCredentials
+from google.oauth2.service_account import Credentials
+
 def get_exhausted_debtors():
     obj=broker_report()
     conn=obj.make_db_connection()
@@ -104,14 +108,14 @@ def calc_broker_limit_breach():
     # tunnel.stop()
     return broker_limit_breach_df
 
-def sum_until_zero(g):
-    zero_idx = g.index[g['is_exhausted'] == 0]
-    if len(zero_idx) == 0:
-        # No zero → sum all
-        return g['is_exhausted'].sum()
-    else:
-        stop = zero_idx[0]
-        return g.loc[g.index < stop, 'is_exhausted'].sum()
+# def sum_until_zero(g):
+#     zero_idx = g.index[g['is_exhausted'] == 0]
+#     if len(zero_idx) == 0:
+#         # No zero → sum all
+#         return g['is_exhausted'].sum()
+#     else:
+#         stop = zero_idx[0]
+#         return g.loc[g.index < stop, 'is_exhausted'].sum()
 def ageing_cohort(x):
     if x==1:
         return 'brokers exhausted today'
@@ -141,47 +145,7 @@ def limit_cohort(x):
     else:
         return None
 
-def create_debtor_level_view():
-    # obj=broker_report()
-    # conn=obj.make_db_connection()
-    # conn.autocommit=True
-    open_invoice_df=calc_open_invoice_volume()
-    debtor_limit_df=calc_debtor_limit()
-    broker_limit_breach_df=calc_broker_limit_breach()
-
-    # conn.close()
-    # tunnel.stop()
-    
-    ageing_df=open_invoice_df.merge(debtor_limit_df, left_on=['id', 'snapshot_date'], right_on=['original_id', 'snapshot_date'], how='inner')
-    ageing_df['is_exhausted']=ageing_df.apply(lambda x: 1 if x['approved_amount']>=x['debtor_limit']else 0, axis=1)
-    ageing_df=ageing_df.sort_values(['id', 'snapshot_date'], ascending=[True, False]).reset_index()
-
-    debtor_ageing = ageing_df.groupby('id').apply(sum_until_zero).reset_index(name='ageing')
-    debtor_ageing['ageing']=debtor_ageing['ageing'].apply(lambda x: x+1)
-
-    debtor_limit=get_exhausted_debtors()
-
-    debtor_level_view=debtor_ageing.merge(debtor_limit, on='id', how='outer')
-    debtor_level_view['utilization_rate']=debtor_level_view['approved_total'] / debtor_level_view['debtor_limit']
-    debtor_level_view['unnaturality']=debtor_level_view['approved_total']-debtor_level_view['debtor_limit']
-
-    grouped=broker_limit_breach_df.groupby('debtor_id')
-    debtor_level_view_2=grouped.apply(lambda g: pd.Series({
-        'invoice_created_l30': g.loc[
-            g['created_date'].isna()==False,
-            'id'
-        ].nunique(),
-        'invoice_flagged_l30': g.loc[
-            (g['created_date'].isna()==False) & (g['limit_exceeded']==1),
-            'id'
-        ].nunique()
-    })).reset_index()
-    
-    debtor_level_view_2['perc_invoices_flagged_l30']=debtor_level_view_2['invoice_flagged_l30'] / debtor_level_view_2['invoice_created_l30']
-    debtor_level=debtor_level_view.merge(debtor_level_view_2, left_on='id', right_on='debtor_id', how='outer')
-
-    # debtor_level['ageing_cohort']=debtor_level['ageing'].apply(lambda x: ageing_cohort(x))
-    # ageing_cohort_df=debtor_level.groupby('ageing_cohort').agg(broker_count=('id', 'nunique')).reset_index()
+def create_debtor_level_view(debtor_level):
     ageing_cohort_df=pd.DataFrame()
     
     ageing_cohort_df['ageing_cohort']=["brokers exhausted today", "brokers exhausted since the last 7 days", "brokers exhausted since the last 15 days", "brokers exhausted for more than 15 days"]
@@ -204,7 +168,7 @@ def create_debtor_level_view():
     limit_cohort_df = limit_cohort_df.sort_values("limit_cohort").reset_index()
     limit_cohort_df=limit_cohort_df.drop('index', axis=1)
 
-    return debtor_level, ageing_cohort_df, limit_cohort_df
+    return ageing_cohort_df, limit_cohort_df
 
 def generate_data_for_payment_trend(debtor_id):
     obj=broker_report()
@@ -269,6 +233,16 @@ def extract_debtor_id_from_name_or_dot(typee, value):
             return ''
     else:
         return None
+
+def connect_to_gsheet(creds_json,spreadsheet_name,sheet_name):
+    scope = ["https://spreadsheets.google.com/feeds", 'https://www.googleapis.com/auth/spreadsheets',
+             "https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/drive"]
+    
+    # credentials = ServiceAccountCredentials.from_json_keyfile_name(creds_json, scope)
+    credentials = Credentials.from_service_account_file(creds_json, scopes=scope)
+    client = gspread.authorize(credentials)
+    spreadsheet = client.open(spreadsheet_name)  # Access the first sheet
+    return spreadsheet.worksheet(sheet_name)
     
 
 st.set_page_config(
@@ -288,14 +262,32 @@ if 'tab3_metrics' not in st.session_state:
     st.session_state.tab3_metrics=False
 if 'tab3_trend' not in st.session_state:
     st.session_state.tab3_trend=False
+
+gcp_secrets = st.secrets["gcp_service_account"]
+json_str = json.dumps(dict(gcp_secrets))
+with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as tmp:
+    tmp.write(json_str.encode())
+    tmp.flush()
+    creds_path = tmp.name
+
+SPREADSHEET_NAME = 'Raw Data'
+# SHEET_NAME = 'Sheet1'
+CREDENTIALS_FILE = creds_path
     
 tab1, tab2, tab3=st.tabs(['Exhausted Brokers', 'Debtor Limit and Open Invoice Comparison', 'Broker Profile and Payment Trend'])
 with tab1:
     if st.button("Refresh", key='refresh_tab1'):
         st.session_state.tab1=True
     if st.session_state.tab1==True:
-        exhaust_debtors=get_exhausted_debtors()
-        debtor_level, ageing_cohort_df,limit_cohort_df=create_debtor_level_view()
+        sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='exhausted_debtors')
+        x=sheet_by_name.get_all_records()
+        exhaust_debtors=pd.DataFrame(x)
+
+        sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='debtor_level')
+        x=sheet_by_name.get_all_records()
+        debtor_level=pd.DataFrame(x)
+        # exhaust_debtors=get_exhausted_debtors()
+        ageing_cohort_df,limit_cohort_df=create_debtor_level_view(debtor_level)
         debtor_level=debtor_level[['id','name','dot', 'debtor_limit', 'approved_total', 'utilization_rate', 'invoice_created_l30', 'invoice_flagged_l30', 'perc_invoices_flagged_l30']]
         brokers_exhausted=exhaust_debtors['id'].nunique()
         # st.write('Exhaustion counter', brokers_exhausted)
