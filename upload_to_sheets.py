@@ -20,12 +20,16 @@ def connect_to_gsheet(creds_json,spreadsheet_name,sheet_name):
     spreadsheet = client.open(spreadsheet_name)  # Access the first sheet
     return spreadsheet.worksheet(sheet_name)
 
-def get_exhausted_debtors():
+def get_all_debtors(debtor_id):
+    obj=broker_report()
+    conn=obj.make_db_connection()
+    conn.autocommit=True
     query='''select distinct a.*, b.dot from 
-(select id, name, debtor_limit/100 as debtor_limit, approved_total/100 as approved_total from debtors d where d.approved_total>=d.debtor_limit and d.status = 'active' and d.debtor_limit<>100) a
+(select id, name, debtor_limit/100 as debtor_limit, approved_total/100 as approved_total from debtors d where d.id='{debtor_id}') a
 left join
 (select debtor_id, dot from brokers) b 
 on a.id=b.debtor_id'''
+    query=query.format(debtor_id=debtor_id)
     exhaust_debtors=pd.read_sql_query(query, conn)
     return exhaust_debtors
 
@@ -47,7 +51,8 @@ conn=obj.make_db_connection()
 conn.autocommit=True
 
 sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='exhausted_debtors')
-exhausted_df=get_exhausted_debtors()
+exhausted_df=get_all_debtors()
+exhausted_df=exhausted_df[exhausted_df['approved_total']>exhausted_df['debtor_limit']]
 data_to_upload = [exhausted_df.columns.values.tolist()] + exhausted_df.values.tolist()
 # data_to_upload
 sheet_by_name.clear()
