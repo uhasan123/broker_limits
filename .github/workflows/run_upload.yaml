@@ -1,4 +1,4 @@
-name: Run Upload Script
+name: Run Upload Hourly Script
 
 on:
   schedule:
