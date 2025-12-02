@@ -8,7 +8,7 @@ from pandas.api.types import CategoricalDtype
 from psycopg2 import errors
 import json
 import tempfile
-
+import numpy as np
 from broker_report import broker_report
 
 import gspread
