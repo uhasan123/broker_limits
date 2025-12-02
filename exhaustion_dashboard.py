@@ -378,8 +378,9 @@ with tab3:
         st.session_state.tab3_metrics=True
 
     if st.session_state.tab3_metrics==True:
+        invoice_df, debtors_df, brokers_df=generate_data_for_payment_trend(debtor_id)
         if debtor_id !='':
-            invoice_df, debtors_df, brokers_df=generate_data_for_payment_trend(debtor_id)
+            # invoice_df, debtors_df, brokers_df=generate_data_for_payment_trend(debtor_id)
             date_today=date.today()
             date_last_year=date_today - pd.Timedelta(days=365)
             # start_date=(date_last_year + pd.Timedelta(days=(8-date_last_year.isoweekday())%7) + pd.Timedelta(days=7))-pd.Timedelta(days=1) # for weekly
