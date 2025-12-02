@@ -219,7 +219,7 @@ if 'tab3_trend' not in st.session_state:
 
 gcp_secrets = st.secrets["gcp_service_account"]
 json_str = json.dumps(dict(gcp_secrets))
-st.write(json_str)
+# st.write(json_str)
 with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as tmp:
     tmp.write(json_str.encode())
     tmp.flush()
