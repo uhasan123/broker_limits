@@ -256,7 +256,6 @@ with tab1:
         sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='exhausted_debtors')
         x=sheet_by_name.get_all_records()
         exhaust_debtors=pd.DataFrame(x)
-        exhaust_debtors=exhaust_debtors[exhaust_debtors['approved_total']>exhaust_debtors['debtor_limit']]
 
         sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='debtor_level')
         x=sheet_by_name.get_all_records()
