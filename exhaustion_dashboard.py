@@ -209,22 +209,22 @@ st.set_page_config(
 st.title("Exhaustion Monitoring Dashboard")
 
 # Check login state
-if "user" not in st.session_state:
+# if "user" not in st.session_state:
 
-    # If redirected from Google
-    if "code" in st.query_params:
-        callback()
-    else:
-        login()
-        st.stop()
+#     # If redirected from Google
+#     if "code" in st.query_params:
+#         callback()
+#     else:
+#         login()
+#         st.stop()
 
-# Logged-in User
-user = st.session_state["user"]
+# # Logged-in User
+# user = st.session_state["user"]
 
-st.sidebar.image(user["picture"], width=50)
-st.sidebar.write(user["email"])
+# st.sidebar.image(user["picture"], width=50)
+# st.sidebar.write(user["email"])
 
-st.title("🎉 Welcome, " + user["name"])
+# st.title("🎉 Welcome, " + user["name"])
 
 
 if 'tab1' not in st.session_state:
