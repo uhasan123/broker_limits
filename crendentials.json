@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "bobtail-dashboard-123",
+  "private_key_id": "456d8d5e05f79da8d128c5bdc41d06738e3e729c",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCwgMjE62IlEHp8\n/fBhgi5RtC8QTaVKPN2AswOcUMcB6G5kVKNuNihDP++y07V5NSCFjaRiCQoz7Sxz\n/ABqjlrqLuaDF3vcR1vRtgaVouqBtpIZlrI/sUbvHOMV2fLjrosdCij3TFQwt58Q\n38kHr0zrtCzPmioSycBlkL/g0em1xe+93yPpj0lA/Kkj6KlVOWHx2zeAen3e4HO6\nmdcvPBX1EIbgcE4Pxi3mVb7uLGgpHrD5WbZ/cZY5qF/sNIdFq/jEahMIhzXbd7ew\n3yLbC7ucjT2wZyE9imuv4p5ArgOMouEF+AtUW2oaf2jxRsSJ+kstImDLaCjLI/hs\n85m85n2bAgMBAAECggEAJ8j3uG+IYWtr+MWyy//wmekgHLAr3GaI1UxEuZT5rsPq\nMkJjzmF1xObiDHCtPMONb51EWvbHrnm9Je29WEd7VcM5oX4HJNmO6F/77vnYm2GA\nYDU4O6QlpZtg0pmcpta+s86I+mlhptOVDtQqt8k7cPvdh/QrnK2OaTZuEeqvIBI8\nSH7JSOdAeupGG2/nrp7FBx0DL96BGNVG3sr4Ik/HOUCqIgyEdoJE2BuwKVVlqqEi\nf+RBh1svJuBIs0q6KyrQT6rM5mgKSloFsbaqv5lLosfB0CsvuVN19A9QT6Bseg2N\nLHn2owkqPgLzG5w0rGNVV91Kg/kArdRe4vxELb9BcQKBgQDks2OeRBuuYpgYKz68\nUUbQmdwoM0liNayPE64II1ZccquU3rZ9kLPOLQ6Xv12m8PmwaTiLQaWx6jN/HG8p\nOTalJD6TaUqqGS06Q3xHnJIYfhuz6vnakqv3khN+EyQl3qpOv25Kn5I9wTPdU95M\nlvUCS3+90fDxpvYzGbR7DBEfMQKBgQDFklg1Vo7z8rdHk8enDBE2X+OjqVIfD3Ls\n+kde1Ua8DC7e4UPcayoyJABHhyk7aL1ps1sjMJ0aIEcyQBE+yb+rqyM2v3Y02EAt\nmEmo9Tj8ROq2ixHdY/q9OHdEcxYe1ImLyQA3GfEI8QvSnxefHMI09SwG5oP8Dy7p\nKkJ4ZYvuiwKBgHo22w9ieiBwk7KmuXnNPTiQYDQjZB3VbQdwjtnOeIIizUpa0c68\nGzocneW94AAsWmJJeGwCgtdWvno46bZv2qHZgo8n/zxzA9ZU5f8mznPEQG2fLjH9\nm2RLbZs8A18xZHV8myXJrE7QBjVKcksfiILXccYwgL/CZ2LbY7U1t5ihAoGBAIdN\ny97rYocqh94bFLYQC5GjZbBlevoOiHRGiq4lfYW3CjpVJzZCpekkwpQ5ukEXX/CN\nhjK5Tj3gMSH2wlivrfYRA9KwmHFkT79p9bgiCF6ri9prr1Zg7Ay+KN/VuSZwA6qZ\ngu45c9rdyWz6yyCKf23pIbewEl+CvmusJ01wrb41AoGAWOoFd1AXCrPYltlki+ww\nwpVrgadc3G0fihONUWws4hVi0tuv7N1dOwsWyHnlenAc0BPSbcpxn6y8qGvI/4CA\nDXaME2MPEhGjfkdOH8kc01XRROXCrt3xiN8ifJBK/5mXhmWupyhATgR9tKTjFPGD\nP9GC4FSm5JilMN1sqEWByzU=\n-----END PRIVATE KEY-----\n",
+  "client_email": "bobtail-dashboard@bobtail-dashboard-123.iam.gserviceaccount.com",
+  "client_id": "110770844380010408889",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/bobtail-dashboard%40bobtail-dashboard-123.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

@@ -1,0 +1,40 @@
+name: Run Upload Script
+
+on:
+  schedule:
+    - cron: "0 * * * *"   # Runs at the start of every hour
+  workflow_dispatch:      # Allows manual trigger
+  push:
+    branches:
+      - main
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+    env:
+      ssh_host: ${{ vars.SSH_HOST }}
+      ssh_user: ${{ vars.SSH_USER }}
+      db_host: ${{ vars.DB_HOST }}
+      db_port: ${{ vars.DB_PORT }}
+      db_name: ${{ vars.DB_NAME }}
+      db_user: ${{ vars.DB_USER }}
+      db_password: ${{ vars.DB_PASSWORD }}
+      ssh_key: ${{ vars.SSH_KEY }}
+      private_key_json: ${{ secrets.PRIVATE_KEY_JSON }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"   # or your version
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+      
+      - name: Run Python Script
+        run: |
+          python upload_to_sheets.py
