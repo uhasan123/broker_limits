@@ -411,7 +411,7 @@ with tab3:
             else:
                 segment_level_data=None
             broker_level_df=segment_level_data[segment_level_data['id']==debtor_id]
-            pivot_table, df_t, pivot_table_client_conc=broker_report.generate_report(broker_level_df, broker_profile_report=True, cohort=value,payment_trend_count=5, payment_trend_step='default', debtors_df=debtors_df, brokers_df=brokers_df, invoice_df=invoice_df)
+            pivot_table, df_t, pivot_table_client_conc=broker_report.generate_report(broker_level_df, broker_profile_report=True, cohort=value,payment_trend_count=5, payment_trend_step='default', debtors_df=None, brokers_df=None, invoice_df=None)
             st.write('Debtors Info')
             st.write(df_t)
             #############
