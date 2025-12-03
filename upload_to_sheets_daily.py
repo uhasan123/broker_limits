@@ -164,6 +164,7 @@ sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name
 # debtor_level=create_debtor_level_view(exhaust_debtors)
 generate_segment_level_data_day = generate_segment_level_data_day.replace([np.inf, -np.inf], np.nan)
 generate_segment_level_data_day = generate_segment_level_data_day.fillna('')
+generate_segment_level_data_day['snapshot_date']=generate_segment_level_data_day['snapshot_date'].astype(str)
 data_to_upload = [generate_segment_level_data_day.columns.values.tolist()] + generate_segment_level_data_day.values.tolist()
 # data_to_upload
 sheet_by_name.clear()
@@ -173,6 +174,7 @@ sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name
 # debtor_level=create_debtor_level_view(exhaust_debtors)
 generate_segment_level_data_week = generate_segment_level_data_week.replace([np.inf, -np.inf], np.nan)
 generate_segment_level_data_week = generate_segment_level_data_week.fillna('')
+generate_segment_level_data_week['snapshot_date']=generate_segment_level_data_week['snapshot_date'].astype(str)
 data_to_upload = [generate_segment_level_data_week.columns.values.tolist()] + generate_segment_level_data_week.values.tolist()
 # data_to_upload
 sheet_by_name.clear()
@@ -182,6 +184,7 @@ sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name
 # debtor_level=create_debtor_level_view(exhaust_debtors)
 generate_segment_level_data_month = generate_segment_level_data_month.replace([np.inf, -np.inf], np.nan)
 generate_segment_level_data_month = generate_segment_level_data_month.fillna('')
+generate_segment_level_data_month['snapshot_date']=generate_segment_level_data_month['snapshot_date'].astype(str)
 data_to_upload = [generate_segment_level_data_month.columns.values.tolist()] + generate_segment_level_data_month.values.tolist()
 # data_to_upload
 sheet_by_name.clear()
@@ -191,6 +194,7 @@ sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name
 # debtor_level=create_debtor_level_view(exhaust_debtors)
 generate_segment_level_data_current = generate_segment_level_data_current.replace([np.inf, -np.inf], np.nan)
 generate_segment_level_data_current = generate_segment_level_data_current.fillna('')
+generate_segment_level_data_current['snapshot_date']=generate_segment_level_data_current['snapshot_date'].astype(str)
 data_to_upload = [generate_segment_level_data_current.columns.values.tolist()] + generate_segment_level_data_current.values.tolist()
 # data_to_upload
 sheet_by_name.clear()
