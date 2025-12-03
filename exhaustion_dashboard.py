@@ -391,8 +391,8 @@ with tab3:
         st.session_state.tab3_metrics=True
 
     if st.session_state.tab3_metrics==True:
-        invoice_df=generate_data_for_payment_trend(debtor_id)
         if debtor_id !='':
+            invoice_df=generate_data_for_payment_trend(debtor_id)
             # invoice_df, debtors_df, brokers_df=generate_data_for_payment_trend(debtor_id)
             # date_today=date.today()
             # date_last_year=date_today - pd.Timedelta(days=365)
