@@ -123,7 +123,10 @@ def generate_segment_level_data():
     with open('generate_segment_level_data_month.sql', 'r') as file:
         query2=file.read()
     generate_segment_level_data_month=pd.read_sql_query(query2, conn)
-    return generate_segment_level_data_day, generate_segment_level_data_week, generate_segment_level_data_month
+    with open('generate_segment_level_data_current.sql', 'r') as file:
+        query3=file.read()
+    generate_segment_level_data_current=pd.read_sql_query(query3, conn)
+    return generate_segment_level_data_day, generate_segment_level_data_week, generate_segment_level_data_month, generate_segment_level_data_current
 
 
 # def job():
@@ -156,7 +159,7 @@ data_to_upload = [debtor_level.columns.values.tolist()] + debtor_level.values.to
 sheet_by_name.clear()
 sheet_by_name.append_rows(data_to_upload)
 
-generate_segment_level_data_day, generate_segment_level_data_week, generate_segment_level_data_month=generate_segment_level_data()
+generate_segment_level_data_day, generate_segment_level_data_week, generate_segment_level_data_month, generate_segment_level_data_current=generate_segment_level_data()
 sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_daily')
 # debtor_level=create_debtor_level_view(exhaust_debtors)
 generate_segment_level_data_day = generate_segment_level_data_day.replace([np.inf, -np.inf], np.nan)
@@ -183,4 +186,14 @@ data_to_upload = [generate_segment_level_data_month.columns.values.tolist()] + g
 # data_to_upload
 sheet_by_name.clear()
 sheet_by_name.append_rows(data_to_upload)
+
+sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_week_start_to_date')
+# debtor_level=create_debtor_level_view(exhaust_debtors)
+generate_segment_level_data_current = generate_segment_level_data_current.replace([np.inf, -np.inf], np.nan)
+generate_segment_level_data_current = generate_segment_level_data_current.fillna(np.nan)
+data_to_upload = [generate_segment_level_data_current.columns.values.tolist()] + generate_segment_level_data_current.values.tolist()
+# data_to_upload
+sheet_by_name.clear()
+sheet_by_name.append_rows(data_to_upload)
+
 print('uploaded')
