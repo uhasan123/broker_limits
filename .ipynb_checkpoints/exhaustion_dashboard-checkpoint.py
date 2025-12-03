@@ -6,12 +6,15 @@ import ast
 from datetime import date
 from pandas.api.types import CategoricalDtype
 from psycopg2 import errors
-
+import json
+import tempfile
+import numpy as np
 from broker_report import broker_report
 
 import gspread
 # from oauth2client.service_account import ServiceAccountCredentials
 from google.oauth2.service_account import Credentials
+from auth import login, callback
 
 def get_exhausted_debtors():
     obj=broker_report()
@@ -38,18 +41,6 @@ on a.id=b.debtor_id'''
     exhaust_debtors=pd.read_sql_query(query, conn)
     return exhaust_debtors
 
-def calc_open_invoice_volume():
-    obj=broker_report()
-    conn=obj.make_db_connection()
-    conn.autocommit=True
-    with open('calc_open_invoice_volume.sql', 'r') as file:
-        query=file.read()
-
-    open_invoice_df=pd.read_sql_query(query, conn)
-    open_invoice_df=open_invoice_df[['id', 'snapshot_date', 'approved_amount']]
-    # conn.close()
-    # tunnel.stop()
-    return open_invoice_df
 def calc_open_invoice_volume_l90(debtor_id):
     obj=broker_report()
     conn=obj.make_db_connection()
@@ -64,20 +55,6 @@ def calc_open_invoice_volume_l90(debtor_id):
     # tunnel.stop()
     return open_invoice_df_l90
 
-def calc_debtor_limit():
-    obj=broker_report()
-    conn=obj.make_db_connection()
-    conn.autocommit=True
-    with open('calc_debtor_limit.sql', 'r') as file:
-        query=file.read()
-    
-    debtor_limit_df=pd.read_sql_query(query, conn)
-    debtor_limit_df = debtor_limit_df.drop_duplicates(subset=['original_id', 'snapshot_date'], keep='first')
-    debtor_limit_df['debtor_limit']=debtor_limit_df['debtor_limit']/100
-    debtor_limit_df=debtor_limit_df[['original_id', 'snapshot_date', 'debtor_limit']]
-    # conn.close()
-    # tunnel.stop()
-    return debtor_limit_df
 def calc_debtor_limit_l90(debtor_id):
     obj=broker_report()
     conn=obj.make_db_connection()
@@ -93,29 +70,7 @@ def calc_debtor_limit_l90(debtor_id):
     # conn.close()
     # tunnel.stop()
     return debtor_limit_df_l90
-
-def calc_broker_limit_breach():
-    obj=broker_report()
-    conn=obj.make_db_connection()
-    conn.autocommit=True
-    with open('broker_limit_breach_query.sql', 'r') as file:
-        query=file.read()
-
-    broker_limit_breach_df=pd.read_sql_query(query, conn)
-    broker_limit_breach_df['created_at'] = pd.to_datetime(broker_limit_breach_df['created_at'], errors='coerce')
-    broker_limit_breach_df['created_date']=broker_limit_breach_df['created_at'].dt.date
-    # conn.close()
-    # tunnel.stop()
-    return broker_limit_breach_df
-
-# def sum_until_zero(g):
-#     zero_idx = g.index[g['is_exhausted'] == 0]
-#     if len(zero_idx) == 0:
-#         # No zero → sum all
-#         return g['is_exhausted'].sum()
-#     else:
-#         stop = zero_idx[0]
-#         return g.loc[g.index < stop, 'is_exhausted'].sum()
+    
 def ageing_cohort(x):
     if x==1:
         return 'brokers exhausted today'
@@ -253,6 +208,24 @@ st.set_page_config(
 
 st.title("Exhaustion Monitoring Dashboard")
 
+# Check login state
+# if "user" not in st.session_state:
+
+#     # If redirected from Google
+#     if "code" in st.query_params:
+#         callback()
+#     else:
+#         login()
+#         st.stop()
+
+# # Logged-in User
+# user = st.session_state["user"]
+
+# st.sidebar.image(user["picture"], width=50)
+# st.sidebar.write(user["email"])
+
+# st.title("🎉 Welcome, " + user["name"])
+
 
 if 'tab1' not in st.session_state:
     st.session_state.tab1=False
@@ -265,6 +238,7 @@ if 'tab3_trend' not in st.session_state:
 
 gcp_secrets = st.secrets["gcp_service_account"]
 json_str = json.dumps(dict(gcp_secrets))
+# st.write(json_str)
 with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as tmp:
     tmp.write(json_str.encode())
     tmp.flush()
@@ -324,6 +298,10 @@ with tab2:
         if debtor_id !='':
             open_invoice_df_l90=calc_open_invoice_volume_l90(debtor_id)
             debtor_limit_df_l90=calc_debtor_limit_l90(debtor_id)
+
+            # sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='exhausted_debtors')
+            # x=sheet_by_name.get_all_records()
+            # debtor_limit=pd.DataFrame(x)
             debtor_limit=get_all_debtors(debtor_id)
     
         # conn.close()
@@ -384,8 +362,8 @@ with tab3:
     else:
         debtor_id=''
 
-    if debtor_id !='':
-        invoice_df, debtors_df, brokers_df=generate_data_for_payment_trend(debtor_id)
+    # if debtor_id !='':
+    #     invoice_df, debtors_df, brokers_df=generate_data_for_payment_trend(debtor_id)
 
     st.markdown(f"<h1 style='font-size:28px; color:green;'>Broker Profile</h1>", unsafe_allow_html=True)
 
@@ -400,15 +378,27 @@ with tab3:
         st.session_state.tab3_metrics=True
 
     if st.session_state.tab3_metrics==True:
+        # invoice_df, debtors_df, brokers_df=generate_data_for_payment_trend(debtor_id)
         if debtor_id !='':
             # invoice_df, debtors_df, brokers_df=generate_data_for_payment_trend(debtor_id)
-            date_today=date.today()
-            date_last_year=date_today - pd.Timedelta(days=365)
-            # start_date=(date_last_year + pd.Timedelta(days=(8-date_last_year.isoweekday())%7) + pd.Timedelta(days=7))-pd.Timedelta(days=1) # for weekly
-            start_date=invoice_df['approved_date'].min().date() # for monthly
-            end_date=date_today
+            # date_today=date.today()
+            # date_last_year=date_today - pd.Timedelta(days=365)
+            # # start_date=(date_last_year + pd.Timedelta(days=(8-date_last_year.isoweekday())%7) + pd.Timedelta(days=7))-pd.Timedelta(days=1) # for weekly
+            # start_date=invoice_df['approved_date'].min().date() # for monthly
+            # end_date=date_today
             
-            broker_level_df=broker_report.generate_segment_level_data(start_date, end_date, debtors_df, brokers_df, invoice_df, step=period)
+            # broker_level_df=broker_report.generate_segment_level_data(start_date, end_date, debtors_df, brokers_df, invoice_df, step=period)
+            if period=='weekly':
+                sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_weekly')
+                x=sheet_by_name.get_all_records()
+                segment_level_data=pd.DataFrame(x)
+            elif period=='monthly':
+                sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_monthly')
+                x=sheet_by_name.get_all_records()
+                segment_level_data=pd.DataFrame(x)
+            else:
+                segment_level_data=None
+            broker_level_df=segment_level_data[segment_level_data['id']==debtor_id]
             pivot_table, df_t, pivot_table_client_conc=broker_report.generate_report(broker_level_df, broker_profile_report=True, cohort=value,payment_trend_count=5, payment_trend_step='default', debtors_df=debtors_df, brokers_df=brokers_df, invoice_df=invoice_df)
             st.write('Debtors Info')
             st.write(df_t)
@@ -444,23 +434,44 @@ with tab3:
         st.session_state.tab3_trend=True
 
     if st.session_state.tab3_trend==True:
+        # invoice_df, debtors_df, brokers_df=generate_data_for_payment_trend(debtor_id)
         if debtor_id!='':
-            date_today=date.today()
-            date_last_year=date_today - pd.Timedelta(days=365)
-            start_date=(date_last_year + pd.Timedelta(days=(8-date_last_year.isoweekday())%7) + pd.Timedelta(days=7))-pd.Timedelta(days=1) # for weekly
-            # start_date=invoice_df['approved_date'].min().date() # for monthly
-            end_date=date_today
+            # date_today=date.today()
+            # date_last_year=date_today - pd.Timedelta(days=365)
+            # start_date=(date_last_year + pd.Timedelta(days=(8-date_last_year.isoweekday())%7) + pd.Timedelta(days=7))-pd.Timedelta(days=1) # for weekly
+            # # start_date=invoice_df['approved_date'].min().date() # for monthly
+            # end_date=date_today
             
-            broker_level=broker_report.generate_segment_level_data(start_date, end_date, debtors_df, brokers_df, invoice_df, step=period)
+            # broker_level=broker_report.generate_segment_level_data(start_date, end_date, debtors_df, brokers_df, invoice_df, step=period)
+            if period=='weekly':
+                sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_weekly')
+                x=sheet_by_name.get_all_records()
+                segment_level_data=pd.DataFrame(x)
+            elif period=='monthly':
+                sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_monthly')
+                x=sheet_by_name.get_all_records()
+                segment_level_data=pd.DataFrame(x)
+            elif period=='daily':
+                sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_daily')
+                x=sheet_by_name.get_all_records()
+                segment_level_data=pd.DataFrame(x)
+            else:
+                segment_level_data=None
+            broker_level=segment_level_data[segment_level_data['id']==debtor_id]
             if period!='daily':
-                broker_level_current=broker_report.generate_segment_level_data(start_date=None, end_date=end_date, debtors_df=debtors_df, brokers_df=brokers_df, invoice_df=invoice_df, step='current')
+                sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_week_start_to_date')
+                x=sheet_by_name.get_all_records()
+                broker_level_current=pd.DataFrame(x)
+                broker_level_current=broker_level_current[broker_level_current['id']==debtor_id]
+                # broker_level_current=broker_report.generate_segment_level_data(start_date=None, end_date=end_date, debtors_df=debtors_df, brokers_df=brokers_df, invoice_df=invoice_df, step='current')
             else:
                 broker_level_current=None
             # broker_level_df=broker_level[broker_level['dtp'].isna()==False]
             broker_level_df=pd.concat([broker_level, broker_level_current], ignore_index=True)
             # broker_level_df.head()
             # pivot_table, df_t, pivot_table_client_conc=broker_report.generate_report(broker_level_df, broker_profile_report=generate_broker_report, cohort=cohort,payment_trend_count=payment_trend_count, payment_trend_step=payment_trend_step, debtors_df=debtors_df, brokers_df=brokers_df, invoice_df=invoice_df)
-            df_t=broker_report.payment_trend(broker_level_df, count=value, step='default', debtors_df=debtors_df, brokers_df=brokers_df, invoice_df=invoice_df)
+            # df_t=broker_report.payment_trend(broker_level_df, count=value, step='default', debtors_df=debtors_df, brokers_df=brokers_df, invoice_df=invoice_df)
+            df_t=broker_level_df[['snapshot_date','invoice_approved', 'invoice_approved_dollars','open_invoices_in_point', 'invoice_paid', 'invoice_paid_dollars']][-count:].set_index('snapshot_date').T
             fig=broker_report.payment_trend_graph(df_t.T.reset_index())
             st.write(df_t)
             st.plotly_chart(fig, use_container_width=True)

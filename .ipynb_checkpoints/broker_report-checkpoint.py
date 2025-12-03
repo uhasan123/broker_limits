@@ -20,12 +20,16 @@ class broker_report:
         self.db_name = os.getenv("db_name")
         self.db_user = os.getenv("db_user")
         self.db_password = os.getenv("db_password")
+        # self.google_creds=os.getenv('google_credentials')
 
         temp = tempfile.NamedTemporaryFile(delete=False, suffix=".pem")
         temp.write(self.ssh_key_temp.encode())
-        temp.close()
-
         self.ssh_key=temp.name
+        
+        # temp = tempfile.NamedTemporaryFile(delete=False, suffix=".json")
+        # temp.write(self.google_creds.encode())
+        # self.credentials=temp.name
+        temp.close()
 
     def make_db_connection(self):
 
@@ -180,8 +184,11 @@ class broker_report:
                    ).reset_index()
 
         not_paid_df=invoice_df[(invoice_df['paid_date'].isna()) & (invoice_df['approved_date'].isna()==False)]
-        not_paid_df['avg_ageing'] = not_paid_df.apply(lambda x: (end_date - x['approved_date']).days, axis=1)
-        broker_level['avg_ageing']=not_paid_df['avg_ageing'].mean()
+        if len(not_paid_df)>0:
+            not_paid_df['avg_ageing'] = not_paid_df.apply(lambda x: (end_date - x['approved_date']).days, axis=1)
+            broker_level['avg_ageing']=not_paid_df['avg_ageing'].mean()
+        else:
+            broker_level['avg_ageing']=None
 
         return broker_level
 
