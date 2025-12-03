@@ -32,7 +32,7 @@ sum(case when i.approved_date<snapshot_date and (i.paid_date>=snapshot_date or i
 count(distinct case when (i.approved_date>snapshot_date-30 and i.approved_date<=snapshot_date) and i.approved_date is not null then i.client_id else null end) as no_of_clients
 from mondays m
 cross join debtors d
-left join (select *, paid_date-approved_date as dtp from invoices) i
+left join (select *, extract(days from paid_date-approved_date) as dtp from invoices) i
 on d.id = i.debtor_id
 left join brokers b
 on d.id = b.debtor_id
