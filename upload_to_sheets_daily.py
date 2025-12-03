@@ -152,7 +152,7 @@ exhaust_debtors=pd.DataFrame(x)
 
 sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='debtor_level')
 debtor_level=create_debtor_level_view(exhaust_debtors)
-debtor_level = debtor_level.replace([np.inf, -np.inf], '')
+debtor_level = debtor_level.replace([np.inf, -np.inf], np.nan)
 debtor_level = debtor_level.fillna('')
 data_to_upload = [debtor_level.columns.values.tolist()] + debtor_level.values.tolist()
 # data_to_upload
@@ -162,7 +162,7 @@ sheet_by_name.append_rows(data_to_upload)
 generate_segment_level_data_day, generate_segment_level_data_week, generate_segment_level_data_month, generate_segment_level_data_current=generate_segment_level_data()
 sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_daily')
 # debtor_level=create_debtor_level_view(exhaust_debtors)
-generate_segment_level_data_day = generate_segment_level_data_day.replace([np.inf, -np.inf], '')
+generate_segment_level_data_day = generate_segment_level_data_day.replace([np.inf, -np.inf], np.nan)
 generate_segment_level_data_day = generate_segment_level_data_day.fillna('')
 data_to_upload = [generate_segment_level_data_day.columns.values.tolist()] + generate_segment_level_data_day.values.tolist()
 # data_to_upload
@@ -171,7 +171,7 @@ sheet_by_name.append_rows(data_to_upload)
 
 sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_weekly')
 # debtor_level=create_debtor_level_view(exhaust_debtors)
-generate_segment_level_data_week = generate_segment_level_data_week.replace([np.inf, -np.inf], '')
+generate_segment_level_data_week = generate_segment_level_data_week.replace([np.inf, -np.inf], np.nan)
 generate_segment_level_data_week = generate_segment_level_data_week.fillna('')
 data_to_upload = [generate_segment_level_data_week.columns.values.tolist()] + generate_segment_level_data_week.values.tolist()
 # data_to_upload
@@ -180,7 +180,7 @@ sheet_by_name.append_rows(data_to_upload)
 
 sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_monthly')
 # debtor_level=create_debtor_level_view(exhaust_debtors)
-generate_segment_level_data_month = generate_segment_level_data_month.replace([np.inf, -np.inf], '')
+generate_segment_level_data_month = generate_segment_level_data_month.replace([np.inf, -np.inf], np.nan)
 generate_segment_level_data_month = generate_segment_level_data_month.fillna('')
 data_to_upload = [generate_segment_level_data_month.columns.values.tolist()] + generate_segment_level_data_month.values.tolist()
 # data_to_upload
@@ -189,7 +189,7 @@ sheet_by_name.append_rows(data_to_upload)
 
 sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_week_start_to_date')
 # debtor_level=create_debtor_level_view(exhaust_debtors)
-generate_segment_level_data_current = generate_segment_level_data_current.replace([np.inf, -np.inf], '')
+generate_segment_level_data_current = generate_segment_level_data_current.replace([np.inf, -np.inf], np.nan)
 generate_segment_level_data_current = generate_segment_level_data_current.fillna('')
 data_to_upload = [generate_segment_level_data_current.columns.values.tolist()] + generate_segment_level_data_current.values.tolist()
 # data_to_upload
