@@ -134,7 +134,7 @@ exhaust_debtors=pd.DataFrame(x)
 sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='debtor_level')
 debtor_level=create_debtor_level_view(exhaust_debtors)
 debtor_level = debtor_level.replace([np.inf, -np.inf], np.nan)
-debtor_level = debtor_level.fillna(None)
+debtor_level = debtor_level.fillna(np.nan)
 data_to_upload = [debtor_level.columns.values.tolist()] + debtor_level.values.tolist()
 # data_to_upload
 sheet_by_name.clear()
