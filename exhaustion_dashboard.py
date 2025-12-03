@@ -188,6 +188,18 @@ def extract_debtor_id_from_name_or_dot(typee, value):
             return ''
     else:
         return None
+def extract_debtor_id_from_name_or_dot_2(typee, value):
+    sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_monthly')
+    x=sheet_by_name.get_all_records()
+    segment_level_data=pd.DataFrame(x)
+    if typee=='name':
+        debtor_id=segment_level_data[segment_level_data['name']==value]['id'].unique()[0]
+        return debtor_id
+    elif typee=='dot':
+        debtor_id=segment_level_data[segment_level_data['dot']==value]['id'].unique()[0]
+        return debtor_id
+    else:
+        return None
 
 def connect_to_gsheet(creds_json,spreadsheet_name,sheet_name):
     scope = ["https://spreadsheets.google.com/feeds", 'https://www.googleapis.com/auth/spreadsheets',
@@ -286,10 +298,10 @@ with tab2:
 
         if name!='':
             # debtor_id=debtor_limit[debtor_limit['name']==name]['id'].iloc[0]
-            debtor_id=extract_debtor_id_from_name_or_dot('name', name)
+            debtor_id=extract_debtor_id_from_name_or_dot_2('name', name)
         elif dot!='':
             # debtor_id=debtor_limit[debtor_limit['dot']==dot]['id'].iloc[0]
-            debtor_id=extract_debtor_id_from_name_or_dot('dot', dot)
+            debtor_id=extract_debtor_id_from_name_or_dot_2('dot', dot)
         elif debtor_id_!='':
             debtor_id=debtor_id_
         else:
@@ -353,10 +365,10 @@ with tab3:
 
     if name!='':
         # debtor_id=debtor_limit[debtor_limit['name']==name]['id'].iloc[0]
-        debtor_id=extract_debtor_id_from_name_or_dot('name', name)
+        debtor_id=extract_debtor_id_from_name_or_dot_2('name', name)
     elif dot!='':
         # debtor_id=debtor_limit[debtor_limit['dot']==dot]['id'].iloc[0]
-        debtor_id=extract_debtor_id_from_name_or_dot('dot', dot)
+        debtor_id=extract_debtor_id_from_name_or_dot_2('dot', dot)
     elif debtor_id_!='':
         debtor_id=debtor_id_
     else:
