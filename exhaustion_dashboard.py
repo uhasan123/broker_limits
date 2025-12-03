@@ -144,22 +144,23 @@ def generate_data_for_payment_trend(debtor_id):
     invoice_df=pd.DataFrame(results, columns=col_name)
     invoice_df['approved_accounts_receivable_amount']=invoice_df['approved_accounts_receivable_amount']/100
     
-    query = "select * from debtors d where id=%s"
-    cur = conn.cursor()
-    cur.execute(query, (debtor_id,))
-    results=cur.fetchall()
-    col_name=[i[0] for i in cur.description]
-    debtors_df=pd.DataFrame(results, columns=col_name)
-    debtors_df['debtor_limit']=debtors_df['debtor_limit']/100
-    debtors_df['approved_total']=debtors_df['approved_total']/100
+    # query = "select * from debtors d where id=%s"
+    # cur = conn.cursor()
+    # cur.execute(query, (debtor_id,))
+    # results=cur.fetchall()
+    # col_name=[i[0] for i in cur.description]
+    # debtors_df=pd.DataFrame(results, columns=col_name)
+    # debtors_df['debtor_limit']=debtors_df['debtor_limit']/100
+    # debtors_df['approved_total']=debtors_df['approved_total']/100
     
-    query = "select * from brokers b where debtor_id=%s"
-    cur = conn.cursor()
-    cur.execute(query, (debtor_id,))
-    results=cur.fetchall()
-    col_name=[i[0] for i in cur.description]
-    brokers_df=pd.DataFrame(results, columns=col_name)
-    return invoice_df, debtors_df, brokers_df
+    # query = "select * from brokers b where debtor_id=%s"
+    # cur = conn.cursor()
+    # cur.execute(query, (debtor_id,))
+    # results=cur.fetchall()
+    # col_name=[i[0] for i in cur.description]
+    # brokers_df=pd.DataFrame(results, columns=col_name)
+    return invoice_df
+    # , debtors_df, brokers_df
 
 def extract_debtor_id_from_name_or_dot(typee, value):
     obj=broker_report()
@@ -375,7 +376,7 @@ with tab3:
         debtor_id=''
 
     # if debtor_id !='':
-    #     invoice_df, debtors_df, brokers_df=generate_data_for_payment_trend(debtor_id)
+    #     invoice_df=generate_data_for_payment_trend(debtor_id)
 
     st.markdown(f"<h1 style='font-size:28px; color:green;'>Broker Profile</h1>", unsafe_allow_html=True)
 
@@ -390,7 +391,7 @@ with tab3:
         st.session_state.tab3_metrics=True
 
     if st.session_state.tab3_metrics==True:
-        # invoice_df, debtors_df, brokers_df=generate_data_for_payment_trend(debtor_id)
+        invoice_df, debtors_df, brokers_df=generate_data_for_payment_trend(debtor_id)
         if debtor_id !='':
             # invoice_df, debtors_df, brokers_df=generate_data_for_payment_trend(debtor_id)
             # date_today=date.today()
@@ -411,7 +412,7 @@ with tab3:
             else:
                 segment_level_data=None
             broker_level_df=segment_level_data[segment_level_data['id']==debtor_id]
-            pivot_table, df_t, pivot_table_client_conc=broker_report.generate_report(broker_level_df, broker_profile_report=True, cohort=value,payment_trend_count=5, payment_trend_step='default', debtors_df=None, brokers_df=None, invoice_df=None)
+            pivot_table, df_t, pivot_table_client_conc=broker_report.generate_report(broker_level_df, broker_profile_report=True, cohort=value,payment_trend_count=5, payment_trend_step='default', debtors_df=None, brokers_df=None, invoice_df=invoice_df)
             st.write('Debtors Info')
             st.write(df_t)
             #############
