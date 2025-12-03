@@ -9,7 +9,7 @@ SELECT generate_series(current_date-(select iso_weekday from weekday),current_da
 avg_debtor_aeging as (
 select debtor_id, avg(avg_ageing) as avg_ageing
 from
-(select *, current_date-approved_date as avg_ageing from invoices where paid_date is null and approved_date is not null) ag
+(select *, extract(days from current_date-approved_date) as avg_ageing from invoices where paid_date is null and approved_date is not null) ag
 group by debtor_id
 )
 ,generate_segment_level_data as (
