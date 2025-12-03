@@ -166,12 +166,7 @@ generate_segment_level_data_day = generate_segment_level_data_day.replace([np.in
 generate_segment_level_data_day = generate_segment_level_data_day.fillna('')
 generate_segment_level_data_day['snapshot_date']=generate_segment_level_data_day['snapshot_date'].astype(str)
 generate_segment_level_data_day["longevity_in_days"] = generate_segment_level_data_day["longevity_in_days"].dt.days
-generate_segment_level_data_day = generate_segment_level_data_day.where(pd.notnull(generate_segment_level_data_day), None)
 data_to_upload = [generate_segment_level_data_day.columns.values.tolist()] + generate_segment_level_data_day.values.tolist()
-for col in generate_segment_level_data_day.columns:
-    if generate_segment_level_data_day[col].dtype.kind in 'biufc':  # numeric columns
-        if generate_segment_level_data_day[col].isnull().any() or np.isinf(generate_segment_level_data_day[col]).any():
-            print(f"Numeric column with invalid JSON values: {col}")
 # data_to_upload
 sheet_by_name.clear()
 sheet_by_name.append_rows(data_to_upload)
