@@ -110,6 +110,22 @@ def create_debtor_level_view(debtor_limit):
 
     return debtor_level
 
+def generate_segment_level_data():
+    obj=broker_report()
+    conn=obj.make_db_connection()
+    conn.autocommit=True
+    with open('generate_segment_level_data_day.sql', 'r') as file:
+        query=file.read()
+    generate_segment_level_data_day=pd.read_sql_query(query, conn)
+    with open('generate_segment_level_data_week.sql', 'r') as file:
+        query1=file.read()
+    generate_segment_level_data_week=pd.read_sql_query(query1, conn)
+    with open('generate_segment_level_data_month.sql', 'r') as file:
+        query2=file.read()
+    generate_segment_level_data_month=pd.read_sql_query(query2, conn)
+    return generate_segment_level_data_day, generate_segment_level_data_week, generate_segment_level_data_month
+
+
 # def job():
 private_key_json=os.getenv('private_key_json')
 
@@ -136,6 +152,34 @@ debtor_level=create_debtor_level_view(exhaust_debtors)
 debtor_level = debtor_level.replace([np.inf, -np.inf], np.nan)
 debtor_level = debtor_level.fillna(np.nan)
 data_to_upload = [debtor_level.columns.values.tolist()] + debtor_level.values.tolist()
+# data_to_upload
+sheet_by_name.clear()
+sheet_by_name.append_rows(data_to_upload)
+
+generate_segment_level_data_day, generate_segment_level_data_week, generate_segment_level_data_month=generate_segment_level_data()
+sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_daily')
+# debtor_level=create_debtor_level_view(exhaust_debtors)
+generate_segment_level_data_day = generate_segment_level_data_day.replace([np.inf, -np.inf], np.nan)
+generate_segment_level_data_day = generate_segment_level_data_day.fillna(np.nan)
+data_to_upload = [generate_segment_level_data_day.columns.values.tolist()] + generate_segment_level_data_day.values.tolist()
+# data_to_upload
+sheet_by_name.clear()
+sheet_by_name.append_rows(data_to_upload)
+
+sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_weekly')
+# debtor_level=create_debtor_level_view(exhaust_debtors)
+generate_segment_level_data_week = generate_segment_level_data_week.replace([np.inf, -np.inf], np.nan)
+generate_segment_level_data_week = generate_segment_level_data_week.fillna(np.nan)
+data_to_upload = [generate_segment_level_data_week.columns.values.tolist()] + generate_segment_level_data_week.values.tolist()
+# data_to_upload
+sheet_by_name.clear()
+sheet_by_name.append_rows(data_to_upload)
+
+sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_monthly')
+# debtor_level=create_debtor_level_view(exhaust_debtors)
+generate_segment_level_data_month = generate_segment_level_data_month.replace([np.inf, -np.inf], np.nan)
+generate_segment_level_data_month = generate_segment_level_data_month.fillna(np.nan)
+data_to_upload = [generate_segment_level_data_month.columns.values.tolist()] + generate_segment_level_data_month.values.tolist()
 # data_to_upload
 sheet_by_name.clear()
 sheet_by_name.append_rows(data_to_upload)
