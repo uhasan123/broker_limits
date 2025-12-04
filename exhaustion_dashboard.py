@@ -498,7 +498,7 @@ with tab3:
     if st.button("Submit", key='submit_tab3_dtp'):
         st.session_state.tab3_dtp=True
 
-    if st.session_state.tab3_trend==True:
+    if st.session_state.tab3_dtp==True:
         if debtor_id!='':
             if period3=='weekly':
                 sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_weekly')
