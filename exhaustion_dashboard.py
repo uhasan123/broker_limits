@@ -492,8 +492,8 @@ with tab3:
     st.markdown(f"<h1 style='font-size:28px; color:green;'>DTP Trend</h1>", unsafe_allow_html=True)
 
     cols3=st.columns([1,1,2])
-    period3=cols3[0].selectbox("Period: ", ('monthly', 'weekly', 'daily'), key='payment_trend_step')    
-    value3=int(cols3[1].number_input("Value: ", key="payment_trend_count"))
+    period3=cols3[0].selectbox("Period: ", ('monthly', 'weekly', 'daily'), key='dtp_step')    
+    value3=int(cols3[1].number_input("Value: ", key="dtp_count"))
 
     if st.button("Submit", key='submit_tab3_dtp'):
         st.session_state.tab3_dtp=True
