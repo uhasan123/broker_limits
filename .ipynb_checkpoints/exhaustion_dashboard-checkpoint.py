@@ -493,7 +493,7 @@ with tab3:
 
     cols3=st.columns([1,1,2])
     period3=cols3[0].selectbox("Period: ", ('monthly', 'weekly', 'daily'), key='payment_trend_step')    
-    value3=int(cols131].number_input("Value: ", key="payment_trend_count"))
+    value3=int(cols3[1].number_input("Value: ", key="payment_trend_count"))
 
     if st.button("Submit", key='submit_tab3_dtp'):
         st.session_state.tab3_dtp=True
