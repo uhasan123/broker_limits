@@ -30,7 +30,7 @@ left join
 (select debtor_id, dot from brokers) b 
 on a.id=b.debtor_id'''
     exhaust_debtors=pd.read_sql_query(query, conn)
-    return exhaust_debtor
+    return exhaust_debtors
 
 def sum_until_zero(g):
     zero_idx = g.index[g['is_exhausted'] == 0]
