@@ -438,9 +438,9 @@ with tab3:
 
     st.markdown(f"<h1 style='font-size:28px; color:green;'>Broker Payment Trend</h1>", unsafe_allow_html=True)
 
-    cols1=st.columns([1,1,2])
-    period=cols1[0].selectbox("Period: ", ('monthly', 'weekly', 'daily'), key='payment_trend_step')    
-    value=int(cols1[1].number_input("Value: ", key="payment_trend_count"))
+    cols2=st.columns([1,1,2])
+    period2=cols2[0].selectbox("Period: ", ('monthly', 'weekly', 'daily'), key='payment_trend_step')    
+    value2=int(cols2[1].number_input("Value: ", key="payment_trend_count"))
 
         # cohort=ast.literal_eval(cohort)
     if st.button("Submit", key='submit_tab3_trend'):
@@ -456,22 +456,22 @@ with tab3:
             # end_date=date_today
             
             # broker_level=broker_report.generate_segment_level_data(start_date, end_date, debtors_df, brokers_df, invoice_df, step=period)
-            if period=='weekly':
+            if period2=='weekly':
                 sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_weekly')
                 x=sheet_by_name.get_all_records()
                 segment_level_data=pd.DataFrame(x)
-            elif period=='monthly':
+            elif period2=='monthly':
                 sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_monthly')
                 x=sheet_by_name.get_all_records()
                 segment_level_data=pd.DataFrame(x)
-            elif period=='daily':
+            elif period2=='daily':
                 sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_daily')
                 x=sheet_by_name.get_all_records()
                 segment_level_data=pd.DataFrame(x)
             else:
                 segment_level_data=None
             broker_level=segment_level_data[segment_level_data['id']==debtor_id]
-            if period!='daily':
+            if period2!='daily':
                 sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_week_start_to_date')
                 x=sheet_by_name.get_all_records()
                 broker_level_current=pd.DataFrame(x)
@@ -484,9 +484,63 @@ with tab3:
             # broker_level_df.head()
             # pivot_table, df_t, pivot_table_client_conc=broker_report.generate_report(broker_level_df, broker_profile_report=generate_broker_report, cohort=cohort,payment_trend_count=payment_trend_count, payment_trend_step=payment_trend_step, debtors_df=debtors_df, brokers_df=brokers_df, invoice_df=invoice_df)
             # df_t=broker_report.payment_trend(broker_level_df, count=value, step='default', debtors_df=debtors_df, brokers_df=brokers_df, invoice_df=invoice_df)
-            df_t=broker_level_df[['snapshot_date','invoice_approved', 'invoice_approved_dollars','open_invoices_in_point', 'invoice_paid', 'invoice_paid_dollars']][-value:].set_index('snapshot_date').T
+            df_t=broker_level_df[['snapshot_date','invoice_approved', 'invoice_approved_dollars','open_invoices_in_point', 'invoice_paid', 'invoice_paid_dollars']][-value2:].set_index('snapshot_date').T
             fig=broker_report.payment_trend_graph(df_t.T.reset_index())
             st.write(df_t)
+            st.plotly_chart(fig, use_container_width=True)
+
+    st.markdown(f"<h1 style='font-size:28px; color:green;'>DTP Trend</h1>", unsafe_allow_html=True)
+
+    cols3=st.columns([1,1,2])
+    period3=cols3[0].selectbox("Period: ", ('monthly', 'weekly', 'daily'), key='payment_trend_step')    
+    value3=int(cols131].number_input("Value: ", key="payment_trend_count"))
+
+    if st.button("Submit", key='submit_tab3_dtp'):
+        st.session_state.tab3_dtp=True
+
+    if st.session_state.tab3_trend==True:
+        if debtor_id!='':
+            if period3=='weekly':
+                sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_weekly')
+                x=sheet_by_name.get_all_records()
+                segment_level_data=pd.DataFrame(x)
+            elif period3=='monthly':
+                sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_monthly')
+                x=sheet_by_name.get_all_records()
+                segment_level_data=pd.DataFrame(x)
+            elif period3=='daily':
+                sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_daily')
+                x=sheet_by_name.get_all_records()
+                segment_level_data=pd.DataFrame(x)
+            else:
+                segment_level_data=None
+            broker_level_df=segment_level_data[segment_level_data['id']==debtor_id]
+            # if period3!='daily':
+            #     sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_week_start_to_date')
+            #     x=sheet_by_name.get_all_records()
+            #     broker_level_current=pd.DataFrame(x)
+            #     broker_level_current=broker_level_current[broker_level_current['id']==debtor_id]
+            # else:
+            #     broker_level_current=None
+
+            # broker_level_df=pd.concat([broker_level, broker_level_current], ignore_index=True)
+            df_t=broker_level_df[['snapshot_date','invoice_approved', 'invoice_approved_dollars','open_invoices_in_point', 'invoice_paid', 'invoice_paid_dollars']][-value3:].set_index('snapshot_date').T
+
+            fig = go.Figure([
+            go.Scatter(x=broker_level_df['snapshot_date'], y=broker_level_df['dtp'], mode='lines+markers', name='Days to Pay')
+            # go.Scatter(x=df['snapshot_date'], y=df['invoice_approved_dollars'], mode='lines+markers', name='Invoices Approved (dollars)', yaxis='y1'),
+            # go.Scatter(x=df['snapshot_date'], y=df['invoice_paid_dollars'], mode='lines+markers', name='Invoices Paid (dollars)', yaxis='y1')
+        ])
+        
+            fig.update_layout(
+                title="Broker DTP Trend",
+                xaxis_title="Date",
+                yaxis_title="Avg DTP",
+                template="plotly_white",
+                legend=dict(x=1.1, y=1.1),
+                height=500
+            )
+            # st.write(df_t)
             st.plotly_chart(fig, use_container_width=True)
             
     
