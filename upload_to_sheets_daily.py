@@ -21,47 +21,47 @@ def connect_to_gsheet(creds_json,spreadsheet_name,sheet_name):
     spreadsheet = client.open(spreadsheet_name)  # Access the first sheet
     return spreadsheet.worksheet(sheet_name)
 
-def calc_open_invoice_volume():
-    obj=broker_report()
-    conn=obj.make_db_connection()
-    conn.autocommit=True
-    with open('calc_open_invoice_volume.sql', 'r') as file:
-        query=file.read()
+# def calc_open_invoice_volume():
+#     obj=broker_report()
+#     conn=obj.make_db_connection()
+#     conn.autocommit=True
+#     with open('calc_open_invoice_volume.sql', 'r') as file:
+#         query=file.read()
 
-    open_invoice_df=pd.read_sql_query(query, conn)
-    open_invoice_df=open_invoice_df[['id', 'snapshot_date', 'approved_amount']]
-    # conn.close()
-    # tunnel.stop()
-    return open_invoice_df
+#     open_invoice_df=pd.read_sql_query(query, conn)
+#     open_invoice_df=open_invoice_df[['id', 'snapshot_date', 'approved_amount']]
+#     # conn.close()
+#     # tunnel.stop()
+#     return open_invoice_df
 
-def calc_debtor_limit():
-    obj=broker_report()
-    conn=obj.make_db_connection()
-    conn.autocommit=True
-    with open('calc_debtor_limit.sql', 'r') as file:
-        query=file.read()
+# def calc_debtor_limit():
+#     obj=broker_report()
+#     conn=obj.make_db_connection()
+#     conn.autocommit=True
+#     with open('calc_debtor_limit.sql', 'r') as file:
+#         query=file.read()
     
-    debtor_limit_df=pd.read_sql_query(query, conn)
-    debtor_limit_df = debtor_limit_df.drop_duplicates(subset=['original_id', 'snapshot_date'], keep='first')
-    debtor_limit_df['debtor_limit']=debtor_limit_df['debtor_limit']/100
-    debtor_limit_df=debtor_limit_df[['original_id', 'snapshot_date', 'debtor_limit']]
-    # conn.close()
-    # tunnel.stop()
-    return debtor_limit_df
+#     debtor_limit_df=pd.read_sql_query(query, conn)
+#     debtor_limit_df = debtor_limit_df.drop_duplicates(subset=['original_id', 'snapshot_date'], keep='first')
+#     debtor_limit_df['debtor_limit']=debtor_limit_df['debtor_limit']/100
+#     debtor_limit_df=debtor_limit_df[['original_id', 'snapshot_date', 'debtor_limit']]
+#     # conn.close()
+#     # tunnel.stop()
+#     return debtor_limit_df
 
-def calc_broker_limit_breach():
-    obj=broker_report()
-    conn=obj.make_db_connection()
-    conn.autocommit=True
-    with open('broker_limit_breach_query.sql', 'r') as file:
-        query=file.read()
+# def calc_broker_limit_breach():
+#     obj=broker_report()
+#     conn=obj.make_db_connection()
+#     conn.autocommit=True
+#     with open('broker_limit_breach_query.sql', 'r') as file:
+#         query=file.read()
 
-    broker_limit_breach_df=pd.read_sql_query(query, conn)
-    broker_limit_breach_df['created_at'] = pd.to_datetime(broker_limit_breach_df['created_at'], errors='coerce')
-    broker_limit_breach_df['created_date']=broker_limit_breach_df['created_at'].dt.date
-    # conn.close()
-    # tunnel.stop()
-    return broker_limit_breach_df
+#     broker_limit_breach_df=pd.read_sql_query(query, conn)
+#     broker_limit_breach_df['created_at'] = pd.to_datetime(broker_limit_breach_df['created_at'], errors='coerce')
+#     broker_limit_breach_df['created_date']=broker_limit_breach_df['created_at'].dt.date
+#     # conn.close()
+#     # tunnel.stop()
+#     return broker_limit_breach_df
 
 # def sum_until_zero(g):
 #     zero_idx = g.index[g['is_exhausted'] == 0]
