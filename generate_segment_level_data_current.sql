@@ -24,14 +24,14 @@ b.mc,
 b.dot,
 current_date-d.created_at as longevity_in_days,
 --sum(i.approved_accounts_receivable_amount/100.0) as approved_amount
-count(distinct case when (i.approved_date>snapshot_date-30 and i.approved_date<=snapshot_date) and i.approved_date is not null then i.id else null end) as invoice_approved,
-sum(case when (i.approved_date>snapshot_date-30 and i.approved_date<=snapshot_date) and i.approved_date is not null then i.approved_accounts_receivable_amount/100.0 else null end) as invoice_approved_dollars,
-count(distinct case when (i.paid_date>snapshot_date-30 and i.paid_date<=snapshot_date) and i.paid_date is not null then i.id else null end) as invoice_paid,
-sum(case when (i.paid_date>snapshot_date-30 and i.paid_date<=snapshot_date) and i.paid_date is not null then i.approved_accounts_receivable_amount/100.0 else null end) as invoice_paid_dollars,
-avg(case when (i.paid_date>snapshot_date-30 and i.paid_date<=snapshot_date) and i.paid_date is not null then i.dtp else null end) as dtp,
-count(distinct case when (i.approved_date>snapshot_date-30 and i.approved_date<=snapshot_date) and i.paid_date is null then i.id else null end) as open_invoices_till_date,
+count(distinct case when (i.approved_date>snapshot_date-(select iso_weekday from weekday) and i.approved_date<=snapshot_date) and i.approved_date is not null then i.id else null end) as invoice_approved,
+sum(case when (i.approved_date>snapshot_date-(select iso_weekday from weekday) and i.approved_date<=snapshot_date) and i.approved_date is not null then i.approved_accounts_receivable_amount/100.0 else null end) as invoice_approved_dollars,
+count(distinct case when (i.paid_date>snapshot_date-(select iso_weekday from weekday) and i.paid_date<=snapshot_date) and i.paid_date is not null then i.id else null end) as invoice_paid,
+sum(case when (i.paid_date>snapshot_date-(select iso_weekday from weekday) and i.paid_date<=snapshot_date) and i.paid_date is not null then i.approved_accounts_receivable_amount/100.0 else null end) as invoice_paid_dollars,
+avg(case when (i.paid_date>snapshot_date-(select iso_weekday from weekday) and i.paid_date<=snapshot_date) and i.paid_date is not null then i.dtp else null end) as dtp,
+count(distinct case when (i.approved_date>snapshot_date-(select iso_weekday from weekday) and i.approved_date<=snapshot_date) and i.paid_date is null then i.id else null end) as open_invoices_till_date,
 sum(case when i.approved_date<snapshot_date and (i.paid_date>=snapshot_date or i.paid_date is null) then i.approved_accounts_receivable_amount/100 else null end) as open_invoices_in_point,
-count(distinct case when (i.approved_date>snapshot_date-30 and i.approved_date<=snapshot_date) and i.approved_date is not null then i.client_id else null end) as no_of_clients
+count(distinct case when (i.approved_date>snapshot_date-(select iso_weekday from weekday) and i.approved_date<=snapshot_date) and i.approved_date is not null then i.client_id else null end) as no_of_clients
 from currentt m
 cross join debtors d
 left join (select *, extract(days from paid_date-approved_date) as dtp from invoices) i
