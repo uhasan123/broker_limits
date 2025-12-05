@@ -58,4 +58,4 @@ from
 left join
 (select * from avg_debtor_aeging) b
 on a.id=b.debtor_id
-where invoice_approved<>0 and invoice_paid<>0
+where invoice_approved<>0 or invoice_paid<>0
