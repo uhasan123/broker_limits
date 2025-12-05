@@ -4,7 +4,7 @@ SELECT EXTRACT(ISODOW FROM current_date)::int AS iso_weekday
 )
 ,currentt as
 (
-SELECT generate_series(current_date-(select iso_weekday from weekday),current_date,'1 day'::interval)::date AS snapshot_date
+SELECT current_date::date AS snapshot_date
 ),
 avg_debtor_aeging as (
 select debtor_id, avg(avg_ageing) as avg_ageing
