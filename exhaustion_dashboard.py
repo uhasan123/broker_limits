@@ -415,6 +415,11 @@ with tab3:
                 segment_level_data=None
             segment_level_data=segment_level_data.replace('', np.nan)
             broker_level_df=segment_level_data[segment_level_data['id']==debtor_id]
+            # if period = condition:
+            #   generate series: start date will be segment_level_data['snapshot_date'].min and end date will be segment_level_data['snapshot_date'].max
+            #   generate series left join broker_level_df on snapshot date
+            #   dtp will be np.nan and else will be 0
+            #   opne invoice will be same as before if all are 0,0,0,...
             pivot_table, df_t, pivot_table_client_conc=broker_report.generate_report(broker_level_df, broker_profile_report=True, cohort=value,payment_trend_count=5, payment_trend_step='default', debtors_df=None, brokers_df=None, invoice_df=invoice_df)
             st.write('Debtors Info')
             st.write(df_t)
@@ -475,6 +480,7 @@ with tab3:
                 segment_level_data=None
             segment_level_data=segment_level_data.replace('', np.nan)
             broker_level=segment_level_data[segment_level_data['id']==debtor_id]
+            # generate series logic here
             if period2!='daily':
                 sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_week_start_to_date')
                 x=sheet_by_name.get_all_records()
