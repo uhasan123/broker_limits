@@ -2,6 +2,7 @@ import os
 # from dotenv import load_dotenv
 from sshtunnel import SSHTunnelForwarder
 import pandas as pd
+import numpy as np
 import psycopg2
 from datetime import date
 from datetime import datetime
@@ -307,7 +308,7 @@ class broker_report:
             dictt[f"approved_invoice_dollars_{metric}_l{rows}_{d}"]=broker_level_df_new['invoice_approved_dollars'].mean()
             dictt[f"paid_invoice_dollars_{metric}_l{rows}_{d}"]=broker_level_df_new['invoice_paid_dollars'].mean()
             if len(broker_level_df_new[broker_level_df_new['dtp'].isna()==False])==0:
-                dictt[f"dtp_{metric}_l{rows}_{d}"]='NA'
+                dictt[f"dtp_{metric}_l{rows}_{d}"]=np.nan
             else:
                 dictt[f"dtp_{metric}_l{rows}_{d}"]=broker_level_df_new[broker_level_df_new['dtp'].isna()==False]['dtp'].mean()
         
