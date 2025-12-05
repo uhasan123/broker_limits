@@ -248,6 +248,8 @@ if 'tab3_metrics' not in st.session_state:
     st.session_state.tab3_metrics=False
 if 'tab3_trend' not in st.session_state:
     st.session_state.tab3_trend=False
+if 'tab3_dtp' not in st.session_state:
+    st.session_state.tab3_dtp=False
 
 gcp_secrets = st.secrets["gcp_service_account"]
 json_str = json.dumps(dict(gcp_secrets))
