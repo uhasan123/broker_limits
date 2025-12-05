@@ -360,7 +360,7 @@ class broker_report:
             pivot_table_client_conc = df_y.pivot_table(index='metrics', columns='cohort', values='client_metric')
             pivot_table_client_conc=pivot_table_client_conc.sort_index(axis=1, level=[1, 0])
 
-        # print(df_)
+        print(df_)
         pivot_table = df_.pivot_table(index='metrics', columns='cohort', values=['mean', 'std_dev'])
         pivot_table=pivot_table.sort_index(axis=1, level=[1, 0])
         
