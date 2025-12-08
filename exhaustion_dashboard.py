@@ -415,6 +415,19 @@ with tab3:
                 segment_level_data=None
             segment_level_data=segment_level_data.replace('', np.nan)
             broker_level_df=segment_level_data[segment_level_data['id']==debtor_id]
+
+            # generate series logic here
+            date_df, days=generate_date_series(broker_level_df['snapshot_date'].min(), broker_level_df['snapshot_date'].max(), period)
+            broker_level_df=date_df.merge(broker_level_df, how='left', on='snapshot_date')
+            broker_level_df['invoice_approved'].fillna(0)
+            broker_level_df['invoice_approved_dollars'].fillna(0)
+            broker_level_df['invoice_paid'].fillna(0)
+            broker_level_df['invoice_paid_dollars'].fillna(0)
+            broker_level_df['dtp'].fillna(np.nan)
+            broker_level_df['open_invoice_shifted']=broker_level_df.sort_values(by='snapshot_date', ascending=True)['open_invoices_in_point'].shift(1)
+            while broker_level_df[broker_level_df['open_invoices_in_point'].isna()==True]:
+                broker_level_df['open_invoices_in_point'].fillna(broker_level_df['open_invoice_shifted'])
+                
             # if period = condition:
             #   generate series: start date will be segment_level_data['snapshot_date'].min and end date will be segment_level_data['snapshot_date'].max
             #   generate series left join broker_level_df on snapshot date
@@ -481,6 +494,17 @@ with tab3:
             segment_level_data=segment_level_data.replace('', np.nan)
             broker_level=segment_level_data[segment_level_data['id']==debtor_id]
             # generate series logic here
+            date_df, days=generate_date_series(broker_level_df['snapshot_date'].min(), broker_level_df['snapshot_date'].max(), period)
+            broker_level_df=date_df.merge(broker_level_df, how='left', on='snapshot_date')
+            broker_level_df['invoice_approved'].fillna(0)
+            broker_level_df['invoice_approved_dollars'].fillna(0)
+            broker_level_df['invoice_paid'].fillna(0)
+            broker_level_df['invoice_paid_dollars'].fillna(0)
+            broker_level_df['dtp'].fillna(np.nan)
+            broker_level_df['open_invoice_shifted']=broker_level_df.sort_values(by='snapshot_date', ascending=True)['open_invoices_in_point'].shift(1)
+            while broker_level_df[broker_level_df['open_invoices_in_point'].isna()==True]:
+                broker_level_df['open_invoices_in_point'].fillna(broker_level_df['open_invoice_shifted'])
+                
             if period2!='daily':
                 sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_week_start_to_date')
                 x=sheet_by_name.get_all_records()
@@ -526,6 +550,18 @@ with tab3:
                 segment_level_data=None
             segment_level_data=segment_level_data.replace('', np.nan)
             broker_level_df=segment_level_data[segment_level_data['id']==debtor_id]
+
+            # generate series logic here
+            date_df, days=generate_date_series(broker_level_df['snapshot_date'].min(), broker_level_df['snapshot_date'].max(), period)
+            broker_level_df=date_df.merge(broker_level_df, how='left', on='snapshot_date')
+            # broker_level_df['invoice_approved'].fillna(0)
+            # broker_level_df['invoice_approved_dollars'].fillna(0)
+            # broker_level_df['invoice_paid'].fillna(0)
+            # broker_level_df['invoice_paid_dollars'].fillna(0)
+            broker_level_df['dtp'].fillna(np.nan)
+            # broker_level_df['open_invoice_shifted']=broker_level_df.sort_values(by='snapshot_date', ascending=True)['open_invoices_in_point'].shift(1)
+            # while broker_level_df[broker_level_df['open_invoices_in_point'].isna()==True]:
+            #     broker_level_df['open_invoices_in_point'].fillna(broker_level_df['open_invoice_shifted'])
             # if period3!='daily':
             #     sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_week_start_to_date')
             #     x=sheet_by_name.get_all_records()
@@ -538,7 +574,7 @@ with tab3:
             df_t=broker_level_df[['snapshot_date','invoice_approved', 'invoice_approved_dollars','open_invoices_in_point', 'invoice_paid', 'invoice_paid_dollars']][-value3:].set_index('snapshot_date').T
 
             fig = go.Figure([
-            go.Scatter(x=broker_level_df['snapshot_date'], y=broker_level_df['dtp'], mode='lines+markers', name='Days to Pay')
+            go.Scatter(x=df_t['snapshot_date'], y=df_t['dtp'], mode='lines+markers', name='Days to Pay')
             # go.Scatter(x=df['snapshot_date'], y=df['invoice_approved_dollars'], mode='lines+markers', name='Invoices Approved (dollars)', yaxis='y1'),
             # go.Scatter(x=df['snapshot_date'], y=df['invoice_paid_dollars'], mode='lines+markers', name='Invoices Paid (dollars)', yaxis='y1')
         ])

@@ -2,12 +2,14 @@ import os
 # from dotenv import load_dotenv
 from sshtunnel import SSHTunnelForwarder
 import pandas as pd
+import numpy as np
 import psycopg2
 from datetime import date
 from datetime import datetime
 import statistics as stats
 import plotly.graph_objects as go
 import tempfile
+import streamlit as st
 
 class broker_report:
     def __init__(self):
@@ -306,7 +308,7 @@ class broker_report:
             dictt[f"approved_invoice_dollars_{metric}_l{rows}_{d}"]=broker_level_df_new['invoice_approved_dollars'].mean()
             dictt[f"paid_invoice_dollars_{metric}_l{rows}_{d}"]=broker_level_df_new['invoice_paid_dollars'].mean()
             if len(broker_level_df_new[broker_level_df_new['dtp'].isna()==False])==0:
-                dictt[f"dtp_{metric}_l{rows}_{d}"]='NA'
+                dictt[f"dtp_{metric}_l{rows}_{d}"]=np.nan
             else:
                 dictt[f"dtp_{metric}_l{rows}_{d}"]=broker_level_df_new[broker_level_df_new['dtp'].isna()==False]['dtp'].mean()
         
@@ -360,7 +362,7 @@ class broker_report:
             pivot_table_client_conc = df_y.pivot_table(index='metrics', columns='cohort', values='client_metric')
             pivot_table_client_conc=pivot_table_client_conc.sort_index(axis=1, level=[1, 0])
 
-        # print(df_)
+        # st.write(df_)
         pivot_table = df_.pivot_table(index='metrics', columns='cohort', values=['mean', 'std_dev'])
         pivot_table=pivot_table.sort_index(axis=1, level=[1, 0])
         
