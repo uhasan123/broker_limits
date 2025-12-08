@@ -143,6 +143,7 @@ conn.autocommit=True
 
 sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='exhausted_debtors')
 exhausted_df=get_exhausted_debtors()
+
 data_to_upload = [exhausted_df.columns.values.tolist()] + exhausted_df.values.tolist()
 # data_to_upload
 sheet_by_name.clear()
@@ -157,6 +158,7 @@ sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name
 debtor_level=create_debtor_level_view(exhausted_df)
 debtor_level = debtor_level.replace([np.inf, -np.inf], np.nan)
 debtor_level = debtor_level.fillna('')
+debtor_level=debtor_level.rename(columns={'approved_total':'open_invoice_volume'})
 data_to_upload = [debtor_level.columns.values.tolist()] + debtor_level.values.tolist()
 # data_to_upload
 sheet_by_name.clear()
