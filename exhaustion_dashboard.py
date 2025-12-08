@@ -241,7 +241,7 @@ st.title("Exhaustion Monitoring Dashboard")
 
 
 if 'tab1' not in st.session_state:
-    st.session_state.tab1=False
+    st.session_state.tab1=True
 if 'tab2' not in st.session_state:
     st.session_state.tab2=False
 if 'tab3_metrics' not in st.session_state:
