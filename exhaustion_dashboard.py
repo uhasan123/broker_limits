@@ -535,7 +535,8 @@ with tab3:
             #     broker_level_current=None
 
             # broker_level_df=pd.concat([broker_level, broker_level_current], ignore_index=True)
-            df_t=broker_level_df[['snapshot_date','invoice_approved', 'invoice_approved_dollars','open_invoices_in_point', 'invoice_paid', 'invoice_paid_dollars']][-value3:].set_index('snapshot_date').T
+            df_t=broker_level_df[['snapshot_date','invoice_approved', 'invoice_approved_dollars','open_invoices_in_point', 'invoice_paid', 'invoice_paid_dollars', 'dtp']][-value3:].set_index('snapshot_date').T
+            df_t=df_t.T.reset_index()
 
             fig = go.Figure([
             go.Scatter(x=df_t['snapshot_date'], y=df_t['dtp'], mode='lines+markers', name='Days to Pay')
