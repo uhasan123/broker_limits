@@ -284,7 +284,7 @@ with tab1:
         colss=st.columns([2,1,2])
         colss[0].dataframe(ageing_cohort_df)
         colss[1].dataframe(limit_cohort_df)
-        st.write(debtor_level.sort_values(by=['approved_total', 'debtor_limit'], ascending=False).reset_index().drop('index', axis=1))
+        st.write(debtor_level.sort_values(by=['open_invoice_volume', 'debtor_limit'], ascending=False).reset_index().drop('index', axis=1))
         # st.session_state.tab1=False
 
 with tab2:
