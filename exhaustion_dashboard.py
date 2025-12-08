@@ -538,7 +538,7 @@ with tab3:
             df_t=broker_level_df[['snapshot_date','invoice_approved', 'invoice_approved_dollars','open_invoices_in_point', 'invoice_paid', 'invoice_paid_dollars']][-value3:].set_index('snapshot_date').T
 
             fig = go.Figure([
-            go.Scatter(x=broker_level_df['snapshot_date'], y=broker_level_df['dtp'], mode='lines+markers', name='Days to Pay')
+            go.Scatter(x=df_t['snapshot_date'], y=df_t['dtp'], mode='lines+markers', name='Days to Pay')
             # go.Scatter(x=df['snapshot_date'], y=df['invoice_approved_dollars'], mode='lines+markers', name='Invoices Approved (dollars)', yaxis='y1'),
             # go.Scatter(x=df['snapshot_date'], y=df['invoice_paid_dollars'], mode='lines+markers', name='Invoices Paid (dollars)', yaxis='y1')
         ])
