@@ -116,6 +116,8 @@ def create_debtor_level_view(debtor_limit):
     debtor_level_view_2['perc_invoices_flagged_l30']=(debtor_level_view_2['invoice_flagged_l30'] / debtor_level_view_2['invoice_created_l30']) * 100
     debtor_level=debtor_level_view.merge(debtor_level_view_2, left_on='id', right_on='debtor_id', how='outer')
 
+    debtor_level=debtor_level.rename(columns={'approved_amount': 'open_invoice_volume'})
+
     # debtor_level['ageing_cohort']=debtor_level['ageing'].apply(lambda x: ageing_cohort(x))
     # ageing_cohort_df=debtor_level.groupby('ageing_cohort').agg(broker_count=('id', 'nunique')).reset_index()
 
