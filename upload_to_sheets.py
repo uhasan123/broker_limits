@@ -98,8 +98,8 @@ def create_debtor_level_view(debtor_limit):
     # debtor_limit=get_exhausted_debtors() # take from sheets
 
     debtor_level_view=debtor_ageing.merge(debtor_limit, on='id', how='outer')
-    debtor_level_view['utilization_rate']=debtor_level_view['approved_total'] / debtor_level_view['debtor_limit']
-    debtor_level_view['unnaturality']=debtor_level_view['approved_total']-debtor_level_view['debtor_limit']
+    # debtor_level_view['utilization_rate']=debtor_level_view['approved_total'] - debtor_level_view['debtor_limit']
+    debtor_level_view['limit_exceeded_by']=debtor_level_view['approved_total']-debtor_level_view['debtor_limit']
 
     grouped=broker_limit_breach_df.groupby('debtor_id')
     debtor_level_view_2=grouped.apply(lambda g: pd.Series({
