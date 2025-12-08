@@ -105,7 +105,7 @@ def create_debtor_level_view(debtor_level):
     
     ageing_cohort_df['ageing_cohort']=["brokers exhausted today", "brokers exhausted since the last 7 days", "brokers exhausted since the last 15 days", "brokers exhausted for more than 15 days"]
 
-    # debtor_level['ageing']=debtor_level['ageing'].astype(int)
+    debtor_level=debtor_level[debtor_level['ageing']!='']
     
     ltoday=debtor_level[debtor_level['ageing']==1]['id'].nunique()
     l7d=debtor_level[debtor_level['ageing']<=7]['id'].nunique()
