@@ -265,8 +265,8 @@ CREDENTIALS_FILE = creds_path
     
 tab1, tab2, tab3=st.tabs(['Exhausted Brokers', 'Debtor Limit and Open Invoice Comparison', 'Broker Profile and Payment Trend'])
 with tab1:
-    if st.button("Refresh", key='refresh_tab1'):
-        st.session_state.tab1=True
+    if (st.button("Refresh", key='refresh_tab1')) | (st.session_state.tab1==True):
+        # st.session_state.tab1=True
     if st.session_state.tab1==True:
         sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='exhausted_debtors')
         x=sheet_by_name.get_all_records()
