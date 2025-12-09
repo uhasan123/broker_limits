@@ -134,7 +134,6 @@ def calc_debtor_limit_l90():
     conn.autocommit=True
     with open('calc_debtor_limit_l90_overall.sql', 'r') as file:
         query=file.read()
-    query=query.format()
     
     debtor_limit_df_l90=pd.read_sql_query(query, conn)
     debtor_limit_df_l90['debtor_limit']=debtor_limit_df_l90['debtor_limit']/100
@@ -149,7 +148,6 @@ def calc_open_invoice_volume_l90():
     conn.autocommit=True
     with open('calc_open_invoice_volume_l90_overall.sql', 'r') as file:
         query=file.read()
-    query=query.format(debtor_id=debtor_id)
 
     open_invoice_df_l90=pd.read_sql_query(query, conn)
     open_invoice_df_l90=open_invoice_df_l90[['id', 'snapshot_date', 'approved_amount']]
