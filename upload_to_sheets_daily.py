@@ -243,6 +243,7 @@ debtor_limit_df_l90['snapshot_date']=debtor_limit_df_l90['snapshot_date'].astype
 # generate_segment_level_data_current["longevity_in_days"] = generate_segment_level_data_current["longevity_in_days"].dt.days
 data_to_upload = [debtor_limit_df_l90.columns.values.tolist()] + debtor_limit_df_l90.values.tolist()
 # data_to_upload
+print(debtor_limit_df_l90.shape())
 sheet_by_name.clear()
 sheet_by_name.append_rows(data_to_upload)
 
