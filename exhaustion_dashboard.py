@@ -314,7 +314,7 @@ with tab2:
             debtor_id=''
         # print(debtor_id)
         if debtor_id !='':
-            open_invoice_df_l90=calc_open_invoice_volume_l90(debtor_id)
+            # open_invoice_df_l90=calc_open_invoice_volume_l90(debtor_id)
             # debtor_limit_df_l90=calc_debtor_limit_l90(debtor_id)
             sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='debtor_limit_l90')
             x=sheet_by_name.get_all_records()
