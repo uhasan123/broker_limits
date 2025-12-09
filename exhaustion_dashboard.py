@@ -488,8 +488,11 @@ with tab3:
                 sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_week_start_to_date')
                 x=sheet_by_name.get_all_records()
                 broker_level_current=pd.DataFrame(x)
-                st.write(broker_level_current)
-                broker_level_current=broker_level_current[broker_level_current['id']==debtor_id]
+                # st.write(broker_level_current)
+                if len(df)!=0:
+                    broker_level_current=broker_level_current[broker_level_current['id']==debtor_id]
+                else:
+                    broker_level_current=None
                 # broker_level_current=broker_report.generate_segment_level_data(start_date=None, end_date=end_date, debtors_df=debtors_df, brokers_df=brokers_df, invoice_df=invoice_df, step='current')
             else:
                 broker_level_current=None
