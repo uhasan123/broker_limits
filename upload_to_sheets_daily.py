@@ -165,6 +165,7 @@ with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as tmp:
     creds_path = tmp.name
     
 SPREADSHEET_NAME = 'Raw Data'
+SPREADSHEET_NAME_2 = 'Tab 2 Data'
 # SHEET_NAME = 'Sheet1'
 CREDENTIALS_FILE = creds_path # './crendentials.json'
 
@@ -234,7 +235,7 @@ data_to_upload = [generate_segment_level_data_current.columns.values.tolist()] +
 sheet_by_name.clear()
 sheet_by_name.append_rows(data_to_upload)
 
-sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='debtor_limit_l90')
+sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME_2, sheet_name='debtor_limit_l90')
 # debtor_level=create_debtor_level_view(exhaust_debtors)
 debtor_limit_df_l90 = debtor_limit_df_l90.replace([np.inf, -np.inf], np.nan)
 debtor_limit_df_l90 = debtor_limit_df_l90.fillna('')
@@ -245,7 +246,7 @@ data_to_upload = [debtor_limit_df_l90.columns.values.tolist()] + debtor_limit_df
 sheet_by_name.clear()
 sheet_by_name.append_rows(data_to_upload)
 
-sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='open_invoice_l90')
+sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME_2, sheet_name='open_invoice_l90')
 # debtor_level=create_debtor_level_view(exhaust_debtors)
 open_invoice_df_l90 = open_invoice_df_l90.replace([np.inf, -np.inf], np.nan)
 open_invoice_df_l90 = open_invoice_df_l90.fillna('')
