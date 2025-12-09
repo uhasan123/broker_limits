@@ -417,6 +417,7 @@ with tab3:
             else:
                 segment_level_data=None
             segment_level_data=segment_level_data.replace('', np.nan)
+            st.write(debtor_id)
             broker_level_df=segment_level_data[segment_level_data['id']==debtor_id]
             # if period = condition:
             #   generate series: start date will be segment_level_data['snapshot_date'].min and end date will be segment_level_data['snapshot_date'].max
