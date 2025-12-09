@@ -41,35 +41,35 @@ on a.id=b.debtor_id'''
     exhaust_debtors=pd.read_sql_query(query, conn)
     return exhaust_debtors
 
-def calc_open_invoice_volume_l90(debtor_id):
-    obj=broker_report()
-    conn=obj.make_db_connection()
-    conn.autocommit=True
-    with open('calc_open_invoice_volume_l90.sql', 'r') as file:
-        query=file.read()
-    query=query.format(debtor_id=debtor_id)
+# def calc_open_invoice_volume_l90(debtor_id):
+#     obj=broker_report()
+#     conn=obj.make_db_connection()
+#     conn.autocommit=True
+#     with open('calc_open_invoice_volume_l90.sql', 'r') as file:
+#         query=file.read()
+#     query=query.format(debtor_id=debtor_id)
 
-    open_invoice_df_l90=pd.read_sql_query(query, conn)
-    open_invoice_df_l90=open_invoice_df_l90[['id', 'snapshot_date', 'approved_amount']]
-    # conn.close()
-    # tunnel.stop()
-    return open_invoice_df_l90
+#     open_invoice_df_l90=pd.read_sql_query(query, conn)
+#     open_invoice_df_l90=open_invoice_df_l90[['id', 'snapshot_date', 'approved_amount']]
+#     # conn.close()
+#     # tunnel.stop()
+#     return open_invoice_df_l90
 
-def calc_debtor_limit_l90(debtor_id):
-    obj=broker_report()
-    conn=obj.make_db_connection()
-    conn.autocommit=True
-    with open('calc_debtor_limit_l90.sql', 'r') as file:
-        query=file.read()
-    query=query.format(debtor_id=debtor_id)
+# def calc_debtor_limit_l90():
+#     obj=broker_report()
+#     conn=obj.make_db_connection()
+#     conn.autocommit=True
+#     with open('calc_debtor_limit_l90_overall.sql', 'r') as file:
+#         query=file.read()
+#     query=query.format()
     
-    debtor_limit_df_l90=pd.read_sql_query(query, conn)
-    debtor_limit_df_l90 = debtor_limit_df_l90.drop_duplicates(subset=['original_id', 'snapshot_date'], keep='first')
-    debtor_limit_df_l90['debtor_limit']=debtor_limit_df_l90['debtor_limit']/100
-    debtor_limit_df_l90=debtor_limit_df_l90[['original_id', 'snapshot_date', 'debtor_limit']]
-    # conn.close()
-    # tunnel.stop()
-    return debtor_limit_df_l90
+#     debtor_limit_df_l90=pd.read_sql_query(query, conn)
+#     debtor_limit_df_l90 = debtor_limit_df_l90.drop_duplicates(subset=['original_id', 'snapshot_date'], keep='first')
+#     debtor_limit_df_l90['debtor_limit']=debtor_limit_df_l90['debtor_limit']/100
+#     debtor_limit_df_l90=debtor_limit_df_l90[['original_id', 'snapshot_date', 'debtor_limit']]
+#     # conn.close()
+#     # tunnel.stop()
+#     return debtor_limit_df_l90
     
 def ageing_cohort(x):
     if x==1:
@@ -104,6 +104,9 @@ def create_debtor_level_view(debtor_level):
     ageing_cohort_df=pd.DataFrame()
     
     ageing_cohort_df['ageing_cohort']=["brokers exhausted today", "brokers exhausted since the last 7 days", "brokers exhausted since the last 15 days", "brokers exhausted for more than 15 days"]
+
+    debtor_level=debtor_level[debtor_level['ageing']!='']
+    
     ltoday=debtor_level[debtor_level['ageing']==1]['id'].nunique()
     l7d=debtor_level[debtor_level['ageing']<=7]['id'].nunique()
     l15d=debtor_level[debtor_level['ageing']<=15]['id'].nunique()
@@ -241,13 +244,15 @@ st.title("Exhaustion Monitoring Dashboard")
 
 
 if 'tab1' not in st.session_state:
-    st.session_state.tab1=False
+    st.session_state.tab1=True
 if 'tab2' not in st.session_state:
     st.session_state.tab2=False
 if 'tab3_metrics' not in st.session_state:
     st.session_state.tab3_metrics=False
 if 'tab3_trend' not in st.session_state:
     st.session_state.tab3_trend=False
+if 'tab3_dtp' not in st.session_state:
+    st.session_state.tab3_dtp=False
 
 gcp_secrets = st.secrets["gcp_service_account"]
 json_str = json.dumps(dict(gcp_secrets))
@@ -275,15 +280,15 @@ with tab1:
         debtor_level=pd.DataFrame(x)
         # exhaust_debtors=get_exhausted_debtors()
         ageing_cohort_df,limit_cohort_df=create_debtor_level_view(debtor_level)
-        debtor_level=debtor_level[['id','name','dot', 'debtor_limit', 'approved_total', 'utilization_rate', 'invoice_created_l30', 'invoice_flagged_l30', 'perc_invoices_flagged_l30']]
+        debtor_level=debtor_level[['id','name','dot', 'debtor_limit', 'open_invoice_volume', 'limit_exceeded_by', 'invoice_created_l30', 'invoice_flagged_l30', 'perc_invoices_flagged_l30']]
         brokers_exhausted=exhaust_debtors['id'].nunique()
         # st.write('Exhaustion counter', brokers_exhausted)
         st.markdown(f"<h1 style='font-size:28px; color:green;'>Exhaustion counter: {brokers_exhausted}</h1>", unsafe_allow_html=True)
         colss=st.columns([2,1,2])
         colss[0].dataframe(ageing_cohort_df)
         colss[1].dataframe(limit_cohort_df)
-        st.write(debtor_level.sort_values(by=['approved_total', 'debtor_limit'], ascending=False).reset_index().drop('index', axis=1))
-        st.session_state.tab1=False
+        st.write(debtor_level.sort_values(by=['open_invoice_volume', 'debtor_limit'], ascending=False).reset_index().drop('index', axis=1))
+        # st.session_state.tab1=False
 
 with tab2:
     cols=st.columns([2,2,1])
@@ -310,7 +315,16 @@ with tab2:
         # print(debtor_id)
         if debtor_id !='':
             open_invoice_df_l90=calc_open_invoice_volume_l90(debtor_id)
-            debtor_limit_df_l90=calc_debtor_limit_l90(debtor_id)
+            # debtor_limit_df_l90=calc_debtor_limit_l90(debtor_id)
+            sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='debtor_limit_l90')
+            x=sheet_by_name.get_all_records()
+            debtor_limit_df_l90=pd.DataFrame(x)
+            debtor_limit_df_l90=debtor_limit_df_l90[debtor_limit_df_l90['original_id']==debtor_id]
+
+            sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='open_invoice_l90')
+            x=sheet_by_name.get_all_records()
+            open_invoice_df_l90=pd.DataFrame(x)
+            open_invoice_df_l90=open_invoice_df_l90[open_invoice_df_l90['id']==debtor_id]
 
             # sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='exhausted_debtors')
             # x=sheet_by_name.get_all_records()
@@ -411,7 +425,13 @@ with tab3:
                 segment_level_data=pd.DataFrame(x)
             else:
                 segment_level_data=None
+            segment_level_data=segment_level_data.replace('', np.nan)
             broker_level_df=segment_level_data[segment_level_data['id']==debtor_id]
+            # if period = condition:
+            #   generate series: start date will be segment_level_data['snapshot_date'].min and end date will be segment_level_data['snapshot_date'].max
+            #   generate series left join broker_level_df on snapshot date
+            #   dtp will be np.nan and else will be 0
+            #   opne invoice will be same as before if all are 0,0,0,...
             pivot_table, df_t, pivot_table_client_conc=broker_report.generate_report(broker_level_df, broker_profile_report=True, cohort=value,payment_trend_count=5, payment_trend_step='default', debtors_df=None, brokers_df=None, invoice_df=invoice_df)
             st.write('Debtors Info')
             st.write(df_t)
@@ -470,12 +490,18 @@ with tab3:
                 segment_level_data=pd.DataFrame(x)
             else:
                 segment_level_data=None
+            segment_level_data=segment_level_data.replace('', np.nan)
             broker_level=segment_level_data[segment_level_data['id']==debtor_id]
+            # generate series logic here
             if period2!='daily':
                 sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_week_start_to_date')
                 x=sheet_by_name.get_all_records()
                 broker_level_current=pd.DataFrame(x)
-                broker_level_current=broker_level_current[broker_level_current['id']==debtor_id]
+                # st.write(broker_level_current)
+                if len(broker_level_current)!=0:
+                    broker_level_current=broker_level_current[broker_level_current['id']==debtor_id]
+                else:
+                    broker_level_current=None
                 # broker_level_current=broker_report.generate_segment_level_data(start_date=None, end_date=end_date, debtors_df=debtors_df, brokers_df=brokers_df, invoice_df=invoice_df, step='current')
             else:
                 broker_level_current=None
@@ -492,13 +518,13 @@ with tab3:
     st.markdown(f"<h1 style='font-size:28px; color:green;'>DTP Trend</h1>", unsafe_allow_html=True)
 
     cols3=st.columns([1,1,2])
-    period3=cols3[0].selectbox("Period: ", ('monthly', 'weekly', 'daily'), key='payment_trend_step')    
-    value3=int(cols3[1].number_input("Value: ", key="payment_trend_count"))
+    period3=cols3[0].selectbox("Period: ", ('monthly', 'weekly', 'daily'), key='dtp_step')    
+    value3=int(cols3[1].number_input("Value: ", key="dtp_count"))
 
     if st.button("Submit", key='submit_tab3_dtp'):
         st.session_state.tab3_dtp=True
 
-    if st.session_state.tab3_trend==True:
+    if st.session_state.tab3_dtp==True:
         if debtor_id!='':
             if period3=='weekly':
                 sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_weekly')
@@ -514,6 +540,7 @@ with tab3:
                 segment_level_data=pd.DataFrame(x)
             else:
                 segment_level_data=None
+            segment_level_data=segment_level_data.replace('', np.nan)
             broker_level_df=segment_level_data[segment_level_data['id']==debtor_id]
             # if period3!='daily':
             #     sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_week_start_to_date')
@@ -524,10 +551,11 @@ with tab3:
             #     broker_level_current=None
 
             # broker_level_df=pd.concat([broker_level, broker_level_current], ignore_index=True)
-            df_t=broker_level_df[['snapshot_date','invoice_approved', 'invoice_approved_dollars','open_invoices_in_point', 'invoice_paid', 'invoice_paid_dollars']][-value3:].set_index('snapshot_date').T
+            df_t=broker_level_df[['snapshot_date','invoice_approved', 'invoice_approved_dollars','open_invoices_in_point', 'invoice_paid', 'invoice_paid_dollars', 'dtp']][-value3:].set_index('snapshot_date').T
+            df_t=df_t.T.reset_index()
 
             fig = go.Figure([
-            go.Scatter(x=broker_level_df['snapshot_date'], y=broker_level_df['dtp'], mode='lines+markers', name='Days to Pay')
+            go.Scatter(x=df_t['snapshot_date'], y=df_t['dtp'], mode='lines+markers', name='Days to Pay')
             # go.Scatter(x=df['snapshot_date'], y=df['invoice_approved_dollars'], mode='lines+markers', name='Invoices Approved (dollars)', yaxis='y1'),
             # go.Scatter(x=df['snapshot_date'], y=df['invoice_paid_dollars'], mode='lines+markers', name='Invoices Paid (dollars)', yaxis='y1')
         ])

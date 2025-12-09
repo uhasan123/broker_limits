@@ -41,35 +41,35 @@ on a.id=b.debtor_id'''
     exhaust_debtors=pd.read_sql_query(query, conn)
     return exhaust_debtors
 
-def calc_open_invoice_volume_l90(debtor_id):
-    obj=broker_report()
-    conn=obj.make_db_connection()
-    conn.autocommit=True
-    with open('calc_open_invoice_volume_l90.sql', 'r') as file:
-        query=file.read()
-    query=query.format(debtor_id=debtor_id)
+# def calc_open_invoice_volume_l90(debtor_id):
+#     obj=broker_report()
+#     conn=obj.make_db_connection()
+#     conn.autocommit=True
+#     with open('calc_open_invoice_volume_l90.sql', 'r') as file:
+#         query=file.read()
+#     query=query.format(debtor_id=debtor_id)
 
-    open_invoice_df_l90=pd.read_sql_query(query, conn)
-    open_invoice_df_l90=open_invoice_df_l90[['id', 'snapshot_date', 'approved_amount']]
-    # conn.close()
-    # tunnel.stop()
-    return open_invoice_df_l90
+#     open_invoice_df_l90=pd.read_sql_query(query, conn)
+#     open_invoice_df_l90=open_invoice_df_l90[['id', 'snapshot_date', 'approved_amount']]
+#     # conn.close()
+#     # tunnel.stop()
+#     return open_invoice_df_l90
 
-def calc_debtor_limit_l90(debtor_id):
-    obj=broker_report()
-    conn=obj.make_db_connection()
-    conn.autocommit=True
-    with open('calc_debtor_limit_l90.sql', 'r') as file:
-        query=file.read()
-    query=query.format(debtor_id=debtor_id)
+# def calc_debtor_limit_l90():
+#     obj=broker_report()
+#     conn=obj.make_db_connection()
+#     conn.autocommit=True
+#     with open('calc_debtor_limit_l90_overall.sql', 'r') as file:
+#         query=file.read()
+#     query=query.format()
     
-    debtor_limit_df_l90=pd.read_sql_query(query, conn)
-    debtor_limit_df_l90 = debtor_limit_df_l90.drop_duplicates(subset=['original_id', 'snapshot_date'], keep='first')
-    debtor_limit_df_l90['debtor_limit']=debtor_limit_df_l90['debtor_limit']/100
-    debtor_limit_df_l90=debtor_limit_df_l90[['original_id', 'snapshot_date', 'debtor_limit']]
-    # conn.close()
-    # tunnel.stop()
-    return debtor_limit_df_l90
+#     debtor_limit_df_l90=pd.read_sql_query(query, conn)
+#     debtor_limit_df_l90 = debtor_limit_df_l90.drop_duplicates(subset=['original_id', 'snapshot_date'], keep='first')
+#     debtor_limit_df_l90['debtor_limit']=debtor_limit_df_l90['debtor_limit']/100
+#     debtor_limit_df_l90=debtor_limit_df_l90[['original_id', 'snapshot_date', 'debtor_limit']]
+#     # conn.close()
+#     # tunnel.stop()
+#     return debtor_limit_df_l90
     
 def ageing_cohort(x):
     if x==1:
@@ -315,7 +315,16 @@ with tab2:
         # print(debtor_id)
         if debtor_id !='':
             open_invoice_df_l90=calc_open_invoice_volume_l90(debtor_id)
-            debtor_limit_df_l90=calc_debtor_limit_l90(debtor_id)
+            # debtor_limit_df_l90=calc_debtor_limit_l90(debtor_id)
+            sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='debtor_limit_l90')
+            x=sheet_by_name.get_all_records()
+            debtor_limit_df_l90=pd.DataFrame(x)
+            debtor_limit_df_l90=debtor_limit_df_l90[debtor_limit_df_l90['original_id']==debtor_id]
+
+            sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='open_invoice_l90')
+            x=sheet_by_name.get_all_records()
+            open_invoice_df_l90=pd.DataFrame(x)
+            open_invoice_df_l90=open_invoice_df_l90[open_invoice_df_l90['id']==debtor_id]
 
             # sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='exhausted_debtors')
             # x=sheet_by_name.get_all_records()
