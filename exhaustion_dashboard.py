@@ -489,7 +489,7 @@ with tab3:
                 x=sheet_by_name.get_all_records()
                 broker_level_current=pd.DataFrame(x)
                 # st.write(broker_level_current)
-                if len(df)!=0:
+                if len(broker_level_current)!=0:
                     broker_level_current=broker_level_current[broker_level_current['id']==debtor_id]
                 else:
                     broker_level_current=None
