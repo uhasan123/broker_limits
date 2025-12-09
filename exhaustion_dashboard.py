@@ -263,7 +263,7 @@ with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as tmp:
     creds_path = tmp.name
 
 SPREADSHEET_NAME = 'Raw Data'
-SPREADSHEET_NAME_2 = 'Tab 2 Data'
+# SPREADSHEET_NAME_2 = 'Tab 2 Data'
 # SHEET_NAME = 'Sheet1'
 CREDENTIALS_FILE = creds_path
     
@@ -317,12 +317,12 @@ with tab2:
         if debtor_id !='':
             # open_invoice_df_l90=calc_open_invoice_volume_l90(debtor_id)
             # debtor_limit_df_l90=calc_debtor_limit_l90(debtor_id)
-            sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME_2, sheet_name='debtor_limit_l90')
+            sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='debtor_limit_l90')
             x=sheet_by_name.get_all_records()
             debtor_limit_df_l90=pd.DataFrame(x)
             debtor_limit_df_l90=debtor_limit_df_l90[debtor_limit_df_l90['original_id']==debtor_id]
 
-            sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME_2, sheet_name='open_invoice_l90')
+            sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='open_invoice_l90')
             x=sheet_by_name.get_all_records()
             open_invoice_df_l90=pd.DataFrame(x)
             open_invoice_df_l90=open_invoice_df_l90[open_invoice_df_l90['id']==debtor_id]
