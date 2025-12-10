@@ -439,6 +439,7 @@ with tab3:
             pivot_table, df_t, pivot_table_client_conc=broker_report.generate_report(broker_level_df, broker_profile_report=True, cohort=value,payment_trend_count=5, payment_trend_step='default', debtors_df=None, brokers_df=None, invoice_df=invoice_df)
             st.write('Debtors Info')
             # with col1:
+            df_t['years_in_business']=df_t['years_in_business'].round(2)
             st.write(df_t)
         #     #############
         #     df_trend=broker_level_df[['snapshot_date','invoice_approved', 'invoice_approved_dollars','open_invoices_in_point', 'invoice_paid', 'invoice_paid_dollars', 'dtp']][-value:].set_index('snapshot_date').T
