@@ -110,7 +110,11 @@ def create_debtor_level_view(debtor_limit):
         'invoice_flagged_l30': g.loc[
             (g['created_date'].isna()==False) & (g['limit_exceeded']==1),
             'id'
-        ].nunique()
+        ].nunique(),
+        'avg_dtp_l30': g.loc[
+            (g['paid_date'].isna()==False),
+            'dtp'
+        ].mean()
     })).reset_index()
     
     debtor_level_view_2['perc_invoices_flagged_l30']=(debtor_level_view_2['invoice_flagged_l30'] / debtor_level_view_2['invoice_created_l30']) * 100
@@ -123,7 +127,6 @@ def create_debtor_level_view(debtor_limit):
 
     return debtor_level
     
-
 # def job():
 private_key_json=os.getenv('private_key_json')
 
