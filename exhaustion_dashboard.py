@@ -281,7 +281,7 @@ with tab1:
         debtor_level=pd.DataFrame(x)
         # exhaust_debtors=get_exhausted_debtors()
         ageing_cohort_df,limit_cohort_df=create_debtor_level_view(debtor_level)
-        debtor_level=debtor_level[['id','name','dot', 'debtor_limit', 'open_invoice_volume', 'limit_exceeded_by', 'invoice_created_l30', 'invoice_flagged_l30', 'perc_invoices_flagged_l30']]
+        debtor_level=debtor_level[['id','name','dot', 'debtor_limit', 'open_invoice_volume', 'limit_exceeded_by', 'invoice_created_l30', 'invoice_flagged_l30', 'perc_invoices_flagged_l30', 'avg_dtp_l30']]
         brokers_exhausted=exhaust_debtors['id'].nunique()
         # st.write('Exhaustion counter', brokers_exhausted)
         st.markdown(f"<h1 style='font-size:28px; color:green;'>Exhaustion counter: {brokers_exhausted}</h1>", unsafe_allow_html=True)
