@@ -19,7 +19,7 @@ def connect_to_gsheet(creds_json,spreadsheet_name,sheet_name):
     credentials = ServiceAccountCredentials.from_json_keyfile_name(creds_json, scope)
     client = gspread.authorize(credentials)
     spreadsheet = client.open(spreadsheet_name)  # Access the first sheet
-    return spreadsheet.worksheet(sheet_name)
+    return spreadsheet.worksheet(sheet_name), client
 
 # def calc_open_invoice_volume():
 #     obj=broker_report()
@@ -128,6 +128,33 @@ def generate_segment_level_data():
     generate_segment_level_data_current=pd.read_sql_query(query3, conn)
     return generate_segment_level_data_day, generate_segment_level_data_week, generate_segment_level_data_month, generate_segment_level_data_current
 
+def calc_debtor_limit_l90():
+    obj=broker_report()
+    conn=obj.make_db_connection()
+    conn.autocommit=True
+    with open('calc_debtor_limit_l90_overall.sql', 'r') as file:
+        query=file.read()
+    
+    debtor_limit_df_l90=pd.read_sql_query(query, conn)
+    debtor_limit_df_l90['debtor_limit']=debtor_limit_df_l90['debtor_limit']/100
+    debtor_limit_df_l90=debtor_limit_df_l90[['original_id', 'snapshot_date', 'debtor_limit']]
+    # conn.close()
+    # tunnel.stop()
+    return debtor_limit_df_l90
+
+def calc_open_invoice_volume_l90():
+    obj=broker_report()
+    conn=obj.make_db_connection()
+    conn.autocommit=True
+    with open('calc_open_invoice_volume_l90_overall.sql', 'r') as file:
+        query=file.read()
+
+    open_invoice_df_l90=pd.read_sql_query(query, conn)
+    open_invoice_df_l90=open_invoice_df_l90[['id', 'snapshot_date', 'approved_amount']]
+    # conn.close()
+    # tunnel.stop()
+    return open_invoice_df_l90
+
 
 # def job():
 private_key_json=os.getenv('private_key_json')
@@ -138,6 +165,7 @@ with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as tmp:
     creds_path = tmp.name
     
 SPREADSHEET_NAME = 'Raw Data'
+# SPREADSHEET_NAME_2 = 'Tab 2 Data'
 # SHEET_NAME = 'Sheet1'
 CREDENTIALS_FILE = creds_path # './crendentials.json'
 
@@ -160,7 +188,10 @@ conn.autocommit=True
 # sheet_by_name.append_rows(data_to_upload)
 
 generate_segment_level_data_day, generate_segment_level_data_week, generate_segment_level_data_month, generate_segment_level_data_current=generate_segment_level_data()
-sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_daily')
+debtor_limit_df_l90=calc_debtor_limit_l90()
+open_invoice_df_l90=calc_open_invoice_volume_l90()
+
+sheet_by_name, client = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_daily')
 # debtor_level=create_debtor_level_view(exhaust_debtors)
 generate_segment_level_data_day = generate_segment_level_data_day.replace([np.inf, -np.inf], np.nan)
 generate_segment_level_data_day = generate_segment_level_data_day.fillna('')
@@ -169,9 +200,11 @@ generate_segment_level_data_day['snapshot_date']=generate_segment_level_data_day
 data_to_upload = [generate_segment_level_data_day.columns.values.tolist()] + generate_segment_level_data_day.values.tolist()
 # data_to_upload
 sheet_by_name.clear()
+ws = client.open(SPREADSHEET_NAME).worksheet("segment_level_data_daily")
+ws.resize(rows=1, cols=1)  # Shrink sheet completely
 sheet_by_name.append_rows(data_to_upload)
 
-sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_weekly')
+sheet_by_name, client = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_weekly')
 # debtor_level=create_debtor_level_view(exhaust_debtors)
 generate_segment_level_data_week = generate_segment_level_data_week.replace([np.inf, -np.inf], np.nan)
 generate_segment_level_data_week = generate_segment_level_data_week.fillna('')
@@ -180,9 +213,11 @@ generate_segment_level_data_week['snapshot_date']=generate_segment_level_data_we
 data_to_upload = [generate_segment_level_data_week.columns.values.tolist()] + generate_segment_level_data_week.values.tolist()
 # data_to_upload
 sheet_by_name.clear()
+ws = client.open(SPREADSHEET_NAME).worksheet("segment_level_data_weekly")
+ws.resize(rows=1, cols=1)  # Shrink sheet completely
 sheet_by_name.append_rows(data_to_upload)
 
-sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_monthly')
+sheet_by_name, client = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_monthly')
 # debtor_level=create_debtor_level_view(exhaust_debtors)
 generate_segment_level_data_month = generate_segment_level_data_month.replace([np.inf, -np.inf], np.nan)
 generate_segment_level_data_month = generate_segment_level_data_month.fillna('')
@@ -191,9 +226,11 @@ generate_segment_level_data_month['snapshot_date']=generate_segment_level_data_m
 data_to_upload = [generate_segment_level_data_month.columns.values.tolist()] + generate_segment_level_data_month.values.tolist()
 # data_to_upload
 sheet_by_name.clear()
+ws = client.open(SPREADSHEET_NAME).worksheet("segment_level_data_monthly")
+ws.resize(rows=1, cols=1)  # Shrink sheet completely
 sheet_by_name.append_rows(data_to_upload)
 
-sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_week_start_to_date')
+sheet_by_name, client = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_week_start_to_date')
 # debtor_level=create_debtor_level_view(exhaust_debtors)
 generate_segment_level_data_current = generate_segment_level_data_current.replace([np.inf, -np.inf], np.nan)
 generate_segment_level_data_current = generate_segment_level_data_current.fillna('')
@@ -202,6 +239,35 @@ generate_segment_level_data_current['snapshot_date']=generate_segment_level_data
 data_to_upload = [generate_segment_level_data_current.columns.values.tolist()] + generate_segment_level_data_current.values.tolist()
 # data_to_upload
 sheet_by_name.clear()
+ws = client.open(SPREADSHEET_NAME).worksheet("segment_level_data_week_start_to_date")
+ws.resize(rows=1, cols=1)  # Shrink sheet completely
+sheet_by_name.append_rows(data_to_upload)
+
+sheet_by_name, client = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='debtor_limit_l90')
+# debtor_level=create_debtor_level_view(exhaust_debtors)
+debtor_limit_df_l90 = debtor_limit_df_l90.replace([np.inf, -np.inf], np.nan)
+debtor_limit_df_l90 = debtor_limit_df_l90.fillna('')
+debtor_limit_df_l90['snapshot_date']=debtor_limit_df_l90['snapshot_date'].astype(str)
+# generate_segment_level_data_current["longevity_in_days"] = generate_segment_level_data_current["longevity_in_days"].dt.days
+data_to_upload = [debtor_limit_df_l90.columns.values.tolist()] + debtor_limit_df_l90.values.tolist()
+# data_to_upload
+# print(debtor_limit_df_l90.shape())
+sheet_by_name.clear()
+ws = client.open(SPREADSHEET_NAME).worksheet("debtor_limit_l90")
+ws.resize(rows=1, cols=1)  # Shrink sheet completely
+sheet_by_name.append_rows(data_to_upload)
+
+sheet_by_name, client = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='open_invoice_l90')
+# debtor_level=create_debtor_level_view(exhaust_debtors)
+open_invoice_df_l90 = open_invoice_df_l90.replace([np.inf, -np.inf], np.nan)
+open_invoice_df_l90 = open_invoice_df_l90.fillna('')
+open_invoice_df_l90['snapshot_date']=open_invoice_df_l90['snapshot_date'].astype(str)
+# generate_segment_level_data_current["longevity_in_days"] = generate_segment_level_data_current["longevity_in_days"].dt.days
+data_to_upload = [open_invoice_df_l90.columns.values.tolist()] + open_invoice_df_l90.values.tolist()
+# data_to_upload
+sheet_by_name.clear()
+ws = client.open(SPREADSHEET_NAME).worksheet("open_invoice_l90")
+ws.resize(rows=1, cols=1)  # Shrink sheet completely
 sheet_by_name.append_rows(data_to_upload)
 
 print('uploaded')

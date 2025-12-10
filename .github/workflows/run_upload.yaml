@@ -6,7 +6,7 @@ on:
   workflow_dispatch:      # Allows manual trigger
   push:
     branches:
-      - main
+      - tab_2_scheduler
 
 jobs:
   run-script:
