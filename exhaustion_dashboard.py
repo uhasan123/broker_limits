@@ -348,7 +348,7 @@ with tab2:
             df_l90_['min_limit_L90d']=df_l90['debtor_limit'].min()
             # df_l90_['debtor_limit_perc_change_L90d']=(df_l90_['debtor_limit']-df_l90[df_l90['snapshot_date']==df_l90['snapshot_date'].min()]['debtor_limit'].iloc[0])/df_l90_['debtor_limit'] * 100
             df_l90_['no_of_exhaustions_L90d']=df_l90['breach_count'].sum()
-            df_l90_.rename(columns={'approved_total':'open_invoice_volume'})
+            df_l90_=df_l90_.rename(columns={'approved_total':'open_invoice_volume'})
             st.write(df_l90_)
         
             fig = go.Figure([
