@@ -348,17 +348,18 @@ with tab2:
             df_l90_['min_limit_L90d']=df_l90['debtor_limit'].min()
             # df_l90_['debtor_limit_perc_change_L90d']=(df_l90_['debtor_limit']-df_l90[df_l90['snapshot_date']==df_l90['snapshot_date'].min()]['debtor_limit'].iloc[0])/df_l90_['debtor_limit'] * 100
             df_l90_['no_of_exhaustions_L90d']=df_l90['breach_count'].sum()
+            df_l90_.rename(columns={'approved_total':'open_invoice_volume'})
             st.write(df_l90_)
         
             fig = go.Figure([
-            go.Scatter(x=df_l90['snapshot_date'], y=df_l90['approved_amount'], mode='lines+markers', name='Approved amount', yaxis='y1'),
+            go.Scatter(x=df_l90['snapshot_date'], y=df_l90['open_invoice_volume'], mode='lines+markers', name='Open Invoice Volume', yaxis='y1'),
             go.Scatter(x=df_l90['snapshot_date'], y=df_l90['debtor_limit'], mode='lines+markers', name='Debtor Limit', yaxis='y1'),
             # go.Scatter(x=df['snapshot_date'], y=df['invoice_approved_dollars'], mode='lines+markers', name='Invoices Approved (dollars)', yaxis='y1'),
             # go.Scatter(x=df['snapshot_date'], y=df['invoice_paid_dollars'], mode='lines+markers', name='Invoices Paid (dollars)', yaxis='y1')
             ])
             
             fig.update_layout(
-                title="Broker Approved invoices against debtor limit day wise",
+                title="Broker Open invoice volume against debtor limit day wise",
                 xaxis_title="Date",
                 yaxis_title="Amount in dollars",
                 template="plotly_white",
