@@ -440,7 +440,7 @@ with tab3:
             with col1:
                     st.write(df_t)
             #############
-            df_trend=broker_level_df[['snapshot_date','invoice_approved', 'invoice_approved_dollars','open_invoices_in_point', 'invoice_paid', 'invoice_paid_dollars', 'dtp']][-value3:].set_index('snapshot_date').T
+            df_trend=broker_level_df[['snapshot_date','invoice_approved', 'invoice_approved_dollars','open_invoices_in_point', 'invoice_paid', 'invoice_paid_dollars', 'dtp']][-value:].set_index('snapshot_date').T
             df_trend=df_trend.T.reset_index()
 
             fig = go.Figure([
