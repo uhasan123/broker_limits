@@ -352,7 +352,7 @@ with tab2:
             st.write(df_l90_)
         
             fig = go.Figure([
-            go.Scatter(x=df_l90['snapshot_date'], y=df_l90['open_invoice_volume'], mode='lines+markers', name='Open Invoice Volume', yaxis='y1'),
+            go.Scatter(x=df_l90['snapshot_date'], y=df_l90['approved_total'], mode='lines+markers', name='Open Invoice Volume', yaxis='y1'),
             go.Scatter(x=df_l90['snapshot_date'], y=df_l90['debtor_limit'], mode='lines+markers', name='Debtor Limit', yaxis='y1'),
             # go.Scatter(x=df['snapshot_date'], y=df['invoice_approved_dollars'], mode='lines+markers', name='Invoices Approved (dollars)', yaxis='y1'),
             # go.Scatter(x=df['snapshot_date'], y=df['invoice_paid_dollars'], mode='lines+markers', name='Invoices Paid (dollars)', yaxis='y1')
