@@ -86,7 +86,7 @@ class broker_limit:
 
         df=pd.read_sql_query(query, self.conn)
         df['payment_decline_perc']=(df[f'paid_{cohort_size}_{cohort_size*2}']-df[f'paid_0_{cohort_size}'])/df[f'paid_{cohort_size}_{cohort_size*2}']
-        df=df[(df['payment_decline_perc']>=threshold) | ((df[f'paid_{cohort_size}_{cohort_size*2}']==0) & (df[f'paid_0_{cohort_size}']==0))
+        df=df[(df['payment_decline_perc']>=threshold) | ((df[f'paid_{cohort_size}_{cohort_size*2}']==0) & (df[f'paid_0_{cohort_size}']==0))]
         return df
 
 
