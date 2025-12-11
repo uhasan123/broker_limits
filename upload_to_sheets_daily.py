@@ -12,7 +12,7 @@ import numpy as np
 # sys.path.append('C://Users//Lenovo//Documents//Work//github_code//broker_limits')
 from broker_report import broker_report
 
-def connect_to_gsheet(creds_json,spreadsheet_name,sheet_name):
+def connect_to_gsheet(creds_json,spreadsheet_name):
     scope = ["https://spreadsheets.google.com/feeds", 'https://www.googleapis.com/auth/spreadsheets',
              "https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/drive"]
     
