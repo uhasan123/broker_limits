@@ -42,7 +42,7 @@ d.debtor_limit
 case when a.created_at>=current_date-30 then b.limit_exceeded else null end as limit_exceeded, 
 case when a.created_at>=current_date-30 then b.flagged_redd else null end as flagged_redd,
 case when a.created_at>=current_date-30 then b.bypass_flag else null end as bypass_flag,
-case when a.paid_date>=current_date-30 then extract(days from a.paid_date-aapproved_date) else null end as dtp
+case when a.paid_date>=current_date-30 then extract(days from a.paid_date-a.approved_date) else null end as dtp
 from
 (select *,
 -- case when paid_date is not null then extract(days from paid_date-approved_date) else null end as dtp
