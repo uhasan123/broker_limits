@@ -289,7 +289,7 @@ with tab1:
         colss[0].dataframe(ageing_cohort_df)
         colss[1].dataframe(limit_cohort_df)
         debtor_level['perc_invoices_flagged_l30']=debtor_level['perc_invoices_flagged_l30'].round(2)
-        debtor_level['avg_dtp_l30']=debtor_level['avg_dtp_l30'].round(2)
+        # debtor_level['avg_dtp_l30']=debtor_level['avg_dtp_l30'].round(2)
         st.write(debtor_level.sort_values(by=['open_invoice_volume', 'debtor_limit'], ascending=False).reset_index().drop('index', axis=1))
         # st.session_state.tab1=False
 
