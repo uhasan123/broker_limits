@@ -41,7 +41,7 @@ d.debtor_limit
 select a.*, b.limit_exceeded, b.flagged_redd, b.bypass_flag
 from
 (select *,
-case when paid_date is not null then extract(days from paid_date-approved_date) else null end as dtp
+-- case when paid_date is not null then extract(days from paid_date-approved_date) else null end as dtp
 from invoices where created_at<=current_date and created_at>current_date-30 and debtor_id in (select distinct id from cal_debtor_weekly_open_invoice_volume)) a
 left join
 (select invoice_id, max(limit_exceed_flag) as limit_exceeded, max(redd_flag) as flagged_redd, max(bypass_flag_notes) as bypass_flag from
