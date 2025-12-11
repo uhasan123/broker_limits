@@ -12,14 +12,14 @@ import numpy as np
 # sys.path.append('C://Users//Lenovo//Documents//Work//github_code//broker_limits')
 from broker_report import broker_report
 
-def connect_to_gsheet(creds_json,spreadsheet_name,sheet_name):
+def connect_to_gsheet(creds_json,spreadsheet_name):
     scope = ["https://spreadsheets.google.com/feeds", 'https://www.googleapis.com/auth/spreadsheets',
              "https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/drive"]
     
     credentials = ServiceAccountCredentials.from_json_keyfile_name(creds_json, scope)
     client = gspread.authorize(credentials)
     spreadsheet = client.open(spreadsheet_name)  # Access the first sheet
-    return spreadsheet.worksheet(sheet_name), client
+    return spreadsheet
 
 def get_exhausted_debtors():
     obj=broker_report()
@@ -144,32 +144,34 @@ obj=broker_report()
 conn=obj.make_db_connection()
 conn.autocommit=True
 
-sheet_by_name, client = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='exhausted_debtors')
+sheet_by_name= connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME)
 exhausted_df=get_exhausted_debtors()
 
 data_to_upload = [exhausted_df.columns.values.tolist()] + exhausted_df.values.tolist()
 # data_to_upload
-sheet_by_name.clear()
-ws = client.open(SPREADSHEET_NAME).worksheet("exhausted_debtors")
+# sheet_by_name.clear()
+ws = sheet_by_name.worksheet("exhausted_debtors")
 ws.resize(rows=1, cols=1)  # Shrink sheet completely
-sheet_by_name.append_rows(data_to_upload)
+ws.clear()
+ws.update("A1", data_to_upload)
 print('uploaded')
 
-# sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='exhausted_debtors')
+# sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME)
 # x=sheet_by_name.get_all_records()
 # exhaust_debtors=pd.DataFrame(x)
 
-sheet_by_name, client = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='debtor_level')
+# sheet_by_name, client = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='debtor_level')
 debtor_level=create_debtor_level_view(exhausted_df)
 debtor_level = debtor_level.replace([np.inf, -np.inf], np.nan)
 debtor_level = debtor_level.fillna('')
 debtor_level=debtor_level.rename(columns={'approved_total':'open_invoice_volume'})
 data_to_upload = [debtor_level.columns.values.tolist()] + debtor_level.values.tolist()
 # data_to_upload
-sheet_by_name.clear()
-ws = client.open(SPREADSHEET_NAME).worksheet("debtor_level")
+# sheet_by_name.clear()
+ws = sheet_by_name.worksheet("debtor_level")
 ws.resize(rows=1, cols=1)  # Shrink sheet completely
-sheet_by_name.append_rows(data_to_upload)
+ws.clear()
+ws.update("A1", data_to_upload)
     
 # schedule.every().hour.do(job)
 
