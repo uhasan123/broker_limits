@@ -269,6 +269,7 @@ CREDENTIALS_FILE = creds_path
     
 tab1, tab2, tab3=st.tabs(['Exhausted Brokers', 'Debtor Limit and Open Invoice Comparison', 'Broker Profile and Payment Trend'])
 with tab1:
+    st.write(st.query_params.get('code'))
     if st.button("Refresh", key='refresh_tab1'):
         st.session_state.tab1=True
     if st.session_state.tab1==True:
