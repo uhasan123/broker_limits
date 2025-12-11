@@ -45,7 +45,7 @@ case when a.created_at>=current_date-30 then b.flagged_redd else null end as fla
 case when a.created_at>=current_date-30 then b.bypass_flag else null end as bypass_flag,
 case when a.paid_date>=current_date-30 then extract(days from a.paid_date-a.approved_date) else null end as dtp
 from
-(select *,
+(select *
 -- case when paid_date is not null then extract(days from paid_date-approved_date) else null end as dtp
 from invoices where debtor_id in (select distinct id from cal_debtor_weekly_open_invoice_volume)) a
 left join
