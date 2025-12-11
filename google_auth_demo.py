@@ -24,7 +24,7 @@ flow = Flow.from_client_config(
             "token_uri": "https://oauth2.googleapis.com/token",
         }
     },
-    scopes=["openid", "email", "profile"],
+    scopes=["openid", https://www.googleapis.com/auth/userinfo.email, https://www.googleapis.com/auth/userinfo.profile],
     redirect_uri=REDIRECT_URI,
 )
 
