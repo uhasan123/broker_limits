@@ -61,6 +61,7 @@ code = query_params.get("code")
 
 if code:
     user = fetch_user_info(code)
+    st.experimental_set_query_params()
     st.success("Login successful!")
     st.write("Welcome:", user["name"])
     st.write("Email:", user["email"])
