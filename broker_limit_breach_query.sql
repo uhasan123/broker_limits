@@ -39,6 +39,7 @@ d.debtor_limit
 )
 
 ,a1 as (select a.*, 
+case when a.created_at>=current_date-30 then a.id else null end as invoice_id_created_l30,
 case when a.created_at>=current_date-30 then b.limit_exceeded else null end as limit_exceeded, 
 case when a.created_at>=current_date-30 then b.flagged_redd else null end as flagged_redd,
 case when a.created_at>=current_date-30 then b.bypass_flag else null end as bypass_flag,
