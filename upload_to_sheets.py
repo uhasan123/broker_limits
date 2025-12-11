@@ -104,17 +104,17 @@ def create_debtor_level_view(debtor_limit):
     grouped=broker_limit_breach_df.groupby('debtor_id')
     debtor_level_view_2=grouped.apply(lambda g: pd.Series({
         'invoice_created_l30': g.loc[
-            g['created_date'].isna()==False,
+            g['invoice_id_created_l30'].isna()==False,
             'id'
         ].nunique(),
         'invoice_flagged_l30': g.loc[
-            (g['created_date'].isna()==False) & (g['limit_exceeded']==1),
+            (g['invoice_id_created_l30'].isna()==False) & (g['limit_exceeded']==1),
             'id'
         ].nunique(),
-        # 'avg_dtp_l30': g.loc[
-        #     (g['paid_date'].isna()==False),
-        #     'dtp'
-        # ].mean()
+        'avg_dtp_l30': g.loc[
+            (g['dtp'].isna()==False),
+            'dtp'
+        ].mean()
     })).reset_index()
     
     debtor_level_view_2['perc_invoices_flagged_l30']=(debtor_level_view_2['invoice_flagged_l30'] / debtor_level_view_2['invoice_created_l30']) * 100
