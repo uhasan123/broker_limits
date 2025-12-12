@@ -205,7 +205,7 @@ def extract_debtor_id_from_name_or_dot_2(typee, value):
     else:
         return None
 
-def connect_to_gsheet(creds_json,spreadsheet_name,sheet_name):
+def connect_to_gsheet(creds_json,spreadsheet_name):
     scope = ["https://spreadsheets.google.com/feeds", 'https://www.googleapis.com/auth/spreadsheets',
              "https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/drive"]
     
@@ -213,7 +213,7 @@ def connect_to_gsheet(creds_json,spreadsheet_name,sheet_name):
     credentials = Credentials.from_service_account_file(creds_json, scopes=scope)
     client = gspread.authorize(credentials)
     spreadsheet = client.open(spreadsheet_name)  # Access the first sheet
-    return spreadsheet.worksheet(sheet_name)
+    return spreadsheet
     
 
 st.set_page_config(
@@ -266,18 +266,20 @@ SPREADSHEET_NAME = 'Raw Data'
 # SPREADSHEET_NAME_2 = 'Tab 2 Data'
 # SHEET_NAME = 'Sheet1'
 CREDENTIALS_FILE = creds_path
-    
+sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME)
 tab1, tab2, tab3=st.tabs(['Exhausted Brokers', 'Debtor Limit and Open Invoice Comparison', 'Broker Profile and Payment Trend'])
 with tab1:
     if st.button("Refresh", key='refresh_tab1'):
         st.session_state.tab1=True
     if st.session_state.tab1==True:
-        sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='exhausted_debtors')
-        x=sheet_by_name.get_all_records()
+        # sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='exhausted_debtors')
+        ws = sheet_by_name.worksheet("exhausted_debtors")
+        x=ws.get_all_records()
         exhaust_debtors=pd.DataFrame(x)
 
-        sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='debtor_level')
-        x=sheet_by_name.get_all_records()
+        # sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='debtor_level')
+        ws = sheet_by_name.worksheet("debtor_level")
+        x=ws.get_all_records()
         debtor_level=pd.DataFrame(x)
         # exhaust_debtors=get_exhausted_debtors()
         ageing_cohort_df,limit_cohort_df=create_debtor_level_view(debtor_level)
@@ -320,13 +322,15 @@ with tab2:
         if debtor_id !='':
             # open_invoice_df_l90=calc_open_invoice_volume_l90(debtor_id)
             # debtor_limit_df_l90=calc_debtor_limit_l90(debtor_id)
-            sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='debtor_limit_l90')
-            x=sheet_by_name.get_all_records()
+            # sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='debtor_limit_l90')
+            ws = sheet_by_name.worksheet("debtor_limit_l90")
+            x=ws.get_all_records()
             debtor_limit_df_l90=pd.DataFrame(x)
             debtor_limit_df_l90=debtor_limit_df_l90[debtor_limit_df_l90['original_id']==debtor_id]
 
-            sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='open_invoice_l90')
-            x=sheet_by_name.get_all_records()
+            # sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='open_invoice_l90')
+            ws = sheet_by_name.worksheet("open_invoice_l90")
+            x=ws.get_all_records()
             open_invoice_df_l90=pd.DataFrame(x)
             open_invoice_df_l90=open_invoice_df_l90[open_invoice_df_l90['id']==debtor_id]
 
@@ -422,12 +426,14 @@ with tab3:
             
             # broker_level_df=broker_report.generate_segment_level_data(start_date, end_date, debtors_df, brokers_df, invoice_df, step=period)
             if period=='weekly':
-                sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_weekly')
-                x=sheet_by_name.get_all_records()
+                # sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_weekly')
+                ws = sheet_by_name.worksheet("segment_level_data_weekly")
+                x=ws.get_all_records()
                 segment_level_data=pd.DataFrame(x)
             elif period=='monthly':
-                sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_monthly')
-                x=sheet_by_name.get_all_records()
+                # sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_monthly')
+                ws = sheet_by_name.worksheet("segment_level_data_monthly")
+                x=ws.get_all_records()
                 segment_level_data=pd.DataFrame(x)
             else:
                 segment_level_data=None
@@ -505,16 +511,19 @@ with tab3:
             
             # broker_level=broker_report.generate_segment_level_data(start_date, end_date, debtors_df, brokers_df, invoice_df, step=period)
             if period2=='weekly':
-                sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_weekly')
-                x=sheet_by_name.get_all_records()
+                # sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_weekly')
+                ws = sheet_by_name.worksheet("segment_level_data_weekly")
+                x=ws.get_all_records()
                 segment_level_data=pd.DataFrame(x)
             elif period2=='monthly':
-                sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_monthly')
-                x=sheet_by_name.get_all_records()
+                # sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_monthly')
+                ws = sheet_by_name.worksheet("segment_level_data_monthly")
+                x=ws.get_all_records()
                 segment_level_data=pd.DataFrame(x)
             elif period2=='daily':
-                sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_daily')
-                x=sheet_by_name.get_all_records()
+                # sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_daily')
+                ws = sheet_by_name.worksheet("segment_level_data_daily")
+                x=ws.get_all_records()
                 segment_level_data=pd.DataFrame(x)
             else:
                 segment_level_data=None
@@ -522,8 +531,9 @@ with tab3:
             broker_level=segment_level_data[segment_level_data['id']==debtor_id]
             # generate series logic here
             if period2!='daily':
-                sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_week_start_to_date')
-                x=sheet_by_name.get_all_records()
+                # sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_week_start_to_date')
+                ws = sheet_by_name.worksheet("segment_level_data_week_start_to_date")
+                x=ws.get_all_records()
                 broker_level_current=pd.DataFrame(x)
                 # st.write(broker_level_current)
                 if len(broker_level_current)!=0:
@@ -555,16 +565,19 @@ with tab3:
     if st.session_state.tab3_dtp==True:
         if debtor_id!='':
             if period3=='weekly':
-                sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_weekly')
-                x=sheet_by_name.get_all_records()
+                # sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_weekly')
+                ws = sheet_by_name.worksheet("segment_level_data_weekly")
+                x=ws.get_all_records()
                 segment_level_data=pd.DataFrame(x)
             elif period3=='monthly':
-                sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_monthly')
-                x=sheet_by_name.get_all_records()
+                # sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_monthly')
+                ws = sheet_by_name.worksheet("segment_level_data_monthly")
+                x=ws.get_all_records()
                 segment_level_data=pd.DataFrame(x)
             elif period3=='daily':
-                sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_daily')
-                x=sheet_by_name.get_all_records()
+                # sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_daily')
+                ws = sheet_by_name.worksheet("segment_level_data_daily")
+                x=ws.get_all_records()
                 segment_level_data=pd.DataFrame(x)
             else:
                 segment_level_data=None
