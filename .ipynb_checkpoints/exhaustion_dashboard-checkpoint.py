@@ -263,6 +263,7 @@ with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as tmp:
     creds_path = tmp.name
 
 SPREADSHEET_NAME = 'Raw Data'
+# SPREADSHEET_NAME_2 = 'Tab 2 Data'
 # SHEET_NAME = 'Sheet1'
 CREDENTIALS_FILE = creds_path
     
@@ -280,13 +281,16 @@ with tab1:
         debtor_level=pd.DataFrame(x)
         # exhaust_debtors=get_exhausted_debtors()
         ageing_cohort_df,limit_cohort_df=create_debtor_level_view(debtor_level)
-        debtor_level=debtor_level[['id','name','dot', 'debtor_limit', 'open_invoice_volume', 'limit_exceeded_by', 'invoice_created_l30', 'invoice_flagged_l30', 'perc_invoices_flagged_l30']]
+        debtor_level=debtor_level[['id','name','dot', 'debtor_limit', 'open_invoice_volume', 'limit_exceeded_by', 'invoice_created_l30', 'invoice_flagged_l30', 'perc_invoices_flagged_l30', 'avg_dtp_l30']]
         brokers_exhausted=exhaust_debtors['id'].nunique()
         # st.write('Exhaustion counter', brokers_exhausted)
         st.markdown(f"<h1 style='font-size:28px; color:green;'>Exhaustion counter: {brokers_exhausted}</h1>", unsafe_allow_html=True)
         colss=st.columns([2,1,2])
         colss[0].dataframe(ageing_cohort_df)
         colss[1].dataframe(limit_cohort_df)
+        debtor_level['perc_invoices_flagged_l30']=debtor_level['perc_invoices_flagged_l30'].round(2)
+        debtor_level['avg_dtp_l30']=debtor_level['avg_dtp_l30'].replace('', np.nan)
+        debtor_level['avg_dtp_l30']=debtor_level['avg_dtp_l30'].round(2)
         st.write(debtor_level.sort_values(by=['open_invoice_volume', 'debtor_limit'], ascending=False).reset_index().drop('index', axis=1))
         # st.session_state.tab1=False
 
@@ -314,7 +318,7 @@ with tab2:
             debtor_id=''
         # print(debtor_id)
         if debtor_id !='':
-            open_invoice_df_l90=calc_open_invoice_volume_l90(debtor_id)
+            # open_invoice_df_l90=calc_open_invoice_volume_l90(debtor_id)
             # debtor_limit_df_l90=calc_debtor_limit_l90(debtor_id)
             sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='debtor_limit_l90')
             x=sheet_by_name.get_all_records()
@@ -347,17 +351,18 @@ with tab2:
             df_l90_['min_limit_L90d']=df_l90['debtor_limit'].min()
             # df_l90_['debtor_limit_perc_change_L90d']=(df_l90_['debtor_limit']-df_l90[df_l90['snapshot_date']==df_l90['snapshot_date'].min()]['debtor_limit'].iloc[0])/df_l90_['debtor_limit'] * 100
             df_l90_['no_of_exhaustions_L90d']=df_l90['breach_count'].sum()
+            df_l90_=df_l90_.rename(columns={'approved_total':'open_invoice_volume'})
             st.write(df_l90_)
         
             fig = go.Figure([
-            go.Scatter(x=df_l90['snapshot_date'], y=df_l90['approved_amount'], mode='lines+markers', name='Approved amount', yaxis='y1'),
+            go.Scatter(x=df_l90['snapshot_date'], y=df_l90['approved_amount'], mode='lines+markers', name='Open Invoice Volume', yaxis='y1'),
             go.Scatter(x=df_l90['snapshot_date'], y=df_l90['debtor_limit'], mode='lines+markers', name='Debtor Limit', yaxis='y1'),
             # go.Scatter(x=df['snapshot_date'], y=df['invoice_approved_dollars'], mode='lines+markers', name='Invoices Approved (dollars)', yaxis='y1'),
             # go.Scatter(x=df['snapshot_date'], y=df['invoice_paid_dollars'], mode='lines+markers', name='Invoices Paid (dollars)', yaxis='y1')
             ])
             
             fig.update_layout(
-                title="Broker Approved invoices against debtor limit day wise",
+                title="Broker Open invoice volume against debtor limit day wise",
                 xaxis_title="Date",
                 yaxis_title="Amount in dollars",
                 template="plotly_white",
@@ -406,6 +411,7 @@ with tab3:
 
     if st.session_state.tab3_metrics==True:
         if debtor_id !='':
+            col1, col2=st.columns(2)
             invoice_df=generate_data_for_payment_trend(debtor_id)
             # invoice_df, debtors_df, brokers_df=generate_data_for_payment_trend(debtor_id)
             # date_today=date.today()
@@ -427,6 +433,22 @@ with tab3:
                 segment_level_data=None
             segment_level_data=segment_level_data.replace('', np.nan)
             broker_level_df=segment_level_data[segment_level_data['id']==debtor_id]
+
+            # generate series logic here
+            date_df, days=generate_date_series(broker_level_df['snapshot_date'].min(), broker_level_df['snapshot_date'].max(), period)
+            broker_level_df=date_df.merge(broker_level_df, how='left', on='snapshot_date')
+            broker_level_df['invoice_approved'].fillna(0)
+            broker_level_df['invoice_approved_dollars'].fillna(0)
+            broker_level_df['invoice_paid'].fillna(0)
+            broker_level_df['invoice_paid_dollars'].fillna(0)
+            broker_level_df['dtp'].fillna(np.nan)
+            broker_level_df['open_invoices_in_point'].ffill()
+            broker_level_df['no_of_clients'].fillna(0)
+            # broker_level_df['open_invoice_shifted']=broker_level_df.sort_values(by='snapshot_date', ascending=True)['open_invoices_in_point'].shift(1)
+            # while broker_level_df[broker_level_df['open_invoices_in_point'].isna()==True]:
+            #     broker_level_df['open_invoices_in_point'].fillna(broker_level_df['open_invoice_shifted'])
+            #     broker_level_df['open_invoice_shifted']=broker_level_df.sort_values(by='snapshot_date', ascending=True)['open_invoices_in_point'].shift(1)
+                
             # if period = condition:
             #   generate series: start date will be segment_level_data['snapshot_date'].min and end date will be segment_level_data['snapshot_date'].max
             #   generate series left join broker_level_df on snapshot date
@@ -434,8 +456,30 @@ with tab3:
             #   opne invoice will be same as before if all are 0,0,0,...
             pivot_table, df_t, pivot_table_client_conc=broker_report.generate_report(broker_level_df, broker_profile_report=True, cohort=value,payment_trend_count=5, payment_trend_step='default', debtors_df=None, brokers_df=None, invoice_df=invoice_df)
             st.write('Debtors Info')
+            # with col1:
+            df_t['years_in_business']=df_t['years_in_business'].round(2)
             st.write(df_t)
-            #############
+        #     #############
+        #     df_trend=broker_level_df[['snapshot_date','invoice_approved', 'invoice_approved_dollars','open_invoices_in_point', 'invoice_paid', 'invoice_paid_dollars', 'dtp']][-value:].set_index('snapshot_date').T
+        #     df_trend=df_trend.T.reset_index()
+
+        #     fig = go.Figure([
+        #     go.Scatter(x=df_trend['snapshot_date'], y=df_trend['dtp'], mode='lines+markers', name='Days to Pay')
+        #     # go.Scatter(x=df['snapshot_date'], y=df['invoice_approved_dollars'], mode='lines+markers', name='Invoices Approved (dollars)', yaxis='y1'),
+        #     # go.Scatter(x=df['snapshot_date'], y=df['invoice_paid_dollars'], mode='lines+markers', name='Invoices Paid (dollars)', yaxis='y1')
+        # ])
+        
+        #     fig.update_layout(
+        #         title="Broker DTP Trend",
+        #         xaxis_title="Date",
+        #         yaxis_title="Avg DTP",
+        #         template="plotly_white",
+        #         legend=dict(x=1.1, y=1.1),
+        #         height=500
+        #     )
+        #     # st.write(df_t)
+        #     with col2:
+        #         st.plotly_chart(fig, use_container_width=True)
 
             days_diff=(broker_level_df['snapshot_date'].iloc[1] - broker_level_df['snapshot_date'].iloc[0]).days
             d1=broker_level_df.iloc[-1]['snapshot_date']
@@ -493,6 +537,19 @@ with tab3:
             segment_level_data=segment_level_data.replace('', np.nan)
             broker_level=segment_level_data[segment_level_data['id']==debtor_id]
             # generate series logic here
+            date_df, days=generate_date_series(broker_level_df['snapshot_date'].min(), broker_level_df['snapshot_date'].max(), period)
+            broker_level_df=date_df.merge(broker_level_df, how='left', on='snapshot_date')
+            broker_level_df['invoice_approved'].fillna(0)
+            broker_level_df['invoice_approved_dollars'].fillna(0)
+            broker_level_df['invoice_paid'].fillna(0)
+            broker_level_df['invoice_paid_dollars'].fillna(0)
+            broker_level_df['dtp'].fillna(np.nan)
+            broker_level_df['open_invoices_in_point'].ffill()
+            broker_level_df['no_of_clients'].fillna(0)
+            # broker_level_df['open_invoice_shifted']=broker_level_df.sort_values(by='snapshot_date', ascending=True)['open_invoices_in_point'].shift(1)
+            # while broker_level_df[broker_level_df['open_invoices_in_point'].isna()==True]:
+            #     broker_level_df['open_invoices_in_point'].fillna(broker_level_df['open_invoice_shifted'])
+                
             if period2!='daily':
                 sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_week_start_to_date')
                 x=sheet_by_name.get_all_records()

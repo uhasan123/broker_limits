@@ -442,9 +442,12 @@ with tab3:
             broker_level_df['invoice_paid'].fillna(0)
             broker_level_df['invoice_paid_dollars'].fillna(0)
             broker_level_df['dtp'].fillna(np.nan)
-            broker_level_df['open_invoice_shifted']=broker_level_df.sort_values(by='snapshot_date', ascending=True)['open_invoices_in_point'].shift(1)
-            while broker_level_df[broker_level_df['open_invoices_in_point'].isna()==True]:
-                broker_level_df['open_invoices_in_point'].fillna(broker_level_df['open_invoice_shifted'])
+            broker_level_df['open_invoices_in_point'].ffill()
+            broker_level_df['no_of_clients'].fillna(0)
+            # broker_level_df['open_invoice_shifted']=broker_level_df.sort_values(by='snapshot_date', ascending=True)['open_invoices_in_point'].shift(1)
+            # while broker_level_df[broker_level_df['open_invoices_in_point'].isna()==True]:
+            #     broker_level_df['open_invoices_in_point'].fillna(broker_level_df['open_invoice_shifted'])
+            #     broker_level_df['open_invoice_shifted']=broker_level_df.sort_values(by='snapshot_date', ascending=True)['open_invoices_in_point'].shift(1)
                 
             # if period = condition:
             #   generate series: start date will be segment_level_data['snapshot_date'].min and end date will be segment_level_data['snapshot_date'].max
@@ -541,9 +544,11 @@ with tab3:
             broker_level_df['invoice_paid'].fillna(0)
             broker_level_df['invoice_paid_dollars'].fillna(0)
             broker_level_df['dtp'].fillna(np.nan)
-            broker_level_df['open_invoice_shifted']=broker_level_df.sort_values(by='snapshot_date', ascending=True)['open_invoices_in_point'].shift(1)
-            while broker_level_df[broker_level_df['open_invoices_in_point'].isna()==True]:
-                broker_level_df['open_invoices_in_point'].fillna(broker_level_df['open_invoice_shifted'])
+            broker_level_df['open_invoices_in_point'].ffill()
+            broker_level_df['no_of_clients'].fillna(0)
+            # broker_level_df['open_invoice_shifted']=broker_level_df.sort_values(by='snapshot_date', ascending=True)['open_invoices_in_point'].shift(1)
+            # while broker_level_df[broker_level_df['open_invoices_in_point'].isna()==True]:
+            #     broker_level_df['open_invoices_in_point'].fillna(broker_level_df['open_invoice_shifted'])
                 
             if period2!='daily':
                 sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_week_start_to_date')
