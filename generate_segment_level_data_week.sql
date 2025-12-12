@@ -20,7 +20,7 @@ d.approved_total/100.0 as current_approved_total,
 d.debtor_limit,
 b.mc,
 b.dot,
-current_date-d.created_at as longevity_in_days,
+extract(days from (current_date-d.created_at)) as longevity_in_days,
 --sum(i.approved_accounts_receivable_amount/100.0) as approved_amount
 count(distinct case when (i.approved_date>snapshot_date-7 and i.approved_date<=snapshot_date) and i.approved_date is not null then i.id else null end) as invoice_approved,
 sum(case when (i.approved_date>snapshot_date-7 and i.approved_date<=snapshot_date) and i.approved_date is not null then i.approved_accounts_receivable_amount/100.0 else 0 end) as invoice_approved_dollars,

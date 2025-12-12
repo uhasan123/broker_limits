@@ -12,14 +12,14 @@ import numpy as np
 # sys.path.append('C://Users//Lenovo//Documents//Work//github_code//broker_limits')
 from broker_report import broker_report
 
-def connect_to_gsheet(creds_json,spreadsheet_name,sheet_name):
+def connect_to_gsheet(creds_json,spreadsheet_name):
     scope = ["https://spreadsheets.google.com/feeds", 'https://www.googleapis.com/auth/spreadsheets',
              "https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/drive"]
     
     credentials = ServiceAccountCredentials.from_json_keyfile_name(creds_json, scope)
     client = gspread.authorize(credentials)
     spreadsheet = client.open(spreadsheet_name)  # Access the first sheet
-    return spreadsheet.worksheet(sheet_name)
+    return spreadsheet
 
 def get_exhausted_debtors():
     obj=broker_report()
@@ -98,30 +98,35 @@ def create_debtor_level_view(debtor_limit):
     # debtor_limit=get_exhausted_debtors() # take from sheets
 
     debtor_level_view=debtor_ageing.merge(debtor_limit, on='id', how='outer')
-    debtor_level_view['utilization_rate']=debtor_level_view['approved_total'] / debtor_level_view['debtor_limit']
-    debtor_level_view['unnaturality']=debtor_level_view['approved_total']-debtor_level_view['debtor_limit']
+    # debtor_level_view['utilization_rate']=debtor_level_view['approved_total'] - debtor_level_view['debtor_limit']
+    debtor_level_view['limit_exceeded_by']=debtor_level_view['approved_total']-debtor_level_view['debtor_limit']
 
     grouped=broker_limit_breach_df.groupby('debtor_id')
     debtor_level_view_2=grouped.apply(lambda g: pd.Series({
         'invoice_created_l30': g.loc[
-            g['created_date'].isna()==False,
+            g['invoice_id_created_l30'].isna()==False,
             'id'
         ].nunique(),
         'invoice_flagged_l30': g.loc[
-            (g['created_date'].isna()==False) & (g['limit_exceeded']==1),
+            (g['invoice_id_created_l30'].isna()==False) & (g['limit_exceeded']==1),
             'id'
-        ].nunique()
+        ].nunique(),
+        'avg_dtp_l30': g.loc[
+            (g['dtp'].isna()==False),
+            'dtp'
+        ].mean()
     })).reset_index()
     
-    debtor_level_view_2['perc_invoices_flagged_l30']=debtor_level_view_2['invoice_flagged_l30'] / debtor_level_view_2['invoice_created_l30']
+    debtor_level_view_2['perc_invoices_flagged_l30']=(debtor_level_view_2['invoice_flagged_l30'] / debtor_level_view_2['invoice_created_l30']) * 100
     debtor_level=debtor_level_view.merge(debtor_level_view_2, left_on='id', right_on='debtor_id', how='outer')
+
+    debtor_level=debtor_level.rename(columns={'approved_amount': 'open_invoice_volume'})
 
     # debtor_level['ageing_cohort']=debtor_level['ageing'].apply(lambda x: ageing_cohort(x))
     # ageing_cohort_df=debtor_level.groupby('ageing_cohort').agg(broker_count=('id', 'nunique')).reset_index()
 
     return debtor_level
     
-
 # def job():
 private_key_json=os.getenv('private_key_json')
 
@@ -139,26 +144,34 @@ obj=broker_report()
 conn=obj.make_db_connection()
 conn.autocommit=True
 
-sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='exhausted_debtors')
+sheet_by_name= connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME)
 exhausted_df=get_exhausted_debtors()
+
 data_to_upload = [exhausted_df.columns.values.tolist()] + exhausted_df.values.tolist()
 # data_to_upload
-sheet_by_name.clear()
-sheet_by_name.append_rows(data_to_upload)
+# sheet_by_name.clear()
+ws = sheet_by_name.worksheet("exhausted_debtors")
+ws.resize(rows=1, cols=1)  # Shrink sheet completely
+ws.clear()
+ws.update("A1", data_to_upload)
 print('uploaded')
 
-# sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='exhausted_debtors')
+# sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME)
 # x=sheet_by_name.get_all_records()
 # exhaust_debtors=pd.DataFrame(x)
 
-sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='debtor_level')
+# sheet_by_name, client = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='debtor_level')
 debtor_level=create_debtor_level_view(exhausted_df)
 debtor_level = debtor_level.replace([np.inf, -np.inf], np.nan)
 debtor_level = debtor_level.fillna('')
+debtor_level=debtor_level.rename(columns={'approved_total':'open_invoice_volume'})
 data_to_upload = [debtor_level.columns.values.tolist()] + debtor_level.values.tolist()
 # data_to_upload
-sheet_by_name.clear()
-sheet_by_name.append_rows(data_to_upload)
+# sheet_by_name.clear()
+ws = sheet_by_name.worksheet("debtor_level")
+ws.resize(rows=1, cols=1)  # Shrink sheet completely
+ws.clear()
+ws.update("A1", data_to_upload)
     
 # schedule.every().hour.do(job)
 
