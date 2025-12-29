@@ -1,0 +1,331 @@
+
+--select ((8-extract(DOW from current_date-365)::int) % 7)
+--
+--select 6%7
+--
+with mondays as
+(
+SELECT generate_series((current_date-365 + ((8 - EXTRACT(DOW FROM current_date-365)::int) % 7))+'1 week'::interval,current_date,'1 week'::interval)::date AS snapshot_date
+),
+
+brokers_onboarded_last_year as 
+(select d.id, d.created_at from debtors d 
+where d.status = 'active'
+and d.created_at >= current_date - 365),
+
+debtors_invoice_last_year as
+(select * from
+(select *, row_number() over (partition by debtor_id order by approved_date) as rn from invoices i) a
+where rn=1
+and approved_date>= current_date-365), -- optimize the *
+
+debtors_invoice_amount_last_year as
+(select debtor_id, count(distinct id) as invoice_count, sum(approved_accounts_receivable_amount) as invoice_amount from invoices i
+where created_at >= current_date - 365
+and paid_date is not null
+group by debtor_id), -- remove this
+
+cal_debtor_weekly_open_invoice_volume as --here
+(
+select
+d.id,
+d."name",
+b.mc,
+b.dot,
+d.rating,
+d.approved_total/100.0 as current_approved_total,
+d.debtor_limit,
+m.snapshot_date - 1 as report_date,
+sum(i.approved_accounts_receivable_amount/100.0) as approved_amount
+from mondays m
+cross join debtors d
+left join invoices i
+on d.id = i.debtor_id
+left join brokers b
+on d.id = b.debtor_id
+where 1=1
+and (i.approved_date at time zone 'US/Eastern' is not null and i.approved_date at time zone 'US/Eastern' < m.snapshot_date)
+and (i.paid_date at time zone 'US/Eastern' is null or i.paid_date at time zone 'US/Eastern' >= m.snapshot_date)
+and i.approved_date >= current_date-455
+and d.status = 'active'
+--and d."name" = 'TOTAL QUALITY LOGISTICS'
+group by
+d.id,
+d."name",
+b.mc,
+b.dot,
+d.rating,
+report_date,
+d.approved_total,
+d.debtor_limit
+),
+
+cal_debtor_weekly_open_invoice_volume_v2 as 
+(select *, 
+case when (last_year_created_at is not null or last_year_invoice_debtor_id is not null) -- first invoice filter only
+and invoice_amount <= 500000 then 1 else 0 --payment criteria
+end as correction_flag
+from
+(select a.*, x.created_at as last_year_created_at, y.debtor_id as last_year_invoice_debtor_id,
+case when z.invoice_count is null then 0 else z.invoice_count end as invoice_count, 
+case when z.invoice_amount is null then 0 else z.invoice_amount end as invoice_amount
+from
+cal_debtor_weekly_open_invoice_volume a
+left join brokers_onboarded_last_year x 
+on a.id=x.id
+left join debtors_invoice_last_year y 
+on a.id=y.debtor_id 
+left join debtors_invoice_amount_last_year z 
+on a.id=z.debtor_id) sq
+),
+
+cal_statistical_values as
+(
+select
+id,
+name,
+mc,
+dot,
+rating,
+current_approved_total,
+debtor_limit,
+avg (approved_amount) as mean,
+stddev_samp(approved_amount) as std_dev,
+percentile_cont(0.5) within group (order by approved_amount) as median,
+(percentile_cont(0.75) within group (order by approved_amount) - percentile_cont(0.25) within group (order by approved_amount)) as IQR,
+(stddev_samp(approved_amount)/nullif(avg(approved_amount),0)) as CV
+from cal_debtor_weekly_open_invoice_volume_v2
+where correction_flag =0
+group by
+id,
+name,
+mc,
+dot,
+rating,
+current_approved_total,
+debtor_limit
+),
+cal_broker_limits as (
+select
+id,
+name,
+mc,
+dot,
+rating,
+current_approved_total,
+debtor_limit,
+case
+	when (std_dev/nullif(mean,0)) < 1 then (mean + (1.5 * std_dev))
+	else (median + (1.5 * IQR))
+end as broker_limit
+from cal_statistical_values
+),
+apply_floor as
+(
+select
+*,
+case
+	when broker_limit < 10000 then 10000
+	else broker_limit
+end as adjusted_broker_limit
+from cal_broker_limits
+),
+exhaustion_flag as
+(
+select
+*,
+case
+	when current_approved_total > adjusted_broker_limit then 1
+	else 0
+end as exhaustion_flag
+from apply_floor
+),
+
+
+daily_dates as (
+SELECT generate_series(current_date-30,current_date,'1 Day'::interval)::date AS cd
+),
+exhausted_limits as (
+select
+d.id,
+d."name",
+b.mc,
+b.dot,
+d.rating,
+d.approved_total/100.0 as current_approved_total,
+d.debtor_limit,
+dd.cd- 1 as report_date,
+sum(i.approved_accounts_receivable_amount/100.0) as approved_amount
+from  daily_dates dd
+cross join debtors d
+left join invoices i
+on d.id = i.debtor_id
+left join brokers b
+on d.id = b.debtor_id
+join exhaustion_flag ef
+on ef.id = d.id and ef.exhaustion_flag = 1
+where 1=1
+and (i.approved_date at time zone 'US/Eastern' is not null and i.approved_date at time zone 'US/Eastern' < dd.cd)
+and (i.paid_date at time zone 'US/Eastern' is null or i.paid_date at time zone 'US/Eastern' >= dd.cd)
+and i.approved_date >= current_date-455
+and d.status = 'active'
+--and d."name" = 'TOTAL QUALITY LOGISTICS'
+group by
+d.id,
+d."name",
+b.mc,
+b.dot,
+d.rating,
+report_date,
+d.approved_total,
+d.debtor_limit
+),
+cal_ex_statistical_values as
+(
+select
+id,
+name,
+mc,
+dot,
+rating,
+current_approved_total,
+debtor_limit,
+avg (approved_amount) as mean,
+stddev_samp(approved_amount) as std_dev,
+percentile_cont(0.5) within group (order by approved_amount) as median,
+(percentile_cont(0.75) within group (order by approved_amount) - percentile_cont(0.25) within group (order by approved_amount)) as IQR,
+(stddev_samp(approved_amount)/nullif(avg(approved_amount),0)) as CV
+from exhausted_limits
+group by
+id,
+name,
+mc,
+dot,
+rating,
+current_approved_total,
+debtor_limit
+),
+cal_ex_broker_limits as (
+select
+id,
+name,
+mc,
+dot,
+rating,
+current_approved_total,
+debtor_limit,
+case
+	when (std_dev/nullif(mean,0)) < 1 then (mean + (1.5 * std_dev))
+	else (median + (1.5 * IQR))
+end as broker_limit
+from cal_ex_statistical_values
+),
+apply_ex_floor as
+(
+select
+*,
+case
+	when broker_limit < 10000 then 10000
+	else broker_limit
+end as adjusted_broker_limit
+from cal_ex_broker_limits
+),
+exhaustion_flag_v2 as
+(
+select
+*,
+case
+	when current_approved_total > adjusted_broker_limit then 1
+	else 0
+end as exhaustion_flag_v2
+from apply_ex_floor
+),
+consolidate as (
+select id,name,mc,dot,rating,current_approved_total,adjusted_broker_limit, debtor_limit from exhaustion_flag where exhaustion_flag = 0
+union
+select id,name,mc,dot,rating,current_approved_total,adjusted_broker_limit, debtor_limit from exhaustion_flag_v2 where exhaustion_flag_v2 = 0
+),
+
+
+hack as (
+select *, adjusted_broker_limit * 1.2 as adjusted_broker_limit_v2
+from exhaustion_flag_v2 where exhaustion_flag_v2 = 1
+),
+hack_exhaustion as (
+select
+*,
+case
+	when current_approved_total > adjusted_broker_limit_v2 then 1
+	else 0
+end as hack_exhaustion
+from hack
+),
+consolidate_v2 as
+(
+select * from consolidate
+union
+select id,name,mc,dot,rating,current_approved_total,adjusted_broker_limit_v2 as adjusted_broker_limit, debtor_limit from hack_exhaustion
+),
+
+consolidate_v3 as 
+(select *, 0 as correction_flag from consolidate_v2
+union
+select id,name,mc,dot,rating,current_approved_total,debtor_limit/100 as adjusted_broker_limit, debtor_limit, correction_flag from cal_debtor_weekly_open_invoice_volume_v2
+where correction_flag=1)
+
+select * from consolidate_v3
+--select * from hack_exhaustion where hack_exhaustion=1
+--select * from cal_statistical_values
+--where "name" like '%TOTAL QUALITY LOGISTICS%'
+
+--select * from brokers 
+--where debtor_id in ('6cfdeeb9-580a-447e-ba2f-d020dce143ee',
+--'8405ff3e-6209-44bc-a3fb-10d7a1ecc4ea')
+--consolidate_v3 as 
+--(select cv2.*, x.created_at as last_year_created_at, y.debtor_id as last_year_invoice_debtor_id,
+--case when z.invoice_count is null then 0 else z.invoice_count end as invoice_count, 
+--case when z.invoice_amount is null then 0 else z.invoice_amount end as invoice_amount
+--from
+--consolidate_v2 cv2
+--left join 
+--brokers_onboarded_last_year x
+--on cv2.id=x.id
+--left join
+--debtors_invoice_last_year y
+--on cv2.id=y.debtor_id
+--left join
+--debtors_invoice_amount_last_year z 
+--on cv2.id=z.debtor_id
+--)
+
+--consolidate_v4 as 
+--(select a.*, z.invoice_count, z.invoice_amount
+--from
+--(select * from consolidate_v3 cv3 
+--where last_year_created_at is not null 
+--or last_year_invoice_debtor_id is not null) a 
+--left join
+--debtors_invoice_amount_last_year z 
+--on a.id=z.debtor_id
+--)
+
+--select *,
+--case when (last_year_created_at is not null or last_year_invoice_debtor_id is not null) and debtor_limit>1000000
+--and invoice_amount <= 500000 then 1 else 0 
+--end as correction_flag
+--from consolidate_v3
+--select * from invoices i
+--where i.approved_date is not null
+--or i.client_id is not null 
+
+--select count(*) from exhaustion_flag
+--select * from hack_exhaustion where hack_exhaustion = 1;
+--select id,round(adjusted_broker_limit::numeric,-3) as broker_limit from consolidate_v2;
+
+--select * from exhaustion_flag_v2 where exhaustion_flag_v2 = 1;
+--select * from consolidate_v2; -- what is the len
+--select * from mondays
+--select * from cal_debtor_weekly_open_invoice_volume
+--where "name"='BUILDERS FIRST SOURCE'
+
+--select d.id,d."name",d.debtor_limit/100.0 as debtor_limit from debtors d where d.status = 'active';
