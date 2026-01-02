@@ -62,13 +62,16 @@ code = query_params.get("code")
 if code:
     user = fetch_user_info(code)
     st.query_params.clear()
-    st.success("Login successful!")
-    st.write("Welcome:", user["name"])
-    st.write("Email:", user["email"])
-    st.image(user["picture"], width=80)
-
-    # Store session
-    st.session_state["user"] = user
+    if "bobtail.com" not in user['email']:
+        st.error("🚫 Access denied. Your email is not authorized.")
+    else:
+        st.success("Login successful!")
+        st.write("Welcome:", user["name"])
+        st.write("Email:", user["email"])
+        st.image(user["picture"], width=80)
+    
+        # Store session
+        st.session_state["user"] = user
 
 else:
     if "user" in st.session_state:
