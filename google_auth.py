@@ -5,17 +5,10 @@ from google.auth.transport import requests
 import json
 import os
 
-st.set_page_config(page_title="Google Login Demo")
-
-# -------------------------#
-#  LOAD CREDENTIALS
-# -------------------------#
-CLIENT_ID = st.secrets["google_oauth"]["client_id"]
-CLIENT_SECRET = st.secrets["google_oauth"]["client_secret"]
-REDIRECT_URI = st.secrets["google_oauth"]["redirect_uri"]
+# st.set_page_config(page_title="Google Login Demo")
 
 # Use OAuth 2.0 "Flow"
-def google_flow():
+def google_flow(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI):
   flow = Flow.from_client_config(
       {
           "web": {
@@ -39,7 +32,7 @@ def google_login(flow):
     st.markdown(f"[🔐 Login with Google]({auth_url})")
 
 
-def fetch_user_info(code):
+def fetch_user_info(code, flow):
     flow.fetch_token(code=code)
     creds = flow.credentials
     request = requests.Request()
@@ -58,12 +51,20 @@ def fetch_user_info(code):
 def login():
   st.title("🔐 Exhaustion Monitoring Dashboard")
   
+  # -------------------------#
+  #  LOAD CREDENTIALS
+  # -------------------------#
+  CLIENT_ID = st.secrets["google_oauth"]["client_id"]
+  CLIENT_SECRET = st.secrets["google_oauth"]["client_secret"]
+  REDIRECT_URI = st.secrets["google_oauth"]["redirect_uri"]
+  flow=google_flow(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI)
+  
   # Get OAuth "code" from URL
   query_params = st.query_params
   code = query_params.get("code")
   
   if code:
-    user = fetch_user_info(code)
+    user = fetch_user_info(code, flow)
     st.query_params.clear()
     # if "bobtail.com" not in user['email']:
     #     st.error("🚫 Access denied. Your email is not authorized.")
@@ -81,5 +82,4 @@ def login():
       if "user" in st.session_state:
         st.success(f"Welcome back, {st.session_state['user']['name']}!")
       else:
-        flow=google_flow()
         google_login(flow)
