@@ -38,7 +38,7 @@ def fetch_user_info(code, flow):
     request = requests.Request()
 
     id_info = id_token.verify_oauth2_token(
-        creds._id_token, request, CLIENT_ID
+        creds._id_token, request, audience=flow.client_config["client_id"]
     )
 
     return {
@@ -49,37 +49,34 @@ def fetch_user_info(code, flow):
 
 
 def login():
+  if "authenticated" not in st.session_state:
+      st.session_state.authenticated = False
+  if st.session_state.authenticated:
+      return True
   st.title("🔐 Exhaustion Monitoring Dashboard")
   
-  # -------------------------#
-  #  LOAD CREDENTIALS
-  # -------------------------#
   CLIENT_ID = st.secrets["google_oauth"]["client_id"]
   CLIENT_SECRET = st.secrets["google_oauth"]["client_secret"]
   REDIRECT_URI = st.secrets["google_oauth"]["redirect_uri"]
   flow=google_flow(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI)
+
+  auth_url, _ = flow.authorization_url(prompt="consent")
+  st.markdown(f"[🔐 Login with Google]({auth_url})")
+
+  query_params = st.experimental_get_query_params()
+  # query_params = st.query_params
+  # code = query_params.get("code")
   
-  # Get OAuth "code" from URL
-  query_params = st.query_params
-  code = query_params.get("code")
-  
-  if code:
+  if code in query_params:
     user = fetch_user_info(code, flow)
     st.query_params.clear()
-    # if "bobtail.com" not in user['email']:
-    #     st.error("🚫 Access denied. Your email is not authorized.")
-    # else:
-    # st.success("Login successful!")
-    # st.write("Welcome:", user["name"])
-    # st.write("Email:", user["email"])
-    # st.image(user["picture"], width=80)
-    
-    # Store session
+    st.session_state.authenticated = True
     st.session_state["user"] = user
-    return True
+    st.experimental_rerun()
+  return False
   
-  else:
-      if "user" in st.session_state:
-        st.success(f"Welcome back, {st.session_state['user']['name']}!")
-      else:
-        google_login(flow)
+  # else:
+  #     if "user" in st.session_state:
+  #       st.success(f"Welcome back, {st.session_state['user']['name']}!")
+  #     else:
+  #       google_login(flow)
