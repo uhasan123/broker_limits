@@ -10,6 +10,7 @@ import json
 import tempfile
 import numpy as np
 from broker_report import broker_report
+from google_auth import google_login
 
 import gspread
 # from oauth2client.service_account import ServiceAccountCredentials
@@ -215,7 +216,9 @@ def connect_to_gsheet(creds_json,spreadsheet_name):
     spreadsheet = client.open(spreadsheet_name)  # Access the first sheet
     return spreadsheet
     
-
+if google_login()!=True:
+    st.stop()
+    
 st.set_page_config(
     page_title="Exhaustion Monitoring Dashboard",
     layout="wide",  # <--- This makes the page use the full width
