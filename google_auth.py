@@ -53,7 +53,7 @@ def login():
       st.session_state.authenticated = False
   if st.session_state.authenticated:
       return True
-  st.title("🔐 Exhaustion Monitoring Dashboard")
+  # st.title("🔐 Exhaustion Monitoring Dashboard")
   
   CLIENT_ID = st.secrets["google_oauth"]["client_id"]
   CLIENT_SECRET = st.secrets["google_oauth"]["client_secret"]
