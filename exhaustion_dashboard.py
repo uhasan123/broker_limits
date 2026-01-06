@@ -216,7 +216,7 @@ def connect_to_gsheet(creds_json,spreadsheet_name):
     spreadsheet = client.open(spreadsheet_name)  # Access the first sheet
     return spreadsheet
     
-if login()!=True:
+if login():
     st.stop()
     
 st.set_page_config(
