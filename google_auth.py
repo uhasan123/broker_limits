@@ -73,8 +73,8 @@ def login():
     st.query_params.clear()
     st.session_state.authenticated = True
     st.session_state["user"] = user
-    st.experimental_set_query_params()
-    st.experimental_rerun()
+st.experimental_set_query_params()
+st.experimental_rerun()
   return False
   
   # else:
