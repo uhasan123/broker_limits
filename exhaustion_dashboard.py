@@ -215,10 +215,7 @@ def connect_to_gsheet(creds_json,spreadsheet_name):
     client = gspread.authorize(credentials)
     spreadsheet = client.open(spreadsheet_name)  # Access the first sheet
     return spreadsheet
-    
-if login():
-    st.stop()
-    
+
 st.set_page_config(
     page_title="Exhaustion Monitoring Dashboard",
     layout="wide",  # <--- This makes the page use the full width
@@ -226,6 +223,9 @@ st.set_page_config(
 )
 
 st.title("Exhaustion Monitoring Dashboard")
+
+if login():
+    st.stop()
 
 # Check login state
 # if "user" not in st.session_state:
