@@ -55,7 +55,7 @@ def fetch_user_info(code):
     }
 
 
-def google_login():
+def login():
   st.title("🔐 Exhaustion Monitoring Dashboard")
   
   # Get OAuth "code" from URL
