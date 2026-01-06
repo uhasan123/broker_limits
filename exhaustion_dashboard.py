@@ -224,7 +224,7 @@ st.set_page_config(
 
 st.title("Exhaustion Monitoring Dashboard")
 
-if login():
+if not login():
     st.stop()
 
 # Check login state
