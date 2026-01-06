@@ -10,8 +10,8 @@ import json
 import tempfile
 import numpy as np
 from broker_report import broker_report
-# from google_auth import login
-from google_auth import authenticate_user
+from google_auth import login
+# from google_auth import authenticate_user
 
 import gspread
 # from oauth2client.service_account import ServiceAccountCredentials
@@ -225,14 +225,14 @@ st.set_page_config(
 
 st.title("Exhaustion Monitoring Dashboard")
 
-authenticate_user()
-SESSION_TIMEOUT = 3600  # seconds
-if "login_time" in st.session_state:
-    if time.time() - st.session_state.login_time > SESSION_TIMEOUT:
-        st.session_state.authenticated = False
-        st.experimental_rerun()
-# if not login():
-#     st.stop()
+# authenticate_user()
+# SESSION_TIMEOUT = 3600  # seconds
+# if "login_time" in st.session_state:
+#     if time.time() - st.session_state.login_time > SESSION_TIMEOUT:
+#         st.session_state.authenticated = False
+#         st.experimental_rerun()
+if not login():
+    st.stop()
 
 # Check login state
 # if "user" not in st.session_state:
