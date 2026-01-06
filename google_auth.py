@@ -27,9 +27,9 @@ def google_flow(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI):
 # -------------------------#
 #  MAIN LOGIC
 # -------------------------#
-def google_login(flow):
-    auth_url, _ = flow.authorization_url(prompt="consent")
-    st.markdown(f"[🔐 Login with Google]({auth_url})")
+# def google_login(flow):
+#     auth_url, _ = flow.authorization_url(prompt="consent")
+#     st.markdown(f"[🔐 Login with Google]({auth_url})")
 
 
 def fetch_user_info(code, flow):
