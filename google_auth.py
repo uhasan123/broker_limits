@@ -60,8 +60,8 @@ def login():
   REDIRECT_URI = st.secrets["google_oauth"]["redirect_uri"]
   flow=google_flow(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI)
 
-  auth_url, _ = flow.authorization_url(prompt="consent")
-  st.markdown(f"[🔐 Login with Google]({auth_url})")
+  # auth_url, _ = flow.authorization_url(prompt="consent")
+  # st.markdown(f"[🔐 Login with Google]({auth_url})")
 
   query_params = st.experimental_get_query_params()
   # query_params = st.query_params
