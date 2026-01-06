@@ -10,7 +10,7 @@ import json
 import tempfile
 import numpy as np
 from broker_report import broker_report
-# from google_auth import login
+from google_auth import login
 
 import gspread
 # from oauth2client.service_account import ServiceAccountCredentials
@@ -224,8 +224,8 @@ st.set_page_config(
 
 st.title("Exhaustion Monitoring Dashboard")
 
-# if not login():
-#     st.stop()
+if not login():
+    st.stop()
 
 # Check login state
 # if "user" not in st.session_state:
