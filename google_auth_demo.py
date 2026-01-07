@@ -54,7 +54,7 @@ def fetch_user_info(code):
     }
 
 
-st.title("🔐 Google Auth Prototype")
+# st.title("🔐 Google Auth Prototype")
 
 # Get OAuth "code" from URL
 query_params = st.query_params
