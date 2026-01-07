@@ -95,16 +95,16 @@ class broker_report:
         return mondays_df, days
 
     @staticmethod
-    def generate_custom_dates(step='weekly', value):
+    def generate_custom_dates(step='weekly'):
         if step=='weekly':
-            days=7
+            days=365
         elif step=='monthly':
-            days=30
+            days=730
         elif step=='daily':
-            days=1
+            days=60
         else:
             days=None
-        d2=broker_level_df.iloc[-1]['snapshot_date']-pd.Timedelta(days=value*days)
+        d2=date.today()-pd.Timedelta(days=days)
         d1=date.today()
         return d2, d1
 
