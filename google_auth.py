@@ -68,19 +68,19 @@ def login():
   code = query_params.get("code")
   
   if code:
-    # try:
-    # code = query_params.get("code")
-    user = fetch_user_info(code, flow)
-    # st.write(user)
-    st.query_params.clear()
-    st.session_state.authenticated = True
-    st.session_state["user"] = user
-    st.experimental_set_query_params()
-    st.experimental_rerun()
-    # except Exception as e:
-    #   st.error("Authentication failed")
-    #   st.session_state.authenticated = False
-    #   st.stop()
+    try:
+      # code = query_params.get("code")
+      user = fetch_user_info(code, flow)
+      # st.write(user)
+      st.query_params.clear()
+      st.session_state.authenticated = True
+      st.session_state["user"] = user
+      # st.experimental_set_query_params()
+      # st.experimental_rerun()
+    except Exception as e:
+      st.error("Authentication failed")
+      st.session_state.authenticated = False
+      st.stop()
   else:
     if "user" in st.session_state:
         st.success(f"Welcome back, {st.session_state['user']['name']}!")
