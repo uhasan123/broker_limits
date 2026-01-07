@@ -435,7 +435,7 @@ with tab3:
             broker_level_df=segment_level_data[segment_level_data['id']==debtor_id]
 
             # generate series logic here
-            d2, d1=generate_custom_dates(period, value[0])
+            d2, d1=generate_custom_dates(period)
             date_df, days=generate_date_series(d2, d1, period)
             broker_level_df=date_df.merge(broker_level_df, how='left', on='snapshot_date')
             broker_level_df['invoice_approved'].fillna(0)
@@ -538,7 +538,7 @@ with tab3:
             segment_level_data=segment_level_data.replace('', np.nan)
             broker_level=segment_level_data[segment_level_data['id']==debtor_id]
             # generate series logic here
-            d2, d1=generate_custom_dates(period, value[0])
+            d2, d1=generate_custom_dates(period)
             date_df, days=generate_date_series(d2, d1, period)
             broker_level_df=date_df.merge(broker_level_df, how='left', on='snapshot_date')
             broker_level_df['invoice_approved'].fillna(0)
@@ -603,7 +603,7 @@ with tab3:
             broker_level_df=segment_level_data[segment_level_data['id']==debtor_id]
 
             # generate series logic here
-            d2, d1=generate_custom_dates(period, value[0])
+            d2, d1=generate_custom_dates(period)
             date_df, days=generate_date_series(d2, d1, period)
             broker_level_df=date_df.merge(broker_level_df, how='left', on='snapshot_date')
             # broker_level_df['invoice_approved'].fillna(0)
