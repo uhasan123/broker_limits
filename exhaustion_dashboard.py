@@ -216,13 +216,6 @@ def connect_to_gsheet(creds_json,spreadsheet_name,sheet_name):
     return spreadsheet.worksheet(sheet_name)
     
 def main():
-    st.set_page_config(
-        page_title="Exhaustion Monitoring Dashboard",
-        layout="wide",  # <--- This makes the page use the full width
-        initial_sidebar_state="expanded"  # optional: sidebar expanded by default
-    )
-    
-    st.title("Exhaustion Monitoring Dashboard")
     
     # Check login state
     # if "user" not in st.session_state:
