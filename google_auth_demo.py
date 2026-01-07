@@ -55,6 +55,13 @@ def fetch_user_info(code):
 
 
 # st.title("🔐 Google Auth Prototype")
+st.set_page_config(
+    page_title="Exhaustion Monitoring Dashboard",
+    layout="wide",  # <--- This makes the page use the full width
+    initial_sidebar_state="expanded"  # optional: sidebar expanded by default
+)
+
+st.title("Exhaustion Monitoring Dashboard")
 
 # Get OAuth "code" from URL
 query_params = st.query_params
