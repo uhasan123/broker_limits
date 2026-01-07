@@ -95,6 +95,20 @@ class broker_report:
         return mondays_df, days
 
     @staticmethod
+    def generate_custom_dates(step='weekly', value):
+        if step=='weekly':
+            days=7
+        elif step=='monthly':
+            days=30
+        elif step=='daily':
+            days=1
+        else:
+            days=None
+        d2=broker_level_df.iloc[-1]['snapshot_date']-pd.Timedelta(days=value*days)
+        d1=date.today()
+        return d2, d1
+
+    @staticmethod
     def generate_segment_level_data(start_date, end_date,debtors_df, brokers_df, invoice_df, step='weekly'): #start date default None
         mondays_df, days=broker_report.generate_date_series(start_date, end_date, step)
         xx=mondays_df.merge(debtors_df[['id', 'name', 'rating', 'approved_total','debtor_limit', 'created_at']], how='cross')
