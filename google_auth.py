@@ -69,7 +69,7 @@ def login():
   
   if "code" in query_params:
     try:
-      code = query_params.get("code")[0]
+      code = query_params.get("code")
       user = fetch_user_info(code, flow)
       st.query_params.clear()
       st.session_state.authenticated = True
