@@ -64,12 +64,12 @@ def login():
   # st.markdown(f"[🔐 Login with Google]({auth_url})")
 
   query_params = st.experimental_get_query_params()
-  # query_params = st.query_params
-  # code = query_params.get("code")
+  query_params = st.query_params
+  code = query_params.get("code")
   
-  if "code" in query_params:
+  if code:
     try:
-      code = query_params.get("code")
+      # code = query_params.get("code")
       user = fetch_user_info(code, flow)
       st.query_params.clear()
       st.session_state.authenticated = True
@@ -80,8 +80,12 @@ def login():
       st.error("Authentication failed")
       st.session_state.authenticated = False
       st.stop()
-  auth_url, _ = flow.authorization_url(prompt="consent")
-  st.markdown(f"[🔐 Login with Google]({auth_url})")
+  else:
+    if "user" in st.session_state:
+        st.success(f"Welcome back, {st.session_state['user']['name']}!")
+    else:
+      auth_url, _ = flow.authorization_url(prompt="consent")
+      st.markdown(f"[🔐 Login with Google]({auth_url})")
   return False
   
   # else:
