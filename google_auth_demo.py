@@ -4,6 +4,7 @@ from google.oauth2 import id_token
 from google.auth.transport import requests
 import json
 import os
+from exhaustion_dashboard import main
 
 st.set_page_config(page_title="Google Login Demo")
 
@@ -64,14 +65,15 @@ if code:
     st.query_params.clear()
     # if "bobtail.com" not in user['email']:
     #     st.error("🚫 Access denied. Your email is not authorized.")
-    # else:
-    st.success("Login successful!")
-    st.write("Welcome:", user["name"])
-    st.write("Email:", user["email"])
-    st.image(user["picture"], width=80)
+    # # else:
+    # st.success("Login successful!")
+    # st.write("Welcome:", user["name"])
+    # st.write("Email:", user["email"])
+    # st.image(user["picture"], width=80)
 
     # Store session
     st.session_state["user"] = user
+    main()
 
 else:
     if "user" in st.session_state:
