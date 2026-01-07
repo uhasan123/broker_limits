@@ -216,10 +216,10 @@ def connect_to_gsheet(creds_json,spreadsheet_name):
     spreadsheet = client.open(spreadsheet_name)  # Access the first sheet
     return spreadsheet
 
-query_params = st.experimental_get_query_params()
+# query_params = st.experimental_get_query_params()
 
-if "code" not in query_params:
-    st.stop()
+# if "code" not in query_params:
+#     st.stop()
     
 st.set_page_config(
     page_title="Exhaustion Monitoring Dashboard",
