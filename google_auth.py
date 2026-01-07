@@ -4,8 +4,16 @@ from google.oauth2 import id_token
 from google.auth.transport import requests
 import json
 import os
+from exhaustion_dashboard_with_auth import main
 
 # st.set_page_config(page_title="Google Login Demo")
+st.set_page_config(
+    page_title="Exhaustion Monitoring Dashboard",
+    layout="wide",  # <--- This makes the page use the full width
+    initial_sidebar_state="expanded"  # optional: sidebar expanded by default
+)
+
+st.title("Exhaustion Monitoring Dashboard")
 
 # Use OAuth 2.0 "Flow"
 def google_flow(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI):
@@ -48,46 +56,49 @@ def fetch_user_info(code, flow):
     }
 
 
-def login():
-  if "authenticated" not in st.session_state:
-      st.session_state.authenticated = False
-  if st.session_state.authenticated:
-      return True
+# def login():
+  # if "authenticated" not in st.session_state:
+  #     st.session_state.authenticated = False
+  # if st.session_state.authenticated:
+  #     return True
+  
   # st.title("🔐 Exhaustion Monitoring Dashboard")
   
-  CLIENT_ID = st.secrets["google_oauth"]["client_id"]
-  CLIENT_SECRET = st.secrets["google_oauth"]["client_secret"]
-  REDIRECT_URI = st.secrets["google_oauth"]["redirect_uri"]
-  flow=google_flow(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI)
+CLIENT_ID = st.secrets["google_oauth"]["client_id"]
+CLIENT_SECRET = st.secrets["google_oauth"]["client_secret"]
+REDIRECT_URI = st.secrets["google_oauth"]["redirect_uri"]
+flow=google_flow(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI)
 
-  # auth_url, _ = flow.authorization_url(prompt="consent")
-  # st.markdown(f"[🔐 Login with Google]({auth_url})")
+# auth_url, _ = flow.authorization_url(prompt="consent")
+# st.markdown(f"[🔐 Login with Google]({auth_url})")
 
-  # query_params = st.experimental_get_query_params()
-  query_params = st.query_params
-  code = query_params.get("code")
-  
-  if code:
-    try:
-      # code = query_params.get("code")
-      user = fetch_user_info(code, flow)
-      # st.write(user)
-      st.query_params.clear()
-      st.session_state.authenticated = True
-      st.session_state["user"] = user
-      # st.experimental_set_query_params()
-      # st.experimental_rerun()
-    except Exception as e:
-      st.error("Authentication failed")
-      st.session_state.authenticated = False
-      st.stop()
+# query_params = st.experimental_get_query_params()
+query_params = st.query_params
+code = query_params.get("code")
+
+if code:
+  try:
+    # code = query_params.get("code")
+    user = fetch_user_info(code, flow)
+    # st.write(user)
+    st.query_params.clear()
+    st.session_state.authenticated = True
+    st.session_state["user"] = user
+    main()
+    # st.experimental_set_query_params()
+    # st.experimental_rerun()
+  except Exception as e:
+    st.error("Authentication failed")
+    st.session_state.authenticated = False
+    st.stop()
+else:
+  if "user" in st.session_state:
+    main()
+      # st.success(f"Welcome back, {st.session_state['user']['name']}!")
   else:
-    if "user" in st.session_state:
-        st.success(f"Welcome back, {st.session_state['user']['name']}!")
-    else:
-      auth_url, _ = flow.authorization_url(prompt="consent")
-      st.markdown(f"[🔐 Login with Google]({auth_url})")
-  return False
+    auth_url, _ = flow.authorization_url(prompt="consent")
+    st.markdown(f"[🔐 Login with Google]({auth_url})")
+  # return False
   
   # else:
   #     if "user" in st.session_state:
