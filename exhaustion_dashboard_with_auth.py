@@ -417,10 +417,12 @@ def main():
     
         cols1=st.columns([1,1,2])
         period=cols1[0].selectbox("Period: ", ('monthly', 'weekly'), key='step')    
-        value=cols1[1].text_input("Value: ", key="cohort")
-        if value!='':
-            value=value.split(',')
-            value[0]=int(value[0])
+        valuee=int(cols1[1].number_input("Value: ", key="cohort"))
+        if valuee:
+            value=[]
+            value.append(valuee)
+            # value=value.split(',')
+            # value[0]=int(value[0])
             # cohort=ast.literal_eval(cohort)
         if st.button("Submit", key='submit_tab3'):
             st.session_state.tab3_metrics=True
