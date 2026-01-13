@@ -433,10 +433,11 @@ with tab3:
                 segment_level_data=None
             segment_level_data=segment_level_data.replace('', np.nan)
             broker_level_df=segment_level_data[segment_level_data['id']==debtor_id]
+            # broker level df should have till current date. so include a union here
 
             # generate series logic here
             d2, d1=generate_custom_dates(period)
-            date_df, days=generate_date_series(d2, d1, period)
+            date_df, days=generate_date_series(d2, d1, period) # this won't work. need to genaret series with exact dates, including current date
             broker_level_df=date_df.merge(broker_level_df, how='left', on='snapshot_date')
             broker_level_df['invoice_approved'].fillna(0)
             broker_level_df['invoice_approved_dollars'].fillna(0)
