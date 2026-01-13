@@ -190,7 +190,7 @@ conn.autocommit=True
 # sheet_by_name.clear()
 # sheet_by_name.append_rows(data_to_upload)
 
-generate_segment_level_data_day, generate_segment_level_data_week, generate_segment_level_data_month, generate_segment_level_data_current=generate_segment_level_data()
+generate_segment_level_data_day, generate_segment_level_data_week, generate_segment_level_data_month, generate_segment_level_data_current, generate_segment_level_data_current_month=generate_segment_level_data()
 debtor_limit_df_l90=calc_debtor_limit_l90()
 open_invoice_df_l90=calc_open_invoice_volume_l90()
 
