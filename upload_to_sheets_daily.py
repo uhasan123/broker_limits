@@ -126,7 +126,10 @@ def generate_segment_level_data():
     with open('generate_segment_level_data_current.sql', 'r') as file:
         query3=file.read()
     generate_segment_level_data_current=pd.read_sql_query(query3, conn)
-    return generate_segment_level_data_day, generate_segment_level_data_week, generate_segment_level_data_month, generate_segment_level_data_current
+    with open('generate_segment_level_data_current_month.sql', 'r') as file:
+        query4=file.read()
+    generate_segment_level_data_current_month=pd.read_sql_query(query4, conn)
+    return generate_segment_level_data_day, generate_segment_level_data_week, generate_segment_level_data_month, generate_segment_level_data_current, generate_segment_level_data_current_month
 
 def calc_debtor_limit_l90():
     obj=broker_report()
@@ -243,6 +246,17 @@ data_to_upload = [generate_segment_level_data_current.columns.values.tolist()] +
 # data_to_upload
 # sheet_by_name.clear()
 ws = sheet_by_name.worksheet("segment_level_data_week_start_to_date")
+ws.resize(rows=1, cols=1)  # Shrink sheet completely
+ws.clear()
+ws.update("A1",data_to_upload)
+
+generate_segment_level_data_current_month = generate_segment_level_data_current_month.replace([np.inf, -np.inf], np.nan)
+generate_segment_level_data_current_month = generate_segment_level_data_current_month.fillna('')
+generate_segment_level_data_current_month['snapshot_date']=generate_segment_level_data_current_month['snapshot_date'].astype(str)
+data_to_upload = [generate_segment_level_data_current_month.columns.values.tolist()] + generate_segment_level_data_current_month.values.tolist()
+# data_to_upload
+# sheet_by_name.clear()
+ws = sheet_by_name.worksheet("segment_level_data_month_start_to_date")
 ws.resize(rows=1, cols=1)  # Shrink sheet completely
 ws.clear()
 ws.update("A1",data_to_upload)
