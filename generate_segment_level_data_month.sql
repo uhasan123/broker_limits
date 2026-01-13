@@ -2,7 +2,12 @@
 
 with months as
 (
-SELECT generate_series(current_date-730 ,current_date,'30 days'::interval)::date AS snapshot_date
+SELECT generate_series(
+    date_trunc('month', current_date - interval '12 months'),  -- start: first day of month 12 months ago
+    date_trunc('month', current_date),                        -- end: first day of current month
+    interval '1 month'                                        -- step: 1 month
+)::date AS snapshot_date;
+
 ),
 avg_debtor_aeging as (
 select debtor_id, avg(avg_ageing) as avg_ageing
