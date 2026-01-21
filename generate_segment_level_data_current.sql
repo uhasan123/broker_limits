@@ -41,7 +41,7 @@ on d.id = b.debtor_id
 where 1=1
 --and (i.approved_date at time zone 'US/Eastern' is not null and i.approved_date at time zone 'US/Eastern' < m.snapshot_date)
 --and (i.paid_date at time zone 'US/Eastern' is null or i.paid_date at time zone 'US/Eastern' >= m.snapshot_date)
-and (i.approved_date >= current_date-10 or i.paid_date >= current_date-10)
+and (i.approved_date >= current_date-35 or i.paid_date >= current_date-35)
 and d.status = 'active'
 --and d."name" = 'TOTAL QUALITY LOGISTICS'
 group by
