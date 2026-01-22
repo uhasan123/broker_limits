@@ -424,20 +424,56 @@ with tab3:
             if period=='weekly':
                 sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_weekly')
                 x=sheet_by_name.get_all_records()
-                segment_level_data=pd.DataFrame(x)
+                segment_level_data1=pd.DataFrame(x)
+                sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_week_start_to_date')
+                x=sheet_by_name.get_all_records()
+                segment_level_data2=pd.DataFrame(x)
+                current_date=segment_level_data2['snapshot_date'].iloc[0]
+                segment_level_data=pd.concat([segment_level_data1, segment_level_data2], axis=0, ignore_index=True)
+
+                today = pd.Timestamp.today().normalize()
+
+                start = (
+                    today - pd.Timedelta(days=365)
+                ).to_period("W-MON").start_time + pd.Timedelta(weeks=1)
+
+                weekly_dates = pd.date_range(
+                    start=start,
+                    end=today,
+                    freq="W-MON"
+                )
+                weekly_dates=list(weekly_dates.strftime("%d-%m-%Y"))
+                weekly_dates.append(current_date)
+                date_df=pd.DataFrame()
+                date_df['snapshot_date']=weekly_dates
             elif period=='monthly':
                 sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_monthly')
                 x=sheet_by_name.get_all_records()
                 segment_level_data=pd.DataFrame(x)
+                sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_month_start_to_date')
+                x=sheet_by_name.get_all_records()
+                segment_level_data2=pd.DataFrame(x)
+                current_date=segment_level_data2['snapshot_date'].iloc[0]
+                segment_level_data=pd.concat([segment_level_data1, segment_level_data2], axis=0, ignore_index=True)
+
+                start = (date.today() - pd.Timedelta(days=730)).replace(day=1)
+                end = date.today().replace(day=1)
+
+                date_series = pd.date_range(
+                start=start,
+                end=end,
+                freq="MS"  # Month Start
+                )
+                date_series=list(date_series.strftime("%d-%m-%Y"))
+                date_series.append(current_date)
+                date_df=pd.DataFrame()
+                date_df['snapshot_date']=date_series
             else:
                 segment_level_data=None
             segment_level_data=segment_level_data.replace('', np.nan)
             broker_level_df=segment_level_data[segment_level_data['id']==debtor_id]
-            # broker level df should have till current date. so include a union here
 
-            # generate series logic here
-            d2, d1=generate_custom_dates(period)
-            date_df, days=generate_date_series(d2, d1, period) # this won't work. need to genaret series with exact dates, including current date
+            
             broker_level_df=date_df.merge(broker_level_df, how='left', on='snapshot_date')
             broker_level_df['invoice_approved'].fillna(0)
             broker_level_df['invoice_approved_dollars'].fillna(0)
