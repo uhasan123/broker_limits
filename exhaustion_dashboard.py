@@ -449,7 +449,7 @@ with tab3:
             elif period=='monthly':
                 sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_monthly')
                 x=sheet_by_name.get_all_records()
-                segment_level_data=pd.DataFrame(x)
+                segment_level_data1=pd.DataFrame(x)
                 sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_month_start_to_date')
                 x=sheet_by_name.get_all_records()
                 segment_level_data2=pd.DataFrame(x)
