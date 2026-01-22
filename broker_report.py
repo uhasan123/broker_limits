@@ -237,7 +237,8 @@ class broker_report:
     def client_conc(broker_level_df, invoice_df, cohort):
         cols=['client count (absolute)', 'top 3 client share', '25% share client count', '50% share client count', '75% share client count', 'invoice amount per client']
         days_diff=(broker_level_df['snapshot_date'].iloc[1] - broker_level_df['snapshot_date'].iloc[0]).days
-        days_diff_dict={'7': 'weeks', '30':'months', '1': 'days'}
+        # days_diff_dict={'7': 'weeks', '30':'months', '1': 'days'}
+        days_diff_dict={'7': 'weeks', '30':'months','28': 'months', '29':'months', '31':'months', '1': 'days'}
         d=days_diff_dict[str(days_diff)]
         df_list=[]
 
