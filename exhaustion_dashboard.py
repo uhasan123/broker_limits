@@ -482,6 +482,7 @@ with tab3:
             broker_level_df['invoice_paid_dollars'].fillna(0)
             broker_level_df['dtp'].fillna(np.nan)
             broker_level_df['open_invoices_in_point'].ffill()
+            broker_level_df['open_invoices_in_point'].fillna(0)
             broker_level_df['no_of_clients'].fillna(0)
             # broker_level_df['open_invoice_shifted']=broker_level_df.sort_values(by='snapshot_date', ascending=True)['open_invoices_in_point'].shift(1)
             # while broker_level_df[broker_level_df['open_invoices_in_point'].isna()==True]:
