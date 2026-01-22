@@ -442,7 +442,7 @@ with tab3:
                     end=today,
                     freq="W-MON"
                 )
-                weekly_dates=list(weekly_dates.strftime("%d-%m-%Y"))
+                weekly_dates=list(weekly_dates.strftime("%Y-%m-%d"))
                 weekly_dates.append(current_date)
                 date_df=pd.DataFrame()
                 date_df['snapshot_date']=weekly_dates
@@ -464,7 +464,7 @@ with tab3:
                 end=end,
                 freq="MS"  # Month Start
                 )
-                date_series=list(date_series.strftime("%d-%m-%Y"))
+                date_series=list(date_series.strftime("%Y-%m-%d"))
                 date_series.append(current_date)
                 date_df=pd.DataFrame()
                 date_df['snapshot_date']=date_series
