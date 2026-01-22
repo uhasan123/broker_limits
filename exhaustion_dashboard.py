@@ -14,7 +14,7 @@ from broker_report import broker_report
 import gspread
 # from oauth2client.service_account import ServiceAccountCredentials
 from google.oauth2.service_account import Credentials
-from auth import login, callback
+# from auth import login, callback
 
 def get_exhausted_debtors():
     obj=broker_report()
