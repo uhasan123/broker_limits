@@ -475,6 +475,7 @@ with tab3:
 
             
             broker_level_df=date_df.merge(broker_level_df, how='left', on='snapshot_date')
+            broker_level_df=broker_level_df.sort_values(by='snapshot_date', ascending=True)
             broker_level_df['invoice_approved'].fillna(0)
             broker_level_df['invoice_approved_dollars'].fillna(0)
             broker_level_df['invoice_paid'].fillna(0)
