@@ -195,8 +195,10 @@ def extract_debtor_id_from_name_or_dot(typee, value):
     else:
         return None
 def extract_debtor_id_from_name_or_dot_2(typee, value):
-    sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_monthly')
-    x=sheet_by_name.get_all_records()
+    # sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_monthly')
+    # x=sheet_by_name.get_all_records()
+    ws = sheet_by_name.worksheet("segment_level_data_monthly")
+    x=ws.get_all_records()
     segment_level_data=pd.DataFrame(x)
     if typee=='name':
         debtor_id=segment_level_data[segment_level_data['name']==value]['id'].unique()[0]
@@ -440,11 +442,15 @@ def main():
                 
                 # broker_level_df=broker_report.generate_segment_level_data(start_date, end_date, debtors_df, brokers_df, invoice_df, step=period)
                 if period=='weekly':
-                    sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_weekly')
-                    x=sheet_by_name.get_all_records()
+                    # sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_weekly')
+                    ws = sheet_by_name.worksheet("segment_level_data_weekly")
+                    x=ws.get_all_records()
+                    # x=sheet_by_name.get_all_records()
                     segment_level_data1=pd.DataFrame(x)
-                    sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_week_start_to_date')
-                    x=sheet_by_name.get_all_records()
+                    # sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_week_start_to_date')
+                    # x=sheet_by_name.get_all_records()
+                    ws = sheet_by_name.worksheet("segment_level_data_week_start_to_date")
+                    x=ws.get_all_records()
                     segment_level_data2=pd.DataFrame(x)
                     current_date=segment_level_data2['snapshot_date'].iloc[0]
                     segment_level_data=pd.concat([segment_level_data1, segment_level_data2], axis=0, ignore_index=True)
@@ -465,11 +471,15 @@ def main():
                     date_df=pd.DataFrame()
                     date_df['snapshot_date']=weekly_dates
                 elif period=='monthly':
-                    sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_monthly')
-                    x=sheet_by_name.get_all_records()
+                    # sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_monthly')
+                    # x=sheet_by_name.get_all_records()
+                    ws = sheet_by_name.worksheet("segment_level_data_monthly")
+                    x=ws.get_all_records()
                     segment_level_data1=pd.DataFrame(x)
-                    sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_month_start_to_date')
-                    x=sheet_by_name.get_all_records()
+                    # sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_month_start_to_date')
+                    # x=sheet_by_name.get_all_records()
+                    ws = sheet_by_name.worksheet("segment_level_data_month_start_to_date")
+                    x=ws.get_all_records()
                     segment_level_data2=pd.DataFrame(x)
                     current_date=segment_level_data2['snapshot_date'].iloc[0]
                     segment_level_data=pd.concat([segment_level_data1, segment_level_data2], axis=0, ignore_index=True)
@@ -570,11 +580,15 @@ def main():
                 
                 # broker_level=broker_report.generate_segment_level_data(start_date, end_date, debtors_df, brokers_df, invoice_df, step=period)
                 if period2=='weekly':
-                    sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_weekly')
-                    x=sheet_by_name.get_all_records()
+                    # sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_weekly')
+                    # x=sheet_by_name.get_all_records()
+                    ws = sheet_by_name.worksheet("segment_level_data_weekly")
+                    x=ws.get_all_records()
                     segment_level_data1=pd.DataFrame(x)
-                    sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_week_start_to_date')
-                    x=sheet_by_name.get_all_records()
+                    # sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_week_start_to_date')
+                    # x=sheet_by_name.get_all_records()
+                    ws = sheet_by_name.worksheet("segment_level_data_week_start_to_date")
+                    x=ws.get_all_records()
                     segment_level_data2=pd.DataFrame(x)
                     current_date=segment_level_data2['snapshot_date'].iloc[0]
                     segment_level_data=pd.concat([segment_level_data1, segment_level_data2], axis=0, ignore_index=True)
@@ -595,11 +609,15 @@ def main():
                     date_df=pd.DataFrame()
                     date_df['snapshot_date']=weekly_dates
                 elif period2=='monthly':
-                    sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_monthly')
-                    x=sheet_by_name.get_all_records()
+                    # sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_monthly')
+                    # x=sheet_by_name.get_all_records()
+                    ws = sheet_by_name.worksheet("segment_level_data_monthly")
+                    x=ws.get_all_records()
                     segment_level_data1=pd.DataFrame(x)
-                    sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_month_start_to_date')
-                    x=sheet_by_name.get_all_records()
+                    # sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_month_start_to_date')
+                    # x=sheet_by_name.get_all_records()
+                    ws = sheet_by_name.worksheet("segment_level_data_month_start_to_date")
+                    x=ws.get_all_records()
                     segment_level_data2=pd.DataFrame(x)
                     current_date=segment_level_data2['snapshot_date'].iloc[0]
                     segment_level_data=pd.concat([segment_level_data1, segment_level_data2], axis=0, ignore_index=True)
