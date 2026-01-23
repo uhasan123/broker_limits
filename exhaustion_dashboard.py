@@ -481,7 +481,7 @@ with tab3:
             broker_level_df['invoice_paid'].fillna(0, inplace=True)
             broker_level_df['invoice_paid_dollars'].fillna(0, inplace=True)
             broker_level_df['dtp'].fillna(np.nan, inplace=True)
-            broker_level_df['open_invoices_in_point'].ffill()
+            broker_level_df['open_invoices_in_point']=broker_level_df['open_invoices_in_point'].ffill()
             broker_level_df['open_invoices_in_point'].fillna(0, inplace=True)
             broker_level_df.replace([np.inf, -np.inf], 0, inplace=True)
             broker_level_df['no_of_clients'].fillna(0, inplace=True)
@@ -564,11 +564,50 @@ with tab3:
             if period2=='weekly':
                 sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_weekly')
                 x=sheet_by_name.get_all_records()
-                segment_level_data=pd.DataFrame(x)
+                segment_level_data1=pd.DataFrame(x)
+                sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_week_start_to_date')
+                x=sheet_by_name.get_all_records()
+                segment_level_data2=pd.DataFrame(x)
+                current_date=segment_level_data2['snapshot_date'].iloc[0]
+                segment_level_data=pd.concat([segment_level_data1, segment_level_data2], axis=0, ignore_index=True)
+
+                today = pd.Timestamp.today().normalize()
+
+                start = (
+                    today - pd.Timedelta(days=365)
+                ).to_period("W-MON").start_time + pd.Timedelta(weeks=1)
+
+                weekly_dates = pd.date_range(
+                    start=start,
+                    end=today,
+                    freq="W-MON"
+                )
+                weekly_dates=list(weekly_dates.strftime("%Y-%m-%d"))
+                weekly_dates.append(current_date)
+                date_df=pd.DataFrame()
+                date_df['snapshot_date']=weekly_dates
             elif period2=='monthly':
                 sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_monthly')
                 x=sheet_by_name.get_all_records()
-                segment_level_data=pd.DataFrame(x)
+                segment_level_data1=pd.DataFrame(x)
+                sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_month_start_to_date')
+                x=sheet_by_name.get_all_records()
+                segment_level_data2=pd.DataFrame(x)
+                current_date=segment_level_data2['snapshot_date'].iloc[0]
+                segment_level_data=pd.concat([segment_level_data1, segment_level_data2], axis=0, ignore_index=True)
+
+                start = (date.today() - pd.Timedelta(days=730)).replace(day=1)
+                end = date.today().replace(day=1)
+
+                date_series = pd.date_range(
+                start=start,
+                end=end,
+                freq="MS"  # Month Start
+                )
+                date_series=list(date_series.strftime("%Y-%m-%d"))
+                date_series.append(current_date)
+                date_df=pd.DataFrame()
+                date_df['snapshot_date']=date_series
             elif period2=='daily':
                 sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_daily')
                 x=sheet_by_name.get_all_records()
@@ -576,36 +615,34 @@ with tab3:
             else:
                 segment_level_data=None
             segment_level_data=segment_level_data.replace('', np.nan)
-            broker_level=segment_level_data[segment_level_data['id']==debtor_id]
-            # generate series logic here
-            d2, d1=generate_custom_dates(period)
-            date_df, days=generate_date_series(d2, d1, period)
+            broker_level_df=segment_level_data[segment_level_data['id']==debtor_id]
+
             broker_level_df=date_df.merge(broker_level_df, how='left', on='snapshot_date')
-            broker_level_df['invoice_approved'].fillna(0)
-            broker_level_df['invoice_approved_dollars'].fillna(0)
-            broker_level_df['invoice_paid'].fillna(0)
-            broker_level_df['invoice_paid_dollars'].fillna(0)
-            broker_level_df['dtp'].fillna(np.nan)
-            broker_level_df['open_invoices_in_point'].ffill()
-            broker_level_df['no_of_clients'].fillna(0)
-            # broker_level_df['open_invoice_shifted']=broker_level_df.sort_values(by='snapshot_date', ascending=True)['open_invoices_in_point'].shift(1)
-            # while broker_level_df[broker_level_df['open_invoices_in_point'].isna()==True]:
-            #     broker_level_df['open_invoices_in_point'].fillna(broker_level_df['open_invoice_shifted'])
+            broker_level_df=broker_level_df.sort_values(by='snapshot_date', ascending=True)
+            broker_level_df['invoice_approved'].fillna(0, inplace=True)
+            broker_level_df['invoice_approved_dollars'].fillna(0, inplace=True)
+            broker_level_df['invoice_paid'].fillna(0, inplace=True)
+            broker_level_df['invoice_paid_dollars'].fillna(0, inplace=True)
+            broker_level_df['dtp'].fillna(np.nan, inplace=True)
+            broker_level_df['open_invoices_in_point']=broker_level_df['open_invoices_in_point'].ffill()
+            broker_level_df['open_invoices_in_point'].fillna(0, inplace=True)
+            broker_level_df.replace([np.inf, -np.inf], 0, inplace=True)
+            broker_level_df['no_of_clients'].fillna(0, inplace=True)
                 
-            if period2!='daily':
-                sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_week_start_to_date')
-                x=sheet_by_name.get_all_records()
-                broker_level_current=pd.DataFrame(x)
-                # st.write(broker_level_current)
-                if len(broker_level_current)!=0:
-                    broker_level_current=broker_level_current[broker_level_current['id']==debtor_id]
-                else:
-                    broker_level_current=None
-                # broker_level_current=broker_report.generate_segment_level_data(start_date=None, end_date=end_date, debtors_df=debtors_df, brokers_df=brokers_df, invoice_df=invoice_df, step='current')
-            else:
-                broker_level_current=None
-            # broker_level_df=broker_level[broker_level['dtp'].isna()==False]
-            broker_level_df=pd.concat([broker_level, broker_level_current], ignore_index=True)
+            # if period2!='daily':
+            #     sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_week_start_to_date')
+            #     x=sheet_by_name.get_all_records()
+            #     broker_level_current=pd.DataFrame(x)
+            #     # st.write(broker_level_current)
+            #     if len(broker_level_current)!=0:
+            #         broker_level_current=broker_level_current[broker_level_current['id']==debtor_id]
+            #     else:
+            #         broker_level_current=None
+            #     # broker_level_current=broker_report.generate_segment_level_data(start_date=None, end_date=end_date, debtors_df=debtors_df, brokers_df=brokers_df, invoice_df=invoice_df, step='current')
+            # else:
+            #     broker_level_current=None
+            # # broker_level_df=broker_level[broker_level['dtp'].isna()==False]
+            # broker_level_df=pd.concat([broker_level, broker_level_current], ignore_index=True)
             # broker_level_df.head()
             # pivot_table, df_t, pivot_table_client_conc=broker_report.generate_report(broker_level_df, broker_profile_report=generate_broker_report, cohort=cohort,payment_trend_count=payment_trend_count, payment_trend_step=payment_trend_step, debtors_df=debtors_df, brokers_df=brokers_df, invoice_df=invoice_df)
             # df_t=broker_report.payment_trend(broker_level_df, count=value, step='default', debtors_df=debtors_df, brokers_df=brokers_df, invoice_df=invoice_df)
