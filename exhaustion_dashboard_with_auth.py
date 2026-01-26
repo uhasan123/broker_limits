@@ -560,7 +560,7 @@ def main():
                 cols_[1].write(pivot_table_client_conc)
 
                 st.write('DTP Trend')
-                df_t=broker_level_df[['snapshot_date', 'dtp']][-value3:].set_index('snapshot_date').T
+                df_t=broker_level_df[['snapshot_date', 'dtp']][-valuee:].set_index('snapshot_date').T
                 df_t=df_t.T.reset_index()
     
                 fig = go.Figure([
