@@ -675,15 +675,56 @@ def main():
         if st.session_state.tab3_dtp==True:
             if debtor_id!='':
                 if period3=='weekly':
-                    # sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_weekly')
                     ws = sheet_by_name.worksheet("segment_level_data_weekly")
                     x=ws.get_all_records()
-                    segment_level_data=pd.DataFrame(x)
+                    segment_level_data1=pd.DataFrame(x)
+                    # sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_week_start_to_date')
+                    # x=sheet_by_name.get_all_records()
+                    ws = sheet_by_name.worksheet("segment_level_data_week_start_to_date")
+                    x=ws.get_all_records()
+                    segment_level_data2=pd.DataFrame(x)
+                    current_date=segment_level_data2['snapshot_date'].iloc[0]
+                    segment_level_data=pd.concat([segment_level_data1, segment_level_data2], axis=0, ignore_index=True)
+    
+                    today = pd.Timestamp.today().normalize()
+    
+                    start = (
+                        today - pd.Timedelta(days=365)
+                    ).to_period("W-MON").start_time + pd.Timedelta(weeks=1)
+    
+                    weekly_dates = pd.date_range(
+                        start=start,
+                        end=today,
+                        freq="W-MON"
+                    )
+                    weekly_dates=list(weekly_dates.strftime("%Y-%m-%d"))
+                    weekly_dates.append(current_date)
+                    date_df=pd.DataFrame()
+                    date_df['snapshot_date']=weekly_dates
                 elif period3=='monthly':
-                    # sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_monthly')
                     ws = sheet_by_name.worksheet("segment_level_data_monthly")
                     x=ws.get_all_records()
-                    segment_level_data=pd.DataFrame(x)
+                    segment_level_data1=pd.DataFrame(x)
+                    # sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_month_start_to_date')
+                    # x=sheet_by_name.get_all_records()
+                    ws = sheet_by_name.worksheet("segment_level_data_month_start_to_date")
+                    x=ws.get_all_records()
+                    segment_level_data2=pd.DataFrame(x)
+                    current_date=segment_level_data2['snapshot_date'].iloc[0]
+                    segment_level_data=pd.concat([segment_level_data1, segment_level_data2], axis=0, ignore_index=True)
+    
+                    start = (date.today() - pd.Timedelta(days=730)).replace(day=1)
+                    end = date.today().replace(day=1)
+    
+                    date_series = pd.date_range(
+                    start=start,
+                    end=end,
+                    freq="MS"  # Month Start
+                    )
+                    date_series=list(date_series.strftime("%Y-%m-%d"))
+                    date_series.append(current_date)
+                    date_df=pd.DataFrame()
+                    date_df['snapshot_date']=date_series
                 elif period3=='daily':
                     # sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_daily')
                     ws = sheet_by_name.worksheet("segment_level_data_daily")
@@ -693,16 +734,12 @@ def main():
                     segment_level_data=None
                 segment_level_data=segment_level_data.replace('', np.nan)
                 broker_level_df=segment_level_data[segment_level_data['id']==debtor_id]
-                # if period3!='daily':
-                #     sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_week_start_to_date')
-                #     x=sheet_by_name.get_all_records()
-                #     broker_level_current=pd.DataFrame(x)
-                #     broker_level_current=broker_level_current[broker_level_current['id']==debtor_id]
-                # else:
-                #     broker_level_current=None
-    
-                # broker_level_df=pd.concat([broker_level, broker_level_current], ignore_index=True)
-                df_t=broker_level_df[['snapshot_date','invoice_approved', 'invoice_approved_dollars','open_invoices_in_point', 'invoice_paid', 'invoice_paid_dollars', 'dtp']][-value3:].set_index('snapshot_date').T
+
+                broker_level_df=date_df.merge(broker_level_df, how='left', on='snapshot_date')
+                broker_level_df['dtp'].fillna(np.nan, inplace=True)
+                
+                # df_t=broker_level_df[['snapshot_date','invoice_approved', 'invoice_approved_dollars','open_invoices_in_point', 'invoice_paid', 'invoice_paid_dollars', 'dtp']][-value3:].set_index('snapshot_date').T
+                df_t=broker_level_df[['snapshot_date', 'dtp']][-value3:].set_index('snapshot_date').T
                 df_t=df_t.T.reset_index()
     
                 fig = go.Figure([
