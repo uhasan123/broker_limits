@@ -558,6 +558,27 @@ def main():
                 pivot_table_client_conc=pivot_table_client_conc.rename(columns={'m':'metrics', 'l':'count'})
                 # pivot_table_client_conc=pivot_table_client_conc.reset_index().drop('index', axis=1)
                 cols_[1].write(pivot_table_client_conc)
+
+                st.write('DTP Trend')
+                df_t=broker_level_df[['snapshot_date', 'dtp']][-value3:].set_index('snapshot_date').T
+                df_t=df_t.T.reset_index()
+    
+                fig = go.Figure([
+                go.Scatter(x=df_t['snapshot_date'], y=df_t['dtp'], mode='lines+markers', name='Days to Pay')
+                # go.Scatter(x=df['snapshot_date'], y=df['invoice_approved_dollars'], mode='lines+markers', name='Invoices Approved (dollars)', yaxis='y1'),
+                # go.Scatter(x=df['snapshot_date'], y=df['invoice_paid_dollars'], mode='lines+markers', name='Invoices Paid (dollars)', yaxis='y1')
+            ])
+            
+                fig.update_layout(
+                    title="Broker DTP Trend",
+                    xaxis_title="Date",
+                    yaxis_title="Avg DTP",
+                    template="plotly_white",
+                    legend=dict(x=1.1, y=1.1),
+                    height=500
+                )
+                # st.write(df_t)
+                st.plotly_chart(fig, use_container_width=True)
     
         st.markdown(f"<h1 style='font-size:28px; color:green;'>Broker Payment Trend</h1>", unsafe_allow_html=True)
     
@@ -663,101 +684,100 @@ def main():
                 st.write(df_t)
                 st.plotly_chart(fig, use_container_width=True)
     
-        st.markdown(f"<h1 style='font-size:28px; color:green;'>DTP Trend</h1>", unsafe_allow_html=True)
     
-        cols3=st.columns([1,1,2])
-        period3=cols3[0].selectbox("Period: ", ('monthly', 'weekly', 'daily'), key='dtp_step')    
-        value3=int(cols3[1].number_input("Value: ", key="dtp_count"))
+        # cols3=st.columns([1,1,2])
+        # period3=cols3[0].selectbox("Period: ", ('monthly', 'weekly', 'daily'), key='dtp_step')    
+        # value3=int(cols3[1].number_input("Value: ", key="dtp_count"))
     
-        if st.button("Submit", key='submit_tab3_dtp'):
-            st.session_state.tab3_dtp=True
+        # if st.button("Submit", key='submit_tab3_dtp'):
+        #     st.session_state.tab3_dtp=True
     
-        if st.session_state.tab3_dtp==True:
-            if debtor_id!='':
-                if period3=='weekly':
-                    ws = sheet_by_name.worksheet("segment_level_data_weekly")
-                    x=ws.get_all_records()
-                    segment_level_data1=pd.DataFrame(x)
-                    # sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_week_start_to_date')
-                    # x=sheet_by_name.get_all_records()
-                    ws = sheet_by_name.worksheet("segment_level_data_week_start_to_date")
-                    x=ws.get_all_records()
-                    segment_level_data2=pd.DataFrame(x)
-                    current_date=segment_level_data2['snapshot_date'].iloc[0]
-                    segment_level_data=pd.concat([segment_level_data1, segment_level_data2], axis=0, ignore_index=True)
+        # if st.session_state.tab3_dtp==True:
+        #     if debtor_id!='':
+        #         if period3=='weekly':
+        #             ws = sheet_by_name.worksheet("segment_level_data_weekly")
+        #             x=ws.get_all_records()
+        #             segment_level_data1=pd.DataFrame(x)
+        #             # sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_week_start_to_date')
+        #             # x=sheet_by_name.get_all_records()
+        #             ws = sheet_by_name.worksheet("segment_level_data_week_start_to_date")
+        #             x=ws.get_all_records()
+        #             segment_level_data2=pd.DataFrame(x)
+        #             current_date=segment_level_data2['snapshot_date'].iloc[0]
+        #             segment_level_data=pd.concat([segment_level_data1, segment_level_data2], axis=0, ignore_index=True)
     
-                    today = pd.Timestamp.today().normalize()
+        #             today = pd.Timestamp.today().normalize()
     
-                    start = (
-                        today - pd.Timedelta(days=365)
-                    ).to_period("W-MON").start_time + pd.Timedelta(weeks=1)
+        #             start = (
+        #                 today - pd.Timedelta(days=365)
+        #             ).to_period("W-MON").start_time + pd.Timedelta(weeks=1)
     
-                    weekly_dates = pd.date_range(
-                        start=start,
-                        end=today,
-                        freq="W-MON"
-                    )
-                    weekly_dates=list(weekly_dates.strftime("%Y-%m-%d"))
-                    weekly_dates.append(current_date)
-                    date_df=pd.DataFrame()
-                    date_df['snapshot_date']=weekly_dates
-                elif period3=='monthly':
-                    ws = sheet_by_name.worksheet("segment_level_data_monthly")
-                    x=ws.get_all_records()
-                    segment_level_data1=pd.DataFrame(x)
-                    # sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_month_start_to_date')
-                    # x=sheet_by_name.get_all_records()
-                    ws = sheet_by_name.worksheet("segment_level_data_month_start_to_date")
-                    x=ws.get_all_records()
-                    segment_level_data2=pd.DataFrame(x)
-                    current_date=segment_level_data2['snapshot_date'].iloc[0]
-                    segment_level_data=pd.concat([segment_level_data1, segment_level_data2], axis=0, ignore_index=True)
+        #             weekly_dates = pd.date_range(
+        #                 start=start,
+        #                 end=today,
+        #                 freq="W-MON"
+        #             )
+        #             weekly_dates=list(weekly_dates.strftime("%Y-%m-%d"))
+        #             weekly_dates.append(current_date)
+        #             date_df=pd.DataFrame()
+        #             date_df['snapshot_date']=weekly_dates
+        #         elif period3=='monthly':
+        #             ws = sheet_by_name.worksheet("segment_level_data_monthly")
+        #             x=ws.get_all_records()
+        #             segment_level_data1=pd.DataFrame(x)
+        #             # sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_month_start_to_date')
+        #             # x=sheet_by_name.get_all_records()
+        #             ws = sheet_by_name.worksheet("segment_level_data_month_start_to_date")
+        #             x=ws.get_all_records()
+        #             segment_level_data2=pd.DataFrame(x)
+        #             current_date=segment_level_data2['snapshot_date'].iloc[0]
+        #             segment_level_data=pd.concat([segment_level_data1, segment_level_data2], axis=0, ignore_index=True)
     
-                    start = (date.today() - pd.Timedelta(days=730)).replace(day=1)
-                    end = date.today().replace(day=1)
+        #             start = (date.today() - pd.Timedelta(days=730)).replace(day=1)
+        #             end = date.today().replace(day=1)
     
-                    date_series = pd.date_range(
-                    start=start,
-                    end=end,
-                    freq="MS"  # Month Start
-                    )
-                    date_series=list(date_series.strftime("%Y-%m-%d"))
-                    date_series.append(current_date)
-                    date_df=pd.DataFrame()
-                    date_df['snapshot_date']=date_series
-                elif period3=='daily':
-                    # sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_daily')
-                    ws = sheet_by_name.worksheet("segment_level_data_daily")
-                    x=ws.get_all_records()
-                    segment_level_data=pd.DataFrame(x)
-                else:
-                    segment_level_data=None
-                segment_level_data=segment_level_data.replace('', np.nan)
-                broker_level_df=segment_level_data[segment_level_data['id']==debtor_id]
+        #             date_series = pd.date_range(
+        #             start=start,
+        #             end=end,
+        #             freq="MS"  # Month Start
+        #             )
+        #             date_series=list(date_series.strftime("%Y-%m-%d"))
+        #             date_series.append(current_date)
+        #             date_df=pd.DataFrame()
+        #             date_df['snapshot_date']=date_series
+        #         elif period3=='daily':
+        #             # sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name='segment_level_data_daily')
+        #             ws = sheet_by_name.worksheet("segment_level_data_daily")
+        #             x=ws.get_all_records()
+        #             segment_level_data=pd.DataFrame(x)
+        #         else:
+        #             segment_level_data=None
+        #         segment_level_data=segment_level_data.replace('', np.nan)
+        #         broker_level_df=segment_level_data[segment_level_data['id']==debtor_id]
 
-                broker_level_df=date_df.merge(broker_level_df, how='left', on='snapshot_date')
-                broker_level_df['dtp'].fillna(np.nan, inplace=True)
+        #         broker_level_df=date_df.merge(broker_level_df, how='left', on='snapshot_date')
+        #         broker_level_df['dtp'].fillna(np.nan, inplace=True)
                 
-                # df_t=broker_level_df[['snapshot_date','invoice_approved', 'invoice_approved_dollars','open_invoices_in_point', 'invoice_paid', 'invoice_paid_dollars', 'dtp']][-value3:].set_index('snapshot_date').T
-                df_t=broker_level_df[['snapshot_date', 'dtp']][-value3:].set_index('snapshot_date').T
-                df_t=df_t.T.reset_index()
+        #         # df_t=broker_level_df[['snapshot_date','invoice_approved', 'invoice_approved_dollars','open_invoices_in_point', 'invoice_paid', 'invoice_paid_dollars', 'dtp']][-value3:].set_index('snapshot_date').T
+        #         df_t=broker_level_df[['snapshot_date', 'dtp']][-value3:].set_index('snapshot_date').T
+        #         df_t=df_t.T.reset_index()
     
-                fig = go.Figure([
-                go.Scatter(x=df_t['snapshot_date'], y=df_t['dtp'], mode='lines+markers', name='Days to Pay')
-                # go.Scatter(x=df['snapshot_date'], y=df['invoice_approved_dollars'], mode='lines+markers', name='Invoices Approved (dollars)', yaxis='y1'),
-                # go.Scatter(x=df['snapshot_date'], y=df['invoice_paid_dollars'], mode='lines+markers', name='Invoices Paid (dollars)', yaxis='y1')
-            ])
+        #         fig = go.Figure([
+        #         go.Scatter(x=df_t['snapshot_date'], y=df_t['dtp'], mode='lines+markers', name='Days to Pay')
+        #         # go.Scatter(x=df['snapshot_date'], y=df['invoice_approved_dollars'], mode='lines+markers', name='Invoices Approved (dollars)', yaxis='y1'),
+        #         # go.Scatter(x=df['snapshot_date'], y=df['invoice_paid_dollars'], mode='lines+markers', name='Invoices Paid (dollars)', yaxis='y1')
+        #     ])
             
-                fig.update_layout(
-                    title="Broker DTP Trend",
-                    xaxis_title="Date",
-                    yaxis_title="Avg DTP",
-                    template="plotly_white",
-                    legend=dict(x=1.1, y=1.1),
-                    height=500
-                )
-                # st.write(df_t)
-                st.plotly_chart(fig, use_container_width=True)
+        #         fig.update_layout(
+        #             title="Broker DTP Trend",
+        #             xaxis_title="Date",
+        #             yaxis_title="Avg DTP",
+        #             template="plotly_white",
+        #             legend=dict(x=1.1, y=1.1),
+        #             height=500
+        #         )
+        #         # st.write(df_t)
+        #         st.plotly_chart(fig, use_container_width=True)
                 
         
         # payment_trend_count=int(st.number_input("payment trend count: ", key='payment_trend_count'))
