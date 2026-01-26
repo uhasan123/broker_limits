@@ -513,7 +513,7 @@ def main():
                 broker_level_df.replace([np.inf, -np.inf], 0, inplace=True)
                 broker_level_df['no_of_clients'].fillna(0, inplace=True)
 
-                st.write(broker_level_df.tail(10))
+                # st.write(broker_level_df.tail(10))
                 
                 pivot_table, df_t, pivot_table_client_conc=broker_report.generate_report(broker_level_df, broker_profile_report=True, cohort=value,payment_trend_count=5, payment_trend_step='default', debtors_df=None, brokers_df=None, invoice_df=invoice_df)
                 st.write('Debtors Info')
