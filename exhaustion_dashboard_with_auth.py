@@ -422,7 +422,7 @@ def main():
         with st.form('tab3_metrics'):
             period=cols1[0].selectbox("Period: ", ('monthly', 'weekly'), key='step')    
             valuee=int(cols1[1].number_input("Value: ", key="cohort"))
-            if st.form_submit_button("Submit", key='submit_tab3'):
+            if st.form_submit_button("Submit"):
                 st.session_state.tab3_metrics=True
     
         if st.session_state.tab3_metrics==True:
