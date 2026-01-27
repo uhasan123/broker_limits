@@ -419,19 +419,20 @@ def main():
         st.markdown(f"<h1 style='font-size:28px; color:green;'>Broker Profile</h1>", unsafe_allow_html=True)
     
         cols1=st.columns([1,1,2])
-        with st.form('tab3_metrics'):
-            period=cols1[0].selectbox("Period: ", ('monthly', 'weekly'), key='step')    
-            valuee=int(cols1[1].number_input("Value: ", key="cohort"))
-            if st.form_submit_button("Submit"):
-                st.session_state.tab3_metrics=True
+        period=cols1[0].selectbox("Period: ", ('monthly', 'weekly'), key='step')    
+        valuee=int(cols1[1].number_input("Value: ", key="cohort"))
+        
+        if valuee:
+            value=[]
+            value.append(valuee)
+            # value=value.split(',')
+            # value[0]=int(value[0])
+            # cohort=ast.literal_eval(cohort)
+        
+        if st.button("Submit", key='submit_tab3'):
+            st.session_state.tab3_metrics=True
     
         if st.session_state.tab3_metrics==True:
-            if valuee:
-                value=[]
-                value.append(valuee)
-                # value=value.split(',')
-                # value[0]=int(value[0])
-                # cohort=ast.literal_eval(cohort)
             if debtor_id !='':
                 col1, col2=st.columns(2)
                 invoice_df=generate_data_for_payment_trend(debtor_id)
