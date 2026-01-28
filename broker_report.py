@@ -393,8 +393,8 @@ class broker_report:
         go.Scatter(x=df['snapshot_date'], y=df['invoice_approved'], mode='lines+markers', name='Approved invoices', yaxis='y2'),
         go.Scatter(x=df['snapshot_date'], y=df['invoice_paid'], mode='lines+markers', name='Paid Invoices', yaxis='y2'),
         go.Scatter(x=df['snapshot_date'], y=df['open_invoices_in_point'], mode='lines+markers', name='Open Invoices', yaxis='y1'),
-        # go.Scatter(x=df['snapshot_date'], y=df['invoice_approved_dollars'], mode='lines+markers', name='Invoices Approved (dollars)', yaxis='y1'),
-        # go.Scatter(x=df['snapshot_date'], y=df['invoice_paid_dollars'], mode='lines+markers', name='Invoices Paid (dollars)', yaxis='y1')
+        go.Scatter(x=df['snapshot_date'], y=df['invoice_approved_dollars'], mode='lines+markers', name='Invoices Approved (dollars)', yaxis='y1'),
+        go.Scatter(x=df['snapshot_date'], y=df['invoice_paid_dollars'], mode='lines+markers', name='Invoices Paid (dollars)', yaxis='y1')
     ])
     
         fig.update_layout(
