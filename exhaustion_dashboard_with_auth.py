@@ -553,7 +553,7 @@ def main():
                 cols_=st.columns([2,2,2])
                 cols_[0].write('Metrics Averages and Standard Deviation')
                 pivot_table=pivot_table.reset_index()
-                pivot_table=pivot_table.round(2)
+                # pivot_table=pivot_table.round(2)
                 pivot_table.columns = [col[0] if col[0] != '' else col[1] for col in pivot_table.columns]
                 # pivot_table=pivot_table.reset_index().drop('index', axis=1)
                 cols_[0].write(pivot_table)
